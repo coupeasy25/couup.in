@@ -79,11 +79,14 @@ const ListingInfo: React.FC<ListingInfoProps> = ({
 
 
       {/* Host Profile Header */}
-      <div className="flex flex-row items-center gap-4 py-2">
+      <div 
+        onClick={() => window.location.href = `/users/${user?.id || user?._id}`}
+        className="flex flex-row items-center gap-4 py-4 px-4 -mx-4 rounded-xl hover:bg-neutral-50 cursor-pointer transition border border-transparent hover:border-neutral-200"
+      >
         <Avatar src={user?.image} />
         <div className="flex flex-col">
           <div className="font-semibold text-base">Hosted by {user?.name || 'Host'}</div>
-          <div className="font-light text-neutral-500 text-sm">Superhost · 7 years hosting</div>
+          <div className="font-light text-neutral-500 text-sm">Click to view profile</div>
         </div>
       </div>
 

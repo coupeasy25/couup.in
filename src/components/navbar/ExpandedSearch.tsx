@@ -22,8 +22,6 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
   const [locationValue, setLocationValue] = useState(params?.get('locationValue') || "");
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
-  const [pets, setPets] = useState(0);
   
   const [dateRange, setDateRange] = useState<Range>({
     startDate: new Date(),
@@ -259,7 +257,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
               </div>
 
               {/* Children */}
-              <div className="flex flex-row items-center justify-between py-2 border-b-[1px] border-neutral-200">
+              <div className="flex flex-row items-center justify-between py-2">
                 <div className="flex flex-col">
                   <div className="text-[16px] font-semibold text-black">Children</div>
                   <div className="text-sm font-light text-neutral-500">Ages 2–12</div>
@@ -274,52 +272,6 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
                   <div className="font-light text-neutral-600 w-4 text-center">{children}</div>
                   <button 
                     onClick={() => setChildren((prev) => prev + 1)}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Infants */}
-              <div className="flex flex-row items-center justify-between py-2 border-b-[1px] border-neutral-200">
-                <div className="flex flex-col">
-                  <div className="text-[16px] font-semibold text-black">Infants</div>
-                  <div className="text-sm font-light text-neutral-500">Under 2</div>
-                </div>
-                <div className="flex flex-row items-center gap-4">
-                  <button 
-                    onClick={() => setInfants((prev) => Math.max(0, prev - 1))}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
-                  >
-                    -
-                  </button>
-                  <div className="font-light text-neutral-600 w-4 text-center">{infants}</div>
-                  <button 
-                    onClick={() => setInfants((prev) => prev + 1)}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Pets */}
-              <div className="flex flex-row items-center justify-between py-2">
-                <div className="flex flex-col">
-                  <div className="text-[16px] font-semibold text-black">Pets</div>
-                  <div className="text-sm font-light text-neutral-500 underline cursor-pointer hover:text-black">Bringing a service animal?</div>
-                </div>
-                <div className="flex flex-row items-center gap-4">
-                  <button 
-                    onClick={() => setPets((prev) => Math.max(0, prev - 1))}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
-                  >
-                    -
-                  </button>
-                  <div className="font-light text-neutral-600 w-4 text-center">{pets}</div>
-                  <button 
-                    onClick={() => setPets((prev) => prev + 1)}
                     className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
                   >
                     +

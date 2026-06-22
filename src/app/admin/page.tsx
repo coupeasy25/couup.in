@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/actions/admin/adminAuth";
 import getAdminStats from "@/actions/admin/getAdminStats";
+import DashboardCards from "@/components/admin/DashboardCards";
 
 export default async function AdminDashboardPage() {
   const isAdmin = await isAdminAuthenticated();
@@ -12,30 +13,15 @@ export default async function AdminDashboardPage() {
   const stats = await getAdminStats();
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-neutral-500 mt-2">Welcome to the owner admin panel. Here is an overview of your platform.</p>
+    <div className="flex flex-col gap-8 w-full">
+      <div className="bg-white p-8 rounded-2xl border border-neutral-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-bold text-[#0f3d30]">Welcome back, Admin</h1>
+          <p className="text-neutral-500 mt-2">Here is an overview of the platform's performance today.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm flex flex-col gap-2">
-          <div className="text-neutral-500 font-semibold">Total Users</div>
-          <div className="text-4xl font-bold">{stats.userCount}</div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm flex flex-col gap-2">
-          <div className="text-neutral-500 font-semibold">Total Listings</div>
-          <div className="text-4xl font-bold">{stats.listingCount}</div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm flex flex-col gap-2">
-          <div className="text-neutral-500 font-semibold">Total Reservations</div>
-          <div className="text-4xl font-bold">{stats.reservationCount}</div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm flex flex-col gap-2">
-          <div className="text-neutral-500 font-semibold">Total Hosts</div>
-          <div className="text-4xl font-bold">{stats.hostCount}</div>
-        </div>
-      </div>
+      <DashboardCards stats={stats} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ interface ListingCardProps {
   reservation?: any;
   onAction?: (id: string) => void;
   onEdit?: (id: string) => void;
+  onViewDetails?: (reservation: any) => void;
   disabled?: boolean;
   actionLabel?: string;
   actionId?: string;
@@ -21,6 +22,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   reservation,
   onAction,
   onEdit,
+  onViewDetails,
   disabled,
   actionLabel,
   actionId = "",
@@ -82,12 +84,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
   }, [data?.averageRating]);
 
   const onClick = useCallback(() => {
+    if (onViewDetails && reservation) {
+      return onViewDetails(reservation);
+    }
     let url = `/listings/${data.id}`;
     if (searchParams && searchParams.toString()) {
       url += `?${searchParams.toString()}`;
     }
     router.push(url);
-  }, [router, data.id, searchParams]);
+  }, [router, data.id, searchParams, onViewDetails, reservation]);
 
   return (
     <div

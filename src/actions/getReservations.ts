@@ -65,7 +65,11 @@ export default async function getReservations(params: IParams) {
           ...room,
           _id: room._id ? room._id.toString() : undefined
         })) : []
-      }
+      },
+      guests: reservation.guests ? reservation.guests.map((guest: any) => ({
+        ...guest,
+        _id: guest._id ? guest._id.toString() : undefined
+      })) : []
     }));
   } catch (error: any) {
     throw new Error(error);

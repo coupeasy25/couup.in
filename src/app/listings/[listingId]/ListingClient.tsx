@@ -129,27 +129,13 @@ const ListingClient: React.FC<ListingClientProps> = ({
       return loginModal.onOpen();
     }
 
-    setIsLoading(true);
+    const start = dateRange.startDate?.toISOString() || '';
+    const end = dateRange.endDate?.toISOString() || '';
+    const roomType = selectedRoom ? selectedRoom.type : '';
 
-    axios.post('/api/reservations', {
-      totalPrice,
-      startDate: dateRange.startDate,
-      endDate: dateRange.endDate,
-      listingId: listing?.id,
-      roomType: selectedRoom ? selectedRoom.type : undefined
-    })
-      .then(() => {
-        toast.success('Listing reserved!');
-        setDateRange(initialDateRange);
-        router.push('/trips');
-      })
-      .catch(() => {
-        toast.error('Something went wrong.');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      })
-  }, [totalPrice, dateRange, listing?.id, router, currentUser, loginModal]);
+    const url = `/book/${listing?.id}?startDate=${start}&endDate=${end}&roomType=${encodeURIComponent(roomType)}`;
+    router.push(url);
+  }, [dateRange, listing?.id, router, currentUser, loginModal, selectedRoom]);
 
   useEffect(() => {
     if (dateRange.startDate && dateRange.endDate) {

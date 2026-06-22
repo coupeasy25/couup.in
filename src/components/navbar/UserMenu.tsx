@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu, Heart } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
@@ -20,10 +20,22 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, isScrolledStyle = true
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
   const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
   }, []);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 200); // Small delay to allow cursor to reach dropdown
+  };
 
   const onRent = useCallback(() => {
     if (!currentUser) {
@@ -53,12 +65,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, isScrolledStyle = true
 
       <div 
         className="relative"
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <div 
           onClick={toggleOpen}
-          className={`p-4 md:py-2 md:px-3 border-[1px] flex flex-row items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition ${isScrolledStyle ? 'border-neutral-200 bg-white text-black' : 'border-white/30 bg-white/10 text-white hover:bg-white/20'}`}
+          className={`p-4 md:py-2 md:px-3 border-[1px] flex flex-row items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition ${isScrolledStyle ? 'border-neutral-200 bg-white text-black' : 'border-white/50 bg-black/20 backdrop-blur-sm text-white hover:bg-black/40 hover:border-white/80'}`}
         >
           <Menu size={20} strokeWidth={2.5} />
           <div className="hidden md:block">
@@ -67,27 +79,40 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, isScrolledStyle = true
         </div>
 
         {isOpen && (
-          <div className="absolute rounded-xl shadow-md w-[40vw] md:w-[240px] bg-white overflow-hidden right-0 top-12 text-sm text-black">
-            <div className="flex flex-col cursor-pointer">
+          <div className="absolute rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-neutral-200 w-[40vw] md:w-[260px] bg-white overflow-hidden right-0 top-14 text-sm text-neutral-800 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+            <div className="flex flex-col cursor-pointer py-2">
               {currentUser ? (
                 <>
-                  <MenuItem onClick={() => router.push('/trips')} label="My trips" />
-                  <MenuItem onClick={() => router.push('/favorites')} label="My favorites" />
+                  <div className="px-4 py-3 flex items-center gap-3 border-b border-neutral-100 mb-2 bg-neutral-50/50">
+                    <Avatar src={currentUser?.image} />
+                    <div className="flex flex-col">
+                      <span className="font-bold text-black">{currentUser.name}</span>
+                      <span className="text-xs text-neutral-500">{currentUser.email}</span>
+                    </div>
+                  </div>
+                  
+                  <MenuItem onClick={() => { setIsOpen(false); router.push('/trips'); }} label="My trips" />
+                  <MenuItem onClick={() => { setIsOpen(false); router.push('/favorites'); }} label="My favorites" />
+                  
+                  <hr className="my-2 border-neutral-100" />
+                  
                   {currentUser?.isHost && (
                     <>
-                      <MenuItem onClick={() => router.push('/host/reservations')} label="My reservations" />
-                      <MenuItem onClick={() => router.push('/host/properties')} label="My properties" />
-                      <MenuItem onClick={() => router.push('/host/dashboard')} label="Host Dashboard" />
+                      <MenuItem onClick={() => { setIsOpen(false); router.push('/host/reservations'); }} label="My reservations" />
+                      <MenuItem onClick={() => { setIsOpen(false); router.push('/host/properties'); }} label="My properties" />
+                      <MenuItem onClick={() => { setIsOpen(false); router.push('/host/dashboard'); }} label="Host Dashboard" />
+                      <MenuItem onClick={() => { setIsOpen(false); onRent(); }} label="Couup a new property" />
                     </>
                   )}
-                  <MenuItem onClick={onRent} label="Airbnb my home" />
-                  <hr />
-                  <MenuItem onClick={() => signOut()} label="Logout" />
+                  
+                  <hr className="my-2 border-neutral-100" />
+                  
+                  <MenuItem onClick={() => { setIsOpen(false); signOut(); }} label="Logout" />
                 </>
               ) : (
                 <>
-                  <MenuItem onClick={loginModal.onOpen} label="Login" />
-                  <MenuItem onClick={registerModal.onOpen} label="Sign up" />
+                  <MenuItem onClick={() => { setIsOpen(false); loginModal.onOpen(); }} label="Log in" />
+                  <MenuItem onClick={() => { setIsOpen(false); registerModal.onOpen(); }} label="Sign up" />
                 </>
               )}
             </div>

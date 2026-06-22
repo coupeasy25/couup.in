@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
         hostname: "**",
       }
     ]
-  }
+  },
+  serverExternalPackages: ['pdfkit']
 };
 
 export default nextConfig;

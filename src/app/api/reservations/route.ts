@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Reservation } from "@/models/Reservation";
+import { Listing } from "@/models/Listing";
 import getCurrentUser from "@/actions/getCurrentUser";
+import crypto from "crypto";
+import { generateBookingPDF } from "@/lib/pdfGenerator";
+import { sendBookingConfirmationEmail } from "@/lib/mailer";
 
 export async function POST(request: Request) {
   const currentUser = await getCurrentUser();
@@ -11,10 +15,23 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { listingId, startDate, endDate, totalPrice, roomType } = body;
+  const { 
+    listingId, startDate, endDate, totalPrice, basePrice, taxes, roomType, guests, gstState,
+    razorpay_order_id, razorpay_payment_id, razorpay_signature 
+  } = body;
 
-  if (!listingId || !startDate || !endDate || !totalPrice) {
+  if (!listingId || !startDate || !endDate || !totalPrice || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     return NextResponse.error();
+  }
+
+  // Verify Razorpay signature
+  const generatedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET as string)
+    .update(razorpay_order_id + "|" + razorpay_payment_id)
+    .digest("hex");
+
+  if (generatedSignature !== razorpay_signature) {
+    return new NextResponse("Invalid payment signature", { status: 400 });
   }
 
   await connectToDatabase();
@@ -75,9 +92,49 @@ export async function POST(request: Request) {
     listingId,
     startDate,
     endDate,
+    basePrice: basePrice || 0,
+    taxes: taxes || 0,
     totalPrice,
     roomType,
+    guests: guests || [],
+    gstState: gstState || '',
+    razorpay_payment_id,
+    razorpay_order_id,
+    razorpay_signature
   });
+
+  // Generate PDF and Send Email asynchronously (do not block the response)
+  const sendConfirmation = async () => {
+    try {
+      const pdfBuffer = await generateBookingPDF({
+        listingTitle: listing.title,
+        locationValue: listing.locationValue,
+        startDate,
+        endDate,
+        totalPrice,
+        basePrice,
+        taxes,
+        roomType,
+        guests,
+        userName: currentUser.name || (guests[0] ? `${guests[0].firstName} ${guests[0].lastName}` : 'Guest'),
+        userEmail: currentUser.email,
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        bookingDate: new Date()
+      });
+
+      await sendBookingConfirmationEmail(
+        currentUser.email as string,
+        currentUser.name || 'Guest',
+        listing.title,
+        pdfBuffer
+      );
+    } catch (err) {
+      console.error("Failed to generate PDF or send email", err);
+    }
+  };
+
+  sendConfirmation();
 
   return NextResponse.json(reservation);
 }
