@@ -31,7 +31,7 @@ export async function DELETE(
   // Only the creator of the reservation or the creator of the listing can delete the reservation
   if (
     reservation.userId.toString() !== currentUser._id.toString() &&
-    reservation.listingId.userId.toString() !== currentUser._id.toString()
+    (reservation.listingId as any).userId.toString() !== currentUser._id.toString()
   ) {
     return new NextResponse('Unauthorized', { status: 401 });
   }

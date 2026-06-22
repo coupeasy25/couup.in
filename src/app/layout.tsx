@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -27,7 +28,9 @@ export default async function RootLayout({
         <Toaster />
         <RegisterModal />
         <LoginModal />
-        <Navbar currentUser={currentUser} />
+        <Suspense fallback={null}>
+          <Navbar currentUser={currentUser} />
+        </Suspense>
         <div className="pb-20 min-h-screen">
           {children}
         </div>

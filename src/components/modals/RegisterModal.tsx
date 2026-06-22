@@ -21,7 +21,7 @@ const registerSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  isHost: z.boolean().default(false),
+  isHost: z.boolean(),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
