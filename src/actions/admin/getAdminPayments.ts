@@ -10,7 +10,7 @@ export default async function getAdminPayments() {
     // Fetch reservations that have a razorpay_payment_id
     // This ensures we only show real, successful payments and ignore old test data.
     const payments = await Reservation.find({
-      razorpay_payment_id: { $exists: true, $ne: null, $ne: "" }
+      razorpay_payment_id: { $exists: true, $nin: [null, ""] }
     })
       .populate({ path: 'userId', model: User, select: 'name email image' })
       .populate({ path: 'listingId', model: Listing, select: 'title locationValue imageSrc' })

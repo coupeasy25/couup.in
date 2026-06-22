@@ -22,7 +22,7 @@ export default async function getUserById(params: IParams) {
       return null;
     }
 
-    let listings = [];
+    let listings: any[] = [];
     if (user.isHost) {
       listings = await Listing.find({ userId: userId }).lean();
     }
