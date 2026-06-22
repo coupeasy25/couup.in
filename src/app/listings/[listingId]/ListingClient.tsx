@@ -41,26 +41,48 @@ const ListingClient: React.FC<ListingClientProps> = ({
   const loginModal = useLoginModal();
   const router = useRouter();
 
-  const disabledDates = useMemo(() => {
-    let dates: Date[] = [];
+  const [selectedRoom, setSelectedRoom] = useState<any>(listing.rooms?.[0] || null);
+  const currentPrice = selectedRoom ? selectedRoom.price : listing.price;
 
-    reservations.forEach((reservation) => {
+  const disabledDates = useMemo(() => {
+    let disabledDatesList: Date[] = [];
+
+    // Filter reservations by selected room type if available
+    const relevantReservations = selectedRoom 
+      ? reservations.filter(res => res.roomType === selectedRoom.type)
+      : reservations;
+
+    // Determine max available count for the selected room type
+    const maxCount = selectedRoom ? (selectedRoom.count || 1) : 1;
+
+    // Count reservations per date
+    const dateCounts: Record<string, number> = {};
+
+    relevantReservations.forEach((reservation) => {
       const range = eachDayOfInterval({
         start: new Date(reservation.startDate),
         end: new Date(reservation.endDate),
       });
 
-      dates = [...dates, ...range];
+      range.forEach(date => {
+        // Use a simple date string (YYYY-MM-DD) for counting
+        const dateString = date.toISOString().split('T')[0];
+        dateCounts[dateString] = (dateCounts[dateString] || 0) + 1;
+      });
     });
 
-    return dates;
-  }, [reservations]);
+    // Add dates to disabledDatesList if count >= maxCount
+    Object.keys(dateCounts).forEach(dateString => {
+      if (dateCounts[dateString] >= maxCount) {
+        disabledDatesList.push(new Date(dateString));
+      }
+    });
+
+    return disabledDatesList;
+  }, [reservations, selectedRoom]);
 
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
-
-  const [selectedRoom, setSelectedRoom] = useState<any>(listing.rooms?.[0] || null);
-  const currentPrice = selectedRoom ? selectedRoom.price : listing.price;
 
   const [dateRange, setDateRange] = useState<Range>(() => {
     const startDateParam = searchParams?.get('startDate');
@@ -157,17 +179,6 @@ const ListingClient: React.FC<ListingClientProps> = ({
           />
           <div className="grid grid-cols-1 md:grid-cols-7 md:gap-10 mt-6 relative">
             <div className="md:col-span-4">
-              {listing.rooms && listing.rooms.length > 0 && (
-                <>
-                  <ListingRooms 
-                    rooms={listing.rooms} 
-                    selectedRoomId={selectedRoom?.id} 
-                    onSelectRoom={setSelectedRoom} 
-                  />
-                  <hr className="border-neutral-200 my-8" />
-                </>
-              )}
-
               <ListingInfo
                 user={listing.user}
                 description={listing.description}
@@ -179,6 +190,17 @@ const ListingClient: React.FC<ListingClientProps> = ({
                 standoutAmenities={listing.standoutAmenities}
                 safetyItems={listing.safetyItems}
               />
+
+              {listing.rooms && listing.rooms.length > 0 && (
+                <>
+                  <hr className="border-neutral-200 my-8" />
+                  <ListingRooms 
+                    rooms={listing.rooms} 
+                    selectedRoomId={selectedRoom?.id} 
+                    onSelectRoom={setSelectedRoom} 
+                  />
+                </>
+              )}
 
               <hr className="border-neutral-200 mb-8" />
               <div className="pb-10">
@@ -216,6 +238,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
                   disabled={isLoading}
                   disabledDates={disabledDates}
                   guestCount={Number(searchParams?.get('guestCount') || 1)}
+                  selectedRoomName={selectedRoom?.type}
                 />
               </div>
             </div>

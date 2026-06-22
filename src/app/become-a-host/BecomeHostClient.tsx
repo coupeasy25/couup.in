@@ -35,9 +35,10 @@ const CITIES = [
 
 interface BecomeHostClientProps {
   currentUser?: any;
+  initialData?: any;
 }
 
-const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
+const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initialData }) => {
   const router = useRouter();
 
   const [step, setStep] = useState(STEPS.INTRO);
@@ -53,25 +54,25 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
     reset,
   } = useForm<FieldValues>({
     defaultValues: {
-      title: '',
-      description: '',
-      imageSrc: [],
-      propertyType: 'Hotel',
-      fullAddress: '',
-      locationValue: '',
-      peoplePerRoom: 1,
-      bathroomType: 'Private',
-      amenities: [],
-      standoutAmenities: [],
-      safetyItems: [],
-      checkInTime: '2:00 PM',
-      checkOutTime: '11:00 AM',
-      cancellationPolicy: 'Free cancellation before 48 hours',
-      smokingAllowed: false,
-      petsAllowed: false,
-      partyAllowed: false,
-      rooms: [],
-      price: 100,
+      title: initialData?.title || '',
+      description: initialData?.description || '',
+      imageSrc: initialData?.imageSrc || [],
+      propertyType: initialData?.propertyType || 'Hotel',
+      fullAddress: initialData?.fullAddress || '',
+      locationValue: initialData?.locationValue || '',
+      peoplePerRoom: initialData?.peoplePerRoom || 1,
+      bathroomType: initialData?.bathroomType || 'Private',
+      amenities: initialData?.amenities || [],
+      standoutAmenities: initialData?.standoutAmenities || [],
+      safetyItems: initialData?.safetyItems || [],
+      checkInTime: initialData?.checkInTime || '2:00 PM',
+      checkOutTime: initialData?.checkOutTime || '11:00 AM',
+      cancellationPolicy: initialData?.cancellationPolicy || 'Free cancellation before 48 hours',
+      smokingAllowed: initialData?.smokingAllowed || false,
+      petsAllowed: initialData?.petsAllowed || false,
+      partyAllowed: initialData?.partyAllowed || false,
+      rooms: initialData?.rooms || [],
+      price: initialData?.price || 100,
     }
   });
 
@@ -90,6 +91,10 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
   const [roomImgInput, setRoomImgInput] = useState("");
   const [roomFacilityInput, setRoomFacilityInput] = useState("");
   const [roomInclusionInput, setRoomInclusionInput] = useState("");
+
+  const [customAmenityInput, setCustomAmenityInput] = useState("");
+  const [customStandoutInput, setCustomStandoutInput] = useState("");
+  const [customSafetyInput, setCustomSafetyInput] = useState("");
 
   const setCustomValue = (id: string, value: any) => {
     setValue(id, value, {
@@ -138,24 +143,41 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
     setIsLoading(true);
 
-    axios.post('/api/listings', data)
-    .then(() => {
-      toast.success('Listing created successfully!');
-      router.push('/');
-      router.refresh();
-    })
-    .catch((error) => {
-      toast.error(error.response?.data || 'Something went wrong.');
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
+    if (initialData) {
+      axios.patch(`/api/listings/${initialData.id}`, data)
+      .then(() => {
+        toast.success('Listing updated successfully!');
+        router.push('/properties');
+        router.refresh();
+      })
+      .catch((error) => {
+        toast.error(error.response?.data?.error || 'Something went wrong.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+    } else {
+      axios.post('/api/listings', data)
+      .then(() => {
+        toast.success('Listing created successfully!');
+        router.push('/');
+        router.refresh();
+      })
+      .catch((error) => {
+        toast.error(error.response?.data?.error || 'Something went wrong.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+    }
   };
 
   const actionLabel = useMemo(() => {
-    if (step === STEPS.PRICE) return 'Create';
+    if (step === STEPS.PRICE) {
+      return initialData ? 'Save Changes' : 'Create';
+    }
     return 'Next';
-  }, [step]);
+  }, [step, initialData]);
 
   let leftContent;
   let rightContent = null;
@@ -172,8 +194,8 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
     );
     rightContent = (
       <div className="flex items-center justify-center h-full w-full">
-        <div className="relative w-full max-w-md aspect-square">
-          <Image src="/images/isometric_house.png" alt="House Illustration" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain" />
+        <div className="relative w-full max-w-lg aspect-square">
+          <Image src="/images/couup_resort_illustration.png" alt="Resort Illustration" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain mix-blend-multiply scale-110" />
         </div>
       </div>
     );
@@ -181,7 +203,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
   if (step === STEPS.BASICS) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">The Basics</h2>
           <p className="text-xl text-gray-500 font-light">Give your place a name, description, and some photos.</p>
@@ -216,7 +238,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
                     setImgInput('');
                   }
                 }}
-                className="bg-black text-white px-6 rounded-md hover:bg-neutral-800 transition font-semibold"
+                className="bg-[#0f3d30] text-[#D4AF37] px-6 rounded-md hover:bg-[#0a2a21] transition font-semibold"
               >
                 Add
               </button>
@@ -248,7 +270,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
   if (step === STEPS.DETAILS) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Property Details</h2>
           <p className="text-xl text-gray-500 font-light">Tell us more about the property.</p>
@@ -260,13 +282,13 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div 
                 onClick={() => setCustomValue('propertyType', 'Hotel')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Hotel' ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Hotel' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Hotel</div>
               </div>
               <div 
                 onClick={() => setCustomValue('propertyType', 'Resort')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Resort' ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Resort' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Resort</div>
               </div>
@@ -301,13 +323,13 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div 
                 onClick={() => setCustomValue('bathroomType', 'Private')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Private' ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Private' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Private and attached</div>
               </div>
               <div 
                 onClick={() => setCustomValue('bathroomType', 'Shared')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Shared' ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Shared' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Shared</div>
               </div>
@@ -321,7 +343,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
   if (step === STEPS.ROOMS) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Rooms Available</h2>
           <p className="text-xl text-gray-500 font-light">Add the different types of rooms available at your property.</p>
@@ -340,7 +362,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label className="text-sm font-semibold">Price per night (₹)</Label>
                 <Input 
@@ -355,6 +377,15 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
                   type="number"
                   value={editingRoom.capacity}
                   onChange={(e) => setEditingRoom({...editingRoom, capacity: Number(e.target.value)})}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold">Number of Rooms</Label>
+                <Input 
+                  type="number"
+                  min={1}
+                  value={editingRoom.count ?? 1}
+                  onChange={(e) => setEditingRoom({...editingRoom, count: Number(e.target.value)})}
                 />
               </div>
             </div>
@@ -376,7 +407,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
                       setRoomImgInput("");
                     }
                   }}
-                  className="bg-black text-white px-4 py-2 rounded-md font-semibold text-sm"
+                  className="bg-[#0f3d30] text-[#D4AF37] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#0a2a21] transition"
                 >
                   Add
                 </button>
@@ -427,7 +458,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
                       setRoomFacilityInput("");
                     }
                   }}
-                  className="bg-black text-white px-4 py-2 rounded-md font-semibold text-sm"
+                  className="bg-[#0f3d30] text-[#D4AF37] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#0a2a21] transition"
                 >
                   Add
                 </button>
@@ -472,7 +503,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
                       setRoomInclusionInput("");
                     }
                   }}
-                  className="bg-black text-white px-4 py-2 rounded-md font-semibold text-sm"
+                  className="bg-[#0f3d30] text-[#D4AF37] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#0a2a21] transition"
                 >
                   Add
                 </button>
@@ -520,7 +551,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
                   setCustomValue('rooms', updatedRooms);
                   setEditingRoom(null);
                 }}
-                className="px-4 py-2 bg-black text-white rounded-lg font-semibold hover:bg-neutral-800 transition"
+                className="px-4 py-2 bg-[#0f3d30] text-[#D4AF37] rounded-lg font-semibold hover:bg-[#0a2a21] transition"
               >
                 Save Room
               </button>
@@ -561,6 +592,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
                 images: [],
                 price: 1000,
                 capacity: 2,
+                count: 1,
                 facilities: [],
                 inclusions: []
               })}
@@ -577,7 +609,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
   if (step === STEPS.AMENITIES) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Tell guests what your place has to offer</h2>
           <p className="text-xl text-gray-500 font-light">Select all amenities available.</p>
@@ -589,13 +621,52 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
               <div 
                 key={item}
                 onClick={() => toggleArrayItem('amenities', amenities, item)}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <span className="font-semibold text-lg">{item}</span>
-                {isSelected && <Check size={24} className="text-black" />}
+                {isSelected && <Check size={24} className="text-[#0f3d30]" />}
               </div>
             )
           })}
+          {amenities.filter((a: string) => !AMENITIES_LIST.includes(a)).map((item: string) => (
+            <div 
+              key={item}
+              onClick={() => toggleArrayItem('amenities', amenities, item)}
+              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]"
+            >
+              <span className="font-semibold text-lg">{item}</span>
+              <Check size={24} className="text-[#0f3d30]" />
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-2">
+          <Input 
+            value={customAmenityInput} 
+            onChange={(e) => setCustomAmenityInput(e.target.value)} 
+            placeholder="Add another amenity..." 
+            className="text-lg py-6"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (customAmenityInput && !amenities.includes(customAmenityInput)) {
+                  setCustomValue('amenities', [...amenities, customAmenityInput]);
+                  setCustomAmenityInput('');
+                }
+              }
+            }}
+          />
+          <button 
+            type="button"
+            onClick={() => {
+              if (customAmenityInput && !amenities.includes(customAmenityInput)) {
+                setCustomValue('amenities', [...amenities, customAmenityInput]);
+                setCustomAmenityInput('');
+              }
+            }}
+            className="bg-[#0f3d30] text-[#D4AF37] px-8 rounded-md hover:bg-[#0a2a21] transition font-semibold"
+          >
+            Add
+          </button>
         </div>
       </div>
     );
@@ -603,7 +674,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
   if (step === STEPS.STANDOUTS) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Do you have any standout amenities?</h2>
           <p className="text-xl text-gray-500 font-light">Guests love these special features.</p>
@@ -615,13 +686,52 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
               <div 
                 key={item}
                 onClick={() => toggleArrayItem('standoutAmenities', standoutAmenities, item)}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <span className="font-semibold text-lg">{item}</span>
-                {isSelected && <Check size={24} className="text-black" />}
+                {isSelected && <Check size={24} className="text-[#0f3d30]" />}
               </div>
             )
           })}
+          {standoutAmenities.filter((a: string) => !STANDOUTS_LIST.includes(a)).map((item: string) => (
+            <div 
+              key={item}
+              onClick={() => toggleArrayItem('standoutAmenities', standoutAmenities, item)}
+              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]"
+            >
+              <span className="font-semibold text-lg">{item}</span>
+              <Check size={24} className="text-[#0f3d30]" />
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-2">
+          <Input 
+            value={customStandoutInput} 
+            onChange={(e) => setCustomStandoutInput(e.target.value)} 
+            placeholder="Add another standout amenity..." 
+            className="text-lg py-6"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (customStandoutInput && !standoutAmenities.includes(customStandoutInput)) {
+                  setCustomValue('standoutAmenities', [...standoutAmenities, customStandoutInput]);
+                  setCustomStandoutInput('');
+                }
+              }
+            }}
+          />
+          <button 
+            type="button"
+            onClick={() => {
+              if (customStandoutInput && !standoutAmenities.includes(customStandoutInput)) {
+                setCustomValue('standoutAmenities', [...standoutAmenities, customStandoutInput]);
+                setCustomStandoutInput('');
+              }
+            }}
+            className="bg-[#0f3d30] text-[#D4AF37] px-8 rounded-md hover:bg-[#0a2a21] transition font-semibold"
+          >
+            Add
+          </button>
         </div>
       </div>
     );
@@ -629,7 +739,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
   if (step === STEPS.SAFETY) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Do you have any of these safety items?</h2>
           <p className="text-xl text-gray-500 font-light">Help keep your guests safe.</p>
@@ -641,13 +751,52 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
               <div 
                 key={item}
                 onClick={() => toggleArrayItem('safetyItems', safetyItems, item)}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-black bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <span className="font-semibold text-lg">{item}</span>
-                {isSelected && <Check size={24} className="text-black" />}
+                {isSelected && <Check size={24} className="text-[#0f3d30]" />}
               </div>
             )
           })}
+          {safetyItems.filter((a: string) => !SAFETY_LIST.includes(a)).map((item: string) => (
+            <div 
+              key={item}
+              onClick={() => toggleArrayItem('safetyItems', safetyItems, item)}
+              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]"
+            >
+              <span className="font-semibold text-lg">{item}</span>
+              <Check size={24} className="text-[#0f3d30]" />
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-2">
+          <Input 
+            value={customSafetyInput} 
+            onChange={(e) => setCustomSafetyInput(e.target.value)} 
+            placeholder="Add another safety item..." 
+            className="text-lg py-6"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (customSafetyInput && !safetyItems.includes(customSafetyInput)) {
+                  setCustomValue('safetyItems', [...safetyItems, customSafetyInput]);
+                  setCustomSafetyInput('');
+                }
+              }
+            }}
+          />
+          <button 
+            type="button"
+            onClick={() => {
+              if (customSafetyInput && !safetyItems.includes(customSafetyInput)) {
+                setCustomValue('safetyItems', [...safetyItems, customSafetyInput]);
+                setCustomSafetyInput('');
+              }
+            }}
+            className="bg-[#0f3d30] text-[#D4AF37] px-8 rounded-md hover:bg-[#0a2a21] transition font-semibold"
+          >
+            Add
+          </button>
         </div>
       </div>
     );
@@ -655,7 +804,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
 
   if (step === STEPS.POLICIES) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">House Rules & Policies</h2>
           <p className="text-xl text-gray-500 font-light">Set your timing, cancellation rules, and allowed activities.</p>
@@ -686,7 +835,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
               <button 
                 type="button"
                 onClick={() => setCustomValue('smokingAllowed', !smokingAllowed)}
-                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${smokingAllowed ? 'bg-black justify-end' : 'bg-neutral-300 justify-start'}`}
+                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${smokingAllowed ? 'bg-[#0f3d30] justify-end' : 'bg-neutral-300 justify-start'}`}
               >
                 <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
               </button>
@@ -697,7 +846,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
               <button 
                 type="button"
                 onClick={() => setCustomValue('petsAllowed', !petsAllowed)}
-                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${petsAllowed ? 'bg-black justify-end' : 'bg-neutral-300 justify-start'}`}
+                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${petsAllowed ? 'bg-[#0f3d30] justify-end' : 'bg-neutral-300 justify-start'}`}
               >
                 <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
               </button>
@@ -708,7 +857,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
               <button 
                 type="button"
                 onClick={() => setCustomValue('partyAllowed', !partyAllowed)}
-                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${partyAllowed ? 'bg-black justify-end' : 'bg-neutral-300 justify-start'}`}
+                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${partyAllowed ? 'bg-[#0f3d30] justify-end' : 'bg-neutral-300 justify-start'}`}
               >
                 <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
               </button>
@@ -742,20 +891,21 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
   return (
     <div className="fixed inset-0 bg-white z-[999] flex flex-col">
       {/* Top Navbar */}
-      <div className="h-24 w-full flex items-center justify-between px-10 bg-white">
-        <div className="text-[#FF5A5F] cursor-pointer" onClick={() => router.push('/')}>
-          {/* Simple Airbnb Logo Icon SVG */}
-          <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', height: '32px', width: '32px', fill: 'currentColor' }} aria-hidden="true" role="presentation" focusable="false">
-            <path d="M16 1c2.008 0 3.463.963 4.751 3.269l.533 1.025c1.954 3.83 6.114 12.54 7.1 14.836l.145.353c.667 1.591.91 2.472.96 3.396l.011.415.001.228c0 4.062-2.877 6.478-6.357 6.478-2.224 0-4.556-1.258-6.709-3.386l-.257-.26-.172-.179h-.011l-.176.185c-2.044 2.1-4.267 3.42-6.414 3.615l-.28.019-.267.006C5.377 31 2.5 28.584 2.5 24.522l.005-.469c.026-.928.23-1.768.83-3.244l.216-.524c.966-2.266 5.09-10.861 7.1-14.836l.533-1.025C12.537 1.963 13.992 1 16 1zm0 2c-1.239 0-2.053.539-2.987 2.21l-.523 1.008c-1.926 3.776-6.06 12.43-7.031 14.692l-.345.836c-.427 1.071-.573 1.655-.605 2.24l-.009.336-.003.18c0 2.806 1.815 4.499 4.394 4.499 2.055 0 4.156-1.464 6.195-3.662l.241-.264.124-.138.118-.128.169-.176.241-.241.171.18c2.148 2.246 4.303 3.738 6.402 3.896l.266.015.228.004c2.579 0 4.394-1.693 4.394-4.499l-.003-.228c-.023-.623-.157-1.24-.59-2.35l-.332-.823c-.958-2.225-5.02-10.748-7.01-14.624l-.522-1.009C18.053 3.539 17.24 3 16 3zm0 9.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z"></path>
-          </svg>
+      <div className="h-24 w-full flex items-center justify-between px-10 bg-[#0f3d30] shadow-md border-b-[1px] border-[#0a2a21]">
+        <div 
+          onClick={() => router.push('/')}
+          className="flex flex-col cursor-pointer transition text-[#D4AF37]"
+        >
+          <div className="font-serif text-3xl tracking-[0.2em] font-medium uppercase drop-shadow-sm">Couup</div>
+          <div className="text-[9px] tracking-[0.3em] font-light uppercase text-center mt-1 text-[#D4AF37]/80">Hotels & Resorts</div>
         </div>
         <div className="flex gap-4">
-          <button className="px-4 py-2 border-[1px] border-neutral-300 rounded-full font-semibold text-sm hover:bg-neutral-50 transition">
+          <button className="px-4 py-2 border-[1px] border-[#D4AF37]/50 text-[#D4AF37] rounded-full font-semibold text-sm hover:bg-[#D4AF37]/10 transition">
             Questions?
           </button>
           <button 
             onClick={() => router.push('/')}
-            className="px-4 py-2 border-[1px] border-neutral-300 rounded-full font-semibold text-sm hover:bg-neutral-50 transition"
+            className="px-4 py-2 border-[1px] border-[#D4AF37]/50 text-[#D4AF37] rounded-full font-semibold text-sm hover:bg-[#D4AF37]/10 transition"
           >
             Save & exit
           </button>
@@ -778,11 +928,11 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
       </div>
 
       {/* Bottom Fixed Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 h-24 bg-white border-t-[1px] border-neutral-200 z-[1000] flex flex-col justify-between">
+      <div className="fixed bottom-0 left-0 right-0 h-24 bg-[#0f3d30] border-t-[1px] border-[#0a2a21] z-[1000] flex flex-col justify-between">
         {/* Progress bar */}
-        <div className="w-full h-2 bg-neutral-200">
+        <div className="w-full h-2 bg-[#0a2a21]">
           <div 
-            className="h-full bg-black transition-all duration-300 ease-in-out" 
+            className="h-full bg-[#D4AF37] transition-all duration-300 ease-in-out shadow-[0_0_10px_rgba(212,175,55,0.5)]" 
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -791,14 +941,14 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser }) => {
         <div className="flex-1 flex items-center justify-between px-10">
           <button
             onClick={step === STEPS.INTRO ? undefined : onBack}
-            className={`font-semibold underline text-lg ${step === STEPS.INTRO ? 'opacity-0 cursor-default' : 'hover:bg-neutral-100 p-2 rounded-lg transition'}`}
+            className={`font-semibold text-lg text-white/80 hover:text-white transition ${step === STEPS.INTRO ? 'opacity-0 cursor-default' : 'hover:bg-white/10 px-4 py-2 rounded-lg'}`}
           >
             Back
           </button>
           <button
             onClick={handleSubmit(onSubmit)}
             disabled={isLoading}
-            className={`px-8 py-4 rounded-lg font-semibold text-lg text-white transition ${isLoading ? 'opacity-50 cursor-not-allowed bg-neutral-800' : (step === STEPS.PRICE ? 'bg-[#FF5A5F] hover:bg-[#FF5A5F]/90' : 'bg-black hover:bg-neutral-800')}`}
+            className={`px-8 py-3 rounded-lg font-semibold text-lg transition shadow-md ${isLoading ? 'bg-neutral-500 cursor-not-allowed text-white' : 'bg-[#D4AF37] text-[#0f3d30] hover:bg-[#c4a133]'}`}
           >
             {actionLabel}
           </button>

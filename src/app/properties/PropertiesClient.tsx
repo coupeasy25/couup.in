@@ -36,6 +36,10 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
     });
   }, [router]);
 
+  const onEdit = useCallback((id: string) => {
+    router.push(`/properties/${id}/edit`);
+  }, [router]);
+
   return (
     <Container>
       <div className="text-2xl font-bold mb-4 pt-10">Properties</div>
@@ -47,6 +51,7 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
             data={listing}
             actionId={listing.id}
             onAction={onDelete}
+            onEdit={onEdit}
             disabled={deletingId === listing.id}
             actionLabel="Delete property"
             currentUser={currentUser}

@@ -27,6 +27,7 @@ export default async function AdminLayout({
             <Link href="/admin/users" className="text-neutral-600 hover:text-black transition">Users</Link>
             <Link href="/admin/listings" className="text-neutral-600 hover:text-black transition">Listings</Link>
             <Link href="/admin/reservations" className="text-neutral-600 hover:text-black transition">Reservations</Link>
+            <Link href="/admin/settings" className="text-neutral-600 hover:text-black transition">Settings</Link>
             <hr className="my-2 border-neutral-200" />
             <AdminLogoutButton />
           </div>

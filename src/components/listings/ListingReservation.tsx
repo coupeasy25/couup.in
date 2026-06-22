@@ -15,6 +15,7 @@ interface ListingReservationProps {
   disabled?: boolean;
   disabledDates: Date[];
   guestCount?: number;
+  selectedRoomName?: string;
 }
 
 const ListingReservation: React.FC<ListingReservationProps> = ({
@@ -25,7 +26,8 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
   onSubmit,
   disabled,
   disabledDates,
-  guestCount = 1
+  guestCount = 1,
+  selectedRoomName
 }) => {
   const [showCalendar, setShowCalendar] = useState(false);
   const nights = Math.max(1, totalPrice / price);
@@ -90,7 +92,7 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
       <Button 
         disabled={disabled} 
         onClick={onSubmit}
-        className="w-full bg-[#E51D53] hover:bg-[#D70466] text-white font-bold py-6 text-lg rounded-lg transition"
+        className="w-full bg-[#0f3d30] hover:bg-[#0a2a21] text-[#D4AF37] font-bold py-6 text-lg rounded-lg transition"
       >
         Reserve
       </Button>
@@ -100,6 +102,12 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
       </div>
 
       <div className="flex flex-col gap-3 mt-6">
+        {selectedRoomName && (
+          <div className="flex flex-row items-center justify-between font-light text-neutral-600 text-[15px]">
+            <div>Selected Room</div>
+            <div className="text-neutral-800 font-medium text-right max-w-[200px] truncate">{selectedRoomName}</div>
+          </div>
+        )}
         <div className="flex flex-row items-center justify-between font-light text-neutral-600 underline decoration-1 text-[15px]">
           <div>₹{price.toLocaleString('en-IN')} x {nights} nights</div>
           <div className="no-underline text-neutral-800">₹{totalPrice.toLocaleString('en-IN')}</div>

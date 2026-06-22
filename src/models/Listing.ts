@@ -6,6 +6,7 @@ export interface IRoomType {
   images: string[];
   price: number;
   capacity: number;
+  count: number;
   facilities: string[];
   inclusions: string[];
 }
@@ -69,6 +70,7 @@ const ListingSchema = new Schema<IListing>({
       images: { type: [String], default: [] },
       price: { type: Number, required: true },
       capacity: { type: Number, required: true },
+      count: { type: Number, required: true, default: 1 },
       facilities: { type: [String], default: [] },
       inclusions: { type: [String], default: [] }
     }],

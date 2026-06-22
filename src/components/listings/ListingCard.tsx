@@ -9,6 +9,7 @@ interface ListingCardProps {
   data: any;
   reservation?: any;
   onAction?: (id: string) => void;
+  onEdit?: (id: string) => void;
   disabled?: boolean;
   actionLabel?: string;
   actionId?: string;
@@ -19,6 +20,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   data,
   reservation,
   onAction,
+  onEdit,
   disabled,
   actionLabel,
   actionId = "",
@@ -38,6 +40,19 @@ const ListingCard: React.FC<ListingCardProps> = ({
       onAction?.(actionId);
     },
     [onAction, actionId, disabled]
+  );
+
+  const handleEdit = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+
+      if (disabled) {
+        return;
+      }
+
+      onEdit?.(data.id);
+    },
+    [onEdit, data.id, disabled]
   );
 
   const price = useMemo(() => {
@@ -101,6 +116,15 @@ const ListingCard: React.FC<ListingCardProps> = ({
             {reservationDate || `₹${price} for 1 night · ★ ${rating}`}
           </div>
         </div>
+        {onEdit && (
+          <button
+            disabled={disabled}
+            onClick={handleEdit}
+            className="w-full mt-2 bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-[#0f3d30] rounded-md py-2 font-semibold transition disabled:opacity-50"
+          >
+            Edit property
+          </button>
+        )}
         {onAction && actionLabel && (
           <button
             disabled={disabled}

@@ -5,6 +5,7 @@ import getCurrentUser from "@/actions/getCurrentUser";
 import ListingCarousel from "@/components/listings/ListingCarousel";
 import ListingCard from "@/components/listings/ListingCard";
 import ExpandedSearch from "@/components/navbar/ExpandedSearch";
+import { getSettings } from "@/actions/admin/settingsActions";
 
 interface HomeProps {
   searchParams: Promise<any>;
@@ -14,6 +15,8 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const listings = await getListings(params);
   const currentUser = await getCurrentUser();
+  const settings = await getSettings();
+  const featuredCities = settings?.featuredCities || [];
 
   // Group listings by locationValue (city)
   const groupedListings = listings.reduce((acc: any, listing: any) => {
@@ -70,7 +73,9 @@ export default async function Home({ searchParams }: HomeProps) {
               ))}
             </div>
           ) : (
-            Object.keys(groupedListings).map((location) => (
+            Object.keys(groupedListings)
+              .filter((location) => featuredCities.length === 0 || featuredCities.includes(location))
+              .map((location) => (
               <ListingCarousel 
                 key={location}
                 title={`Available in ${location}`} 
