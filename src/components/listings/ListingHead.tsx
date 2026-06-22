@@ -96,9 +96,11 @@ const ListingHead: React.FC<ListingHeadProps> = ({
           className="w-1/2 h-full relative cursor-pointer hover:opacity-90 transition group"
         >
           <Image
-            alt="Image 1"
+            alt={`${title} - Main Image`}
             src={displayImages[0]}
             fill
+            priority={true}
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover w-full group-hover:scale-105 transition duration-500"
           />
         </div>

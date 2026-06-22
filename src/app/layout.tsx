@@ -11,8 +11,12 @@ import Footer from "@/components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Airbnb Clone",
-  description: "An Airbnb clone built with Next.js",
+  metadataBase: new URL('https://couup.in'),
+  title: "Couup Hotels & Resorts",
+  description: "Book the best stays and unforgettable experiences.",
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default async function RootLayout({

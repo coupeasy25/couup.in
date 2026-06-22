@@ -9,7 +9,22 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  serverExternalPackages: ['pdfkit']
+  serverExternalPackages: ['pdfkit'],
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.couup.in',
+          },
+        ],
+        destination: 'https://couup.in/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
