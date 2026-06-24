@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateFeaturedCities } from "@/actions/admin/settingsActions";
+import { updateFeaturedCities, updateFeeSettings } from "@/actions/admin/settingsActions";
 import { toast } from "react-hot-toast";
 
 const CITIES = [
@@ -11,10 +11,18 @@ const CITIES = [
 
 interface SettingsClientProps {
   initialFeaturedCities: string[];
+  initialCouupFeePercentage: number;
+  initialGstPercentage: number;
 }
 
-const SettingsClient: React.FC<SettingsClientProps> = ({ initialFeaturedCities }) => {
+const SettingsClient: React.FC<SettingsClientProps> = ({ 
+  initialFeaturedCities,
+  initialCouupFeePercentage,
+  initialGstPercentage
+}) => {
   const [featuredCities, setFeaturedCities] = useState<string[]>(initialFeaturedCities);
+  const [couupFeePercentage, setCouupFeePercentage] = useState(initialCouupFeePercentage);
+  const [gstPercentage, setGstPercentage] = useState(initialGstPercentage);
   const [isLoading, setIsLoading] = useState(false);
 
   const toggleCity = (city: string) => {
@@ -27,11 +35,13 @@ const SettingsClient: React.FC<SettingsClientProps> = ({ initialFeaturedCities }
 
   const onSave = async () => {
     setIsLoading(true);
-    const result = await updateFeaturedCities(featuredCities);
-    if (result?.success) {
+    const result1 = await updateFeaturedCities(featuredCities);
+    const result2 = await updateFeeSettings(couupFeePercentage, gstPercentage);
+    
+    if (result1?.success && result2?.success) {
       toast.success("Settings saved successfully!");
     } else {
-      toast.error(result?.error || "Failed to save settings");
+      toast.error("Failed to save some settings");
     }
     setIsLoading(false);
   };
@@ -69,6 +79,38 @@ const SettingsClient: React.FC<SettingsClientProps> = ({ initialFeaturedCities }
             </div>
           );
         })}
+      </div>
+
+      <div className="pt-8 border-t border-neutral-200">
+        <h2 className="text-xl font-bold mb-2">Fee & Tax Configuration</h2>
+        <p className="text-neutral-500 text-sm mb-6">
+          Set the service fee percentage and GST percentage that will be applied to all bookings.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+          <div>
+            <label className="block text-sm font-semibold text-neutral-800 mb-2">
+              Couup Service Fee (%)
+            </label>
+            <input 
+              type="number" 
+              value={couupFeePercentage}
+              onChange={(e) => setCouupFeePercentage(Number(e.target.value))}
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f3d30]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-neutral-800 mb-2">
+              GST (%)
+            </label>
+            <input 
+              type="number" 
+              value={gstPercentage}
+              onChange={(e) => setGstPercentage(Number(e.target.value))}
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f3d30]"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-end pt-4 border-t border-neutral-200">

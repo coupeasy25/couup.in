@@ -37,6 +37,10 @@ export interface IListing extends Document {
   petsAllowed: boolean;
   partyAllowed: boolean;
   rooms: IRoomType[];
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 const ListingSchema = new Schema<IListing>({
@@ -75,6 +79,10 @@ const ListingSchema = new Schema<IListing>({
       inclusions: { type: [String], default: [] }
     }],
     default: []
+  },
+  coordinates: {
+    lat: { type: Number, required: false, default: 0 },
+    lng: { type: Number, required: false, default: 0 }
   }
 }, { timestamps: true });
 // Force Mongoose to recompile the schema to fix Next.js HMR dropping new fields

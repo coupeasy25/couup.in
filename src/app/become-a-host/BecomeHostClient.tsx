@@ -73,6 +73,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
       partyAllowed: initialData?.partyAllowed || false,
       rooms: initialData?.rooms || [],
       price: initialData?.price || 100,
+      coordinates: initialData?.coordinates || { lat: 0, lng: 0 },
     }
   });
 
@@ -311,6 +312,17 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
           <div>
             <Label className="text-xl font-semibold">Full Address</Label>
             <Input className="mt-4 text-lg py-6" {...register("fullAddress", { required: true })} placeholder="123 Main St, Local Area" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xl font-semibold">Latitude</Label>
+              <Input type="number" step="any" className="mt-4 text-lg py-6" {...register("coordinates.lat", { required: true, valueAsNumber: true })} placeholder="e.g. 23.0225" />
+            </div>
+            <div>
+              <Label className="text-xl font-semibold">Longitude</Label>
+              <Input type="number" step="any" className="mt-4 text-lg py-6" {...register("coordinates.lng", { required: true, valueAsNumber: true })} placeholder="e.g. 72.5714" />
+            </div>
           </div>
 
           <div>

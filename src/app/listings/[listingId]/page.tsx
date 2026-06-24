@@ -4,6 +4,7 @@ import EmptyState from "@/components/EmptyState";
 import ListingClient from "./ListingClient";
 import getReservations from "@/actions/getReservations";
 import getReviews from "@/actions/getReviews";
+import { getSettings } from "@/actions/admin/settingsActions";
 import { Metadata } from "next";
 
 interface IParams {
@@ -38,6 +39,7 @@ export default async function ListingPage({ params }: { params: Promise<IParams>
   const reservations = await getReservations(p);
   const reviews = await getReviews(p);
   const currentUser = await getCurrentUser();
+  const settings = await getSettings();
 
   if (!listing) {
     return <EmptyState />;
@@ -79,6 +81,7 @@ export default async function ListingPage({ params }: { params: Promise<IParams>
         reservations={reservations}
         reviews={reviews}
         currentUser={currentUser}
+        settings={settings}
       />
     </>
   );

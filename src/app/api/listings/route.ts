@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     amenities, standoutAmenities, safetyItems,
     checkInTime, checkOutTime, cancellationPolicy,
     smokingAllowed, petsAllowed, partyAllowed, locationValue,
-    rooms
+    rooms, coordinates
   } = body;
 
   if (!imageSrc || imageSrc.length < 5 || imageSrc.length > 15) {
@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       petsAllowed: petsAllowed || false,
       partyAllowed: partyAllowed || false,
       rooms: rooms || [],
+      coordinates: coordinates || { lat: 0, lng: 0 },
       // Keep old fields for backwards compatibility or map them
       locationValue: locationValue || fullAddress.split(',').pop()?.trim() || fullAddress,
       category: propertyType || 'Hotel',

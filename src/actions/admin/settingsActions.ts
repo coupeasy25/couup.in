@@ -11,12 +11,14 @@ export async function getSettings() {
     
     let setting = await Setting.findOne();
     if (!setting) {
-      setting = await Setting.create({ featuredCities: [] });
+      setting = await Setting.create({ featuredCities: [], couupFeePercentage: 5, gstPercentage: 18 });
     }
 
     return {
       id: setting._id.toString(),
       featuredCities: setting.featuredCities || [],
+      couupFeePercentage: setting.couupFeePercentage ?? 5,
+      gstPercentage: setting.gstPercentage ?? 18,
       createdAt: setting.createdAt?.toISOString(),
       updatedAt: setting.updatedAt?.toISOString(),
     };
@@ -43,12 +45,38 @@ export async function updateFeaturedCities(cities: string[]) {
       await setting.save();
     }
 
-    revalidatePath("/");
-    revalidatePath("/admin/settings");
+    revalidatePath("/", "layout");
 
     return { success: true };
   } catch (error) {
     console.error("Error updating settings:", error);
+    return { success: false, error: "Something went wrong" };
+  }
+}
+
+export async function updateFeeSettings(couupFeePercentage: number, gstPercentage: number) {
+  try {
+    const isAdmin = await isAdminAuthenticated();
+    if (!isAdmin) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    await connectToDatabase();
+    
+    let setting = await Setting.findOne();
+    if (!setting) {
+      await Setting.create({ featuredCities: [], couupFeePercentage, gstPercentage });
+    } else {
+      setting.couupFeePercentage = couupFeePercentage;
+      setting.gstPercentage = gstPercentage;
+      await setting.save();
+    }
+
+    revalidatePath("/", "layout");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating fee settings:", error);
     return { success: false, error: "Something went wrong" };
   }
 }

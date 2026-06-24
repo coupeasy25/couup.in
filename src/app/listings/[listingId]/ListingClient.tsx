@@ -30,6 +30,7 @@ interface ListingClientProps {
   reviews?: any[];
   listing: any & { user: any };
   currentUser?: any | null;
+  settings?: any;
 }
 
 const ListingClient: React.FC<ListingClientProps> = ({
@@ -37,6 +38,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
   reservations = [],
   reviews = [],
   currentUser,
+  settings,
 }) => {
   const loginModal = useLoginModal();
   const router = useRouter();
@@ -201,6 +203,11 @@ const ListingClient: React.FC<ListingClientProps> = ({
 
               <hr className="border-neutral-200 mb-8" />
               <div className="pb-10">
+                <ListingMap fullAddress={listing.fullAddress} coordinates={listing.coordinates} />
+              </div>
+
+              <hr className="border-neutral-200 mb-8" />
+              <div className="pb-10">
                 <ListingPolicies 
                   checkInTime={listing.checkInTime}
                   checkOutTime={listing.checkOutTime}
@@ -225,6 +232,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
                   disabledDates={disabledDates}
                   guestCount={Number(searchParams?.get('guestCount') || 1)}
                   selectedRoomName={selectedRoom?.type}
+                  settings={settings}
                 />
               </div>
             </div>

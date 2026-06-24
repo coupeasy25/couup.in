@@ -16,6 +16,7 @@ interface ListingReservationProps {
   disabledDates: Date[];
   guestCount?: number;
   selectedRoomName?: string;
+  settings?: any;
 }
 
 const ListingReservation: React.FC<ListingReservationProps> = ({
@@ -27,12 +28,18 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
   disabled,
   disabledDates,
   guestCount = 1,
-  selectedRoomName
+  selectedRoomName,
+  settings
 }) => {
   const [showCalendar, setShowCalendar] = useState(false);
   const nights = Math.max(1, totalPrice / price);
-  const serviceFee = 10; // Fixed 10 rupee Couup fee
-  const total = totalPrice + serviceFee;
+  
+  const couupFeePercentage = settings?.couupFeePercentage ?? 5;
+  const gstPercentage = settings?.gstPercentage ?? 18;
+
+  const serviceFee = (totalPrice * couupFeePercentage) / 100;
+  const gstAmount = (totalPrice * gstPercentage) / 100;
+  const total = totalPrice + serviceFee + gstAmount;
 
   return (
     <div className="bg-white rounded-xl border-[1px] border-neutral-200 shadow-xl p-6 relative">
@@ -113,8 +120,12 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
           <div className="no-underline text-neutral-800">₹{totalPrice.toLocaleString('en-IN')}</div>
         </div>
         <div className="flex flex-row items-center justify-between font-light text-neutral-600 underline decoration-1 text-[15px]">
-          <div>Couup service fee</div>
+          <div>Couup service fee ({couupFeePercentage}%)</div>
           <div className="no-underline text-neutral-800">₹{serviceFee.toLocaleString('en-IN')}</div>
+        </div>
+        <div className="flex flex-row items-center justify-between font-light text-neutral-600 underline decoration-1 text-[15px]">
+          <div>GST ({gstPercentage}%)</div>
+          <div className="no-underline text-neutral-800">₹{gstAmount.toLocaleString('en-IN')}</div>
         </div>
       </div>
 

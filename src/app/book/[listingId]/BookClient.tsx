@@ -14,6 +14,7 @@ import { Plus, Minus } from "lucide-react";
 interface BookClientProps {
   listing: any;
   currentUser?: any | null;
+  settings?: any;
 }
 
 const INDIAN_STATES = [
@@ -26,7 +27,7 @@ const INDIAN_STATES = [
   "Uttarakhand", "West Bengal"
 ];
 
-const BookClient: React.FC<BookClientProps> = ({ listing, currentUser }) => {
+const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -61,7 +62,13 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser }) => {
   }, [dateRange]);
 
   const basePrice = dayCount * currentPrice;
-  const taxes = Math.round(basePrice * 0.18); // 18% GST
+  const couupFeePercentage = settings?.couupFeePercentage ?? 5;
+  const gstPercentage = settings?.gstPercentage ?? 18;
+
+  const serviceFee = (basePrice * couupFeePercentage) / 100;
+  const gstAmount = (basePrice * gstPercentage) / 100;
+  
+  const taxes = serviceFee + gstAmount; // Combined fees + taxes
   const totalPrice = basePrice + taxes;
 
   const [guests, setGuests] = useState([{ firstName: '', lastName: '', gender: 'Male', age: '' }]);
@@ -329,8 +336,12 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser }) => {
                   <span>₹{basePrice.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span>Taxes & Fees (18% GST)</span>
-                  <span>₹{taxes.toLocaleString('en-IN')}</span>
+                  <span>Couup Service Fee ({couupFeePercentage}%)</span>
+                  <span>₹{serviceFee.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span>GST ({gstPercentage}%)</span>
+                  <span>₹{gstAmount.toLocaleString('en-IN')}</span>
                 </div>
                 <hr className="border-neutral-200" />
                 <div className="flex justify-between items-center text-lg font-bold">

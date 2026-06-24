@@ -22,7 +22,11 @@ export default async function AdminSettingsPage() {
       </div>
 
       <div className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm">
-        <SettingsClient initialFeaturedCities={settings?.featuredCities || []} />
+        <SettingsClient 
+          initialFeaturedCities={settings?.featuredCities || []} 
+          initialCouupFeePercentage={settings?.couupFeePercentage ?? 5}
+          initialGstPercentage={settings?.gstPercentage ?? 18}
+        />
       </div>
     </div>
   );

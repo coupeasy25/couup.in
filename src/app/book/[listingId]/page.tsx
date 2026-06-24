@@ -2,6 +2,7 @@ import getCurrentUser from "@/actions/getCurrentUser";
 import getListingById from "@/actions/getListingById";
 import EmptyState from "@/components/EmptyState";
 import BookClient from "./BookClient";
+import { getSettings } from "@/actions/admin/settingsActions";
 
 interface IParams {
   listingId?: string;
@@ -11,6 +12,7 @@ const BookPage = async ({ params }: { params: Promise<IParams> }) => {
   const p = await params;
   const listing = await getListingById({ listingId: p.listingId });
   const currentUser = await getCurrentUser();
+  const settings = await getSettings();
 
   if (!currentUser) {
     return (
@@ -34,6 +36,7 @@ const BookPage = async ({ params }: { params: Promise<IParams> }) => {
     <BookClient
       listing={listing}
       currentUser={currentUser}
+      settings={settings}
     />
   );
 };
