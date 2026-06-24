@@ -147,7 +147,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
       axios.patch(`/api/listings/${initialData.id}`, data)
       .then(() => {
         toast.success('Listing updated successfully!');
-        router.push('/properties');
+        router.push('/host/properties');
         router.refresh();
       })
       .catch((error) => {

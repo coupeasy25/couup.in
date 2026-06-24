@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Listing } from "@/models/Listing";
 import getCurrentUser from "@/actions/getCurrentUser";
+import getListings from "@/actions/getListings";
 
 export async function POST(request: Request) {
   const currentUser = await getCurrentUser();
@@ -60,4 +61,36 @@ export async function POST(request: Request) {
     console.error("LISTING_CREATE_ERROR", error);
     return new NextResponse(error.message || "Internal Server Error", { status: 500 });
   }
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const params = Object.fromEntries(searchParams.entries());
+    
+    // Call the existing getListings logic
+    const listings = await getListings(params);
+    
+    return NextResponse.json(listings, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  } catch (error: any) {
+    console.error("LISTING_GET_ERROR", error);
+    return new NextResponse(error.message || "Internal Server Error", { status: 500 });
+  }
+}
+
+export async function OPTIONS(request: Request) {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }

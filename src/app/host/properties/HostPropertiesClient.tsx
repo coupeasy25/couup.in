@@ -35,6 +35,10 @@ const HostPropertiesClient: React.FC<HostPropertiesClientProps> = ({
     });
   }, [router]);
 
+  const onEdit = useCallback((id: string) => {
+    router.push(`/host/properties/${id}/edit`);
+  }, [router]);
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -48,6 +52,7 @@ const HostPropertiesClient: React.FC<HostPropertiesClientProps> = ({
             data={listing}
             actionId={listing.id}
             onAction={onDelete}
+            onEdit={onEdit}
             disabled={deletingId === listing.id}
             actionLabel="Delete property"
             currentUser={currentUser}

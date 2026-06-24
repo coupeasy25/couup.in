@@ -1,7 +1,7 @@
 import { isAdminAuthenticated } from "@/actions/admin/adminAuth";
 import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
-import { LayoutDashboard, Users, Building, CalendarCheck, CreditCard, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Building, CalendarCheck, CreditCard, Settings, Image as ImageIcon } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -44,6 +44,10 @@ export default async function AdminLayout({
                 <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#0f3d30] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <Settings size={20} />
                   Settings
+                </Link>
+                <Link href="/admin/banners" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#0f3d30] hover:bg-neutral-100 rounded-xl transition font-medium">
+                  <ImageIcon size={20} />
+                  Banners
                 </Link>
                 <hr className="my-4 border-neutral-200" />
                 <AdminLogoutButton />
