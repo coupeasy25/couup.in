@@ -46,7 +46,7 @@ const DashboardCards: React.FC<DashboardCardsProps> = ({ stats }) => {
         {/* Total Users */}
         <div 
           onClick={() => setModalType("users")}
-          className="bg-gradient-to-br from-[#0f3d30] to-[#1a5c4a] p-6 rounded-2xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-shadow"
+          className="bg-gradient-to-br from-[#F97316] to-[#F97316] p-6 rounded-2xl shadow-lg relative overflow-hidden group cursor-pointer hover:shadow-xl transition-shadow"
         >
           <div className="absolute -right-6 -top-6 text-white/10 group-hover:scale-110 transition duration-300">
             <Users size={120} />

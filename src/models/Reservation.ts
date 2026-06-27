@@ -16,12 +16,20 @@ export interface IReservation extends Document {
   taxes: number;
   totalPrice: number;
   createdAt: Date;
+  updatedAt: Date;
   roomType?: string;
   gstState?: string;
   guests?: IGuest[];
+  guestContact?: string;
+  guestEmail?: string;
+  status: string;
+  cancellationFee?: number;
+  refundAmount?: number;
+  cancelledAt?: Date;
   razorpay_payment_id?: string;
   razorpay_order_id?: string;
   razorpay_signature?: string;
+  roomsCount?: number;
 }
 
 const GuestSchema = new Schema<IGuest>({
@@ -42,9 +50,16 @@ const ReservationSchema = new Schema<IReservation>({
   roomType: { type: String, required: false },
   gstState: { type: String, required: false },
   guests: { type: [GuestSchema], required: false },
+  guestContact: { type: String, required: false },
+  guestEmail: { type: String, required: false },
+  status: { type: String, enum: ['Pending', 'Confirmed', 'Cancelled', 'Checked-in', 'Checked-out'], default: 'Pending' },
+  cancellationFee: { type: Number, required: false, default: 0 },
+  refundAmount: { type: Number, required: false, default: 0 },
+  cancelledAt: { type: Date, required: false },
   razorpay_payment_id: { type: String, required: false },
   razorpay_order_id: { type: String, required: false },
-  razorpay_signature: { type: String, required: false }
+  razorpay_signature: { type: String, required: false },
+  roomsCount: { type: Number, required: false, default: 1 }
 }, { timestamps: true });
 
 export const Reservation: Model<IReservation> = mongoose.models.Reservation || mongoose.model<IReservation>("Reservation", ReservationSchema);

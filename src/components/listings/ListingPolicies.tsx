@@ -6,6 +6,9 @@ interface ListingPoliciesProps {
   checkInTime?: string;
   checkOutTime?: string;
   cancellationPolicy?: string;
+  cancellationRules?: { days: number; deduction: number }[];
+  cancellationDays?: number;
+  cancellationDeduction?: number;
   smokingAllowed?: boolean;
   petsAllowed?: boolean;
   partyAllowed?: boolean;
@@ -15,6 +18,9 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
   checkInTime = "Not specified",
   checkOutTime = "Not specified",
   cancellationPolicy = "Not specified",
+  cancellationRules = [],
+  cancellationDays = 0,
+  cancellationDeduction = 0,
   smokingAllowed = false,
   petsAllowed = false,
   partyAllowed = false,
@@ -22,9 +28,9 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
   return (
     <div className="flex flex-col gap-6 py-4">
       <h2 className="text-2xl font-semibold">House Rules & Policies</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-2">
-        
+
         {/* Timing */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 font-semibold text-lg">
@@ -45,6 +51,24 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
           </div>
           <div className="text-neutral-600 font-light text-base leading-relaxed">
             {cancellationPolicy}
+
+            {((cancellationRules?.length > 0) || (cancellationDays !== undefined && cancellationDays > 0)) && (
+              <div className="mt-5 flex flex-col gap-3 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+                {cancellationRules?.length > 0 ? (
+                  cancellationRules.map((rule: any, idx: number) => (
+                    <div key={idx} className={`flex justify-between items-center text-sm ${idx !== cancellationRules.length - 1 ? 'pb-3 border-b border-neutral-200' : ''}`}>
+                      <span className="text-neutral-600">Cancel {rule.days} days before</span>
+                      <span className="font-semibold text-neutral-900">{rule.deduction}% Penalty</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-neutral-600">Cancel {cancellationDays} days before</span>
+                    <span className="font-semibold text-neutral-900">{cancellationDeduction || 0}% Penalty</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

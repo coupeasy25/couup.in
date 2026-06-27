@@ -103,7 +103,7 @@ const ListingReviews: React.FC<ListingReviewsProps> = ({ reviews = [], listingId
             <Button
               disabled={isLoading}
               onClick={onSubmit}
-              className="w-max bg-[#E51D53] hover:bg-[#D70466] text-white font-semibold"
+              className="w-max bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold"
             >
               Submit Review
             </Button>

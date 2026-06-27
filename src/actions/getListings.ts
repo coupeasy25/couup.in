@@ -19,6 +19,15 @@ export default async function getListings(params: any) {
 
     let query: any = {};
 
+    if (params.status) {
+      query.status = params.status;
+    } else if (!userId) {
+      query.$or = [
+        { status: 'APPROVED' },
+        { status: { $exists: false } }
+      ];
+    }
+
     if (userId) {
       query.userId = userId;
     }
@@ -86,6 +95,10 @@ export default async function getListings(params: any) {
       rooms: listing.rooms ? listing.rooms.map((room: any) => ({
         ...room,
         _id: room._id ? room._id.toString() : undefined
+      })) : [],
+      cancellationRules: listing.cancellationRules ? listing.cancellationRules.map((rule: any) => ({
+        ...rule,
+        _id: rule._id ? rule._id.toString() : undefined
       })) : []
     }));
   } catch (error: any) {

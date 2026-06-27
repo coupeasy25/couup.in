@@ -8,6 +8,7 @@ import useLoginModal from "@/hooks/useLoginModal";
 import useSearchModal from "@/hooks/useSearchModal";
 import { signOut } from "next-auth/react";
 import { Search as SearchIcon } from "lucide-react";
+import Image from "next/image";
 import ExpandedSearch from "./ExpandedSearch";
 import UserMenu from "./UserMenu";
 
@@ -22,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isMainPage = pathname === '/';
-  
+
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -37,9 +38,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // If we are not on the main page, always apply the scrolled style
-  const isScrolledStyle = !isMainPage || isScrolled;
 
   const locationValue = searchParams?.get('locationValue');
   const startDate = searchParams?.get('startDate');
@@ -60,43 +58,36 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
 
   const guestLabel = guestCount ? `${guestCount} Guests` : 'Add Guests';
 
+  // Force white navbar background always as requested by user
+  const isScrolledStyle = true;
+
   return (
     <div
       className={`fixed w-full z-50 transition-all duration-300 border-b-[1px] ${isScrolledStyle
-          ? "bg-white shadow-md border-neutral-200 py-3"
-          : "bg-transparent border-transparent py-4"
+        ? "bg-white shadow-md border-neutral-200 py-3"
+        : "bg-transparent border-transparent py-4"
         }`}
     >
       <Container>
         <div className="flex flex-row items-center justify-between gap-3 md:gap-0">
           {/* Logo */}
-          <div 
+          <div
             onClick={() => router.push('/')}
-            className={`flex flex-col cursor-pointer transition ${isScrolledStyle ? 'text-[#0f3d30]' : 'text-[#D4AF37]'}`}
+            className="flex items-center cursor-pointer transition"
           >
-            <div className="font-serif text-3xl tracking-[0.2em] font-medium uppercase drop-shadow-sm">Couup</div>
-            <div className={`text-[9px] tracking-[0.3em] font-light uppercase text-center mt-1 ${isScrolledStyle ? 'text-neutral-500' : 'text-[#D4AF37]/80'}`}>Hotels & Resorts</div>
+            <Image
+              src="/images/logo-2.png"
+              alt="Couup Logo"
+              width={160}
+              height={45}
+              className="object-contain"
+            />
           </div>
 
-          {/* Center Content: Switches between Links and Mini Search Bar */}
+          {/* Center Content */}
           <div className="hidden md:flex flex-1 items-center justify-center">
             {searchModal.isOpen ? (
               <ExpandedSearch />
-            ) : isScrolledStyle ? (
-              /* Mini Search Bar (Visible on Scroll) */
-              <div 
-                onClick={searchModal.onOpen}
-                className="border-[1px] w-full md:w-auto py-2 rounded-full shadow-sm hover:shadow-md transition cursor-pointer flex flex-row items-center justify-between bg-white border-neutral-200 animate-in fade-in zoom-in duration-300"
-              >
-                <div className="text-sm font-semibold px-6 text-black">{locationLabel}</div>
-                <div className="hidden sm:block text-sm font-semibold px-6 border-x-[1px] flex-1 text-center text-black">{durationLabel}</div>
-                <div className="text-sm pl-6 pr-2 text-gray-600 flex flex-row items-center gap-3">
-                  <div className="hidden sm:block">{guestLabel}</div>
-                  <div className="p-2 bg-[#0a4d3c] rounded-full text-white">
-                    <SearchIcon size={14} />
-                  </div>
-                </div>
-              </div>
             ) : null}
           </div>
 

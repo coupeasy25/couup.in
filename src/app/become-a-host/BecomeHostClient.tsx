@@ -10,6 +10,8 @@ import Image from "next/image";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+import ImageUpload from "@/components/inputs/ImageUpload";
 import HostEmailVerification from "./HostEmailVerification";
 
 enum STEPS {
@@ -22,6 +24,8 @@ enum STEPS {
   SAFETY = 6,
   POLICIES = 7,
   PRICE = 8,
+  CONTACT = 9,
+  SUCCESS = 10,
 }
 
 const AMENITIES_LIST = ["Wifi", "TV", "Kitchen", "Washing Machine", "Free Parking", "Paid Parking", "Air Conditioning"];
@@ -50,6 +54,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
     handleSubmit,
     setValue,
     watch,
+    getValues,
     formState: { errors },
     reset,
   } = useForm<FieldValues>({
@@ -68,12 +73,20 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
       checkInTime: initialData?.checkInTime || '2:00 PM',
       checkOutTime: initialData?.checkOutTime || '11:00 AM',
       cancellationPolicy: initialData?.cancellationPolicy || 'Free cancellation before 48 hours',
+      cancellationRules: initialData?.cancellationRules || [{ days: 2, deduction: 50 }],
       smokingAllowed: initialData?.smokingAllowed || false,
       petsAllowed: initialData?.petsAllowed || false,
       partyAllowed: initialData?.partyAllowed || false,
       rooms: initialData?.rooms || [],
       price: initialData?.price || 100,
       coordinates: initialData?.coordinates || { lat: 0, lng: 0 },
+      hostContactDetails: initialData?.hostContactDetails || {
+        name: currentUser?.name || '',
+        email: currentUser?.email || '',
+        phone: '',
+        alternatePhone: '',
+        companyName: '',
+      },
     }
   });
 
@@ -83,6 +96,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
   const amenities = watch('amenities') || [];
   const standoutAmenities = watch('standoutAmenities') || [];
   const safetyItems = watch('safetyItems') || [];
+  const cancellationRules = watch('cancellationRules') || [];
   const smokingAllowed = watch('smokingAllowed');
   const petsAllowed = watch('petsAllowed');
   const partyAllowed = watch('partyAllowed');
@@ -134,11 +148,20 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
         return;
       }
     }
+    if (step === STEPS.CONTACT) {
+      const name = watch('hostContactDetails.name');
+      const email = watch('hostContactDetails.email');
+      const phone = watch('hostContactDetails.phone');
+      if (!name || !email || !phone) {
+        toast.error("Please fill in all required contact details.");
+        return;
+      }
+    }
     setStep((value) => value + 1);
   };
 
   const onSubmit = (data: FieldValues) => {
-    if (step !== STEPS.PRICE) {
+    if (step !== STEPS.CONTACT) {
       return onNext();
     }
 
@@ -160,9 +183,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
     } else {
       axios.post('/api/listings', data)
       .then(() => {
-        toast.success('Listing created successfully!');
-        router.push('/');
-        router.refresh();
+        setStep(STEPS.SUCCESS);
       })
       .catch((error) => {
         toast.error(error.response?.data?.error || 'Something went wrong.');
@@ -174,8 +195,8 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
   };
 
   const actionLabel = useMemo(() => {
-    if (step === STEPS.PRICE) {
-      return initialData ? 'Save Changes' : 'Create';
+    if (step === STEPS.CONTACT) {
+      return initialData ? 'Save Changes' : 'Submit Property';
     }
     return 'Next';
   }, [step, initialData]);
@@ -215,35 +236,19 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
           
           <div className="mt-4">
             <Label className="text-lg font-semibold">Photos (Min 5, Max 15)</Label>
-            <div className="flex gap-2 mt-2">
-              <Input 
-                className="py-6 text-lg"
-                value={imgInput} 
-                onChange={(e) => setImgInput(e.target.value)} 
-                placeholder="Paste image URL here" 
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (imgInput && imageSrc.length < 15) {
-                      setCustomValue('imageSrc', [...imageSrc, imgInput]);
-                      setImgInput('');
-                    }
+            
+            <div className="mt-4 mb-4">
+              <ImageUpload
+                value={imageSrc}
+                onChange={(value) => {
+                  const currentImages = getValues('imageSrc') || [];
+                  if (currentImages.length < 15) {
+                    setCustomValue('imageSrc', [...currentImages, value]);
                   }
                 }}
               />
-              <button 
-                type="button"
-                onClick={() => {
-                  if (imgInput && imageSrc.length < 15) {
-                    setCustomValue('imageSrc', [...imageSrc, imgInput]);
-                    setImgInput('');
-                  }
-                }}
-                className="bg-[#0f3d30] text-[#D4AF37] px-6 rounded-md hover:bg-[#0a2a21] transition font-semibold"
-              >
-                Add
-              </button>
             </div>
+
             <p className="text-sm text-neutral-500 mt-2 font-medium">Added: {imageSrc.length}/15</p>
             <div className="flex flex-wrap gap-4 mt-4">
               {imageSrc.map((src: string, index: number) => (
@@ -283,13 +288,13 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div 
                 onClick={() => setCustomValue('propertyType', 'Hotel')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Hotel' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Hotel' ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Hotel</div>
               </div>
               <div 
                 onClick={() => setCustomValue('propertyType', 'Resort')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Resort' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Resort' ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Resort</div>
               </div>
@@ -335,13 +340,13 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div 
                 onClick={() => setCustomValue('bathroomType', 'Private')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Private' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Private' ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Private and attached</div>
               </div>
               <div 
                 onClick={() => setCustomValue('bathroomType', 'Shared')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Shared' ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition ${bathroomType === 'Shared' ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <div className="font-semibold text-lg">Shared</div>
               </div>
@@ -405,24 +410,18 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             {/* Images */}
             <div>
               <Label className="text-sm font-semibold">Room Photos (1-4 images)</Label>
-              <div className="flex gap-2 mt-2">
-                <Input 
-                  value={roomImgInput}
-                  onChange={(e) => setRoomImgInput(e.target.value)}
-                  placeholder="Paste image URL"
-                />
-                <button 
-                  type="button"
-                  onClick={() => {
-                    if (roomImgInput && editingRoom.images.length < 4) {
-                      setEditingRoom({ ...editingRoom, images: [...editingRoom.images, roomImgInput] });
-                      setRoomImgInput("");
-                    }
+              <div className="mt-2 mb-4">
+                <ImageUpload
+                  value={editingRoom.images}
+                  onChange={(value) => {
+                    setEditingRoom((prev: any) => {
+                      if (prev.images.length < 4) {
+                        return { ...prev, images: [...prev.images, value] };
+                      }
+                      return prev;
+                    });
                   }}
-                  className="bg-[#0f3d30] text-[#D4AF37] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#0a2a21] transition"
-                >
-                  Add
-                </button>
+                />
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
                 {editingRoom.images.map((src: string, index: number) => (
@@ -470,7 +469,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
                       setRoomFacilityInput("");
                     }
                   }}
-                  className="bg-[#0f3d30] text-[#D4AF37] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#0a2a21] transition"
+                  className="bg-[#F97316] text-[#FFFFFF] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#EA580C] transition"
                 >
                   Add
                 </button>
@@ -515,7 +514,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
                       setRoomInclusionInput("");
                     }
                   }}
-                  className="bg-[#0f3d30] text-[#D4AF37] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#0a2a21] transition"
+                  className="bg-[#F97316] text-[#FFFFFF] px-4 py-2 rounded-md font-semibold text-sm hover:bg-[#EA580C] transition"
                 >
                   Add
                 </button>
@@ -563,7 +562,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
                   setCustomValue('rooms', updatedRooms);
                   setEditingRoom(null);
                 }}
-                className="px-4 py-2 bg-[#0f3d30] text-[#D4AF37] rounded-lg font-semibold hover:bg-[#0a2a21] transition"
+                className="px-4 py-2 bg-[#F97316] text-[#FFFFFF] rounded-lg font-semibold hover:bg-[#EA580C] transition"
               >
                 Save Room
               </button>
@@ -633,10 +632,10 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
               <div 
                 key={item}
                 onClick={() => toggleArrayItem('amenities', amenities, item)}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <span className="font-semibold text-lg">{item}</span>
-                {isSelected && <Check size={24} className="text-[#0f3d30]" />}
+                {isSelected && <Check size={24} className="text-[#F97316]" />}
               </div>
             )
           })}
@@ -644,10 +643,10 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             <div 
               key={item}
               onClick={() => toggleArrayItem('amenities', amenities, item)}
-              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]"
+              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]"
             >
               <span className="font-semibold text-lg">{item}</span>
-              <Check size={24} className="text-[#0f3d30]" />
+              <Check size={24} className="text-[#F97316]" />
             </div>
           ))}
         </div>
@@ -675,7 +674,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
                 setCustomAmenityInput('');
               }
             }}
-            className="bg-[#0f3d30] text-[#D4AF37] px-8 rounded-md hover:bg-[#0a2a21] transition font-semibold"
+            className="bg-[#F97316] text-[#FFFFFF] px-8 rounded-md hover:bg-[#EA580C] transition font-semibold"
           >
             Add
           </button>
@@ -698,10 +697,10 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
               <div 
                 key={item}
                 onClick={() => toggleArrayItem('standoutAmenities', standoutAmenities, item)}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <span className="font-semibold text-lg">{item}</span>
-                {isSelected && <Check size={24} className="text-[#0f3d30]" />}
+                {isSelected && <Check size={24} className="text-[#F97316]" />}
               </div>
             )
           })}
@@ -709,10 +708,10 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             <div 
               key={item}
               onClick={() => toggleArrayItem('standoutAmenities', standoutAmenities, item)}
-              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]"
+              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]"
             >
               <span className="font-semibold text-lg">{item}</span>
-              <Check size={24} className="text-[#0f3d30]" />
+              <Check size={24} className="text-[#F97316]" />
             </div>
           ))}
         </div>
@@ -740,7 +739,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
                 setCustomStandoutInput('');
               }
             }}
-            className="bg-[#0f3d30] text-[#D4AF37] px-8 rounded-md hover:bg-[#0a2a21] transition font-semibold"
+            className="bg-[#F97316] text-[#FFFFFF] px-8 rounded-md hover:bg-[#EA580C] transition font-semibold"
           >
             Add
           </button>
@@ -763,10 +762,10 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
               <div 
                 key={item}
                 onClick={() => toggleArrayItem('safetyItems', safetyItems, item)}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                className={`p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center ${isSelected ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
               >
                 <span className="font-semibold text-lg">{item}</span>
-                {isSelected && <Check size={24} className="text-[#0f3d30]" />}
+                {isSelected && <Check size={24} className="text-[#F97316]" />}
               </div>
             )
           })}
@@ -774,10 +773,10 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             <div 
               key={item}
               onClick={() => toggleArrayItem('safetyItems', safetyItems, item)}
-              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#D4AF37] bg-[#0f3d30]/5 shadow-[0_0_0_1px_#D4AF37]"
+              className="p-6 border-2 rounded-xl cursor-pointer transition flex justify-between items-center border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]"
             >
               <span className="font-semibold text-lg">{item}</span>
-              <Check size={24} className="text-[#0f3d30]" />
+              <Check size={24} className="text-[#F97316]" />
             </div>
           ))}
         </div>
@@ -805,7 +804,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
                 setCustomSafetyInput('');
               }
             }}
-            className="bg-[#0f3d30] text-[#D4AF37] px-8 rounded-md hover:bg-[#0a2a21] transition font-semibold"
+            className="bg-[#F97316] text-[#FFFFFF] px-8 rounded-md hover:bg-[#EA580C] transition font-semibold"
           >
             Add
           </button>
@@ -834,9 +833,66 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             </div>
           </div>
 
-          <div>
-            <Label className="text-lg font-semibold">Cancellation Policy</Label>
-            <Input className="mt-2 text-lg py-6" {...register("cancellationPolicy", { required: true })} placeholder="e.g. Free cancellation before 48 hours" />
+          <div className="flex flex-col gap-4 p-4 border-[1px] border-neutral-200 rounded-lg bg-neutral-50/50">
+            <Label className="text-lg font-semibold text-[#F97316]">Cancellation Policy Settings</Label>
+            
+            <div className="flex flex-col gap-3">
+              {cancellationRules.map((rule: any, index: number) => (
+                <div key={index} className="flex gap-4 items-end bg-white p-3 border border-neutral-200 rounded-md">
+                  <div className="flex-1">
+                    <Label className="text-xs font-semibold text-neutral-500 mb-1 block">Days before check-in</Label>
+                    <Input 
+                      type="number" min="0" className="text-md py-4" 
+                      value={rule.days}
+                      onChange={(e) => {
+                        const newRules = [...cancellationRules];
+                        newRules[index].days = parseInt(e.target.value) || 0;
+                        setCustomValue('cancellationRules', newRules);
+                      }}
+                      placeholder="e.g. 7" 
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-xs font-semibold text-neutral-500 mb-1 block">Penalty Deduction (%)</Label>
+                    <Input 
+                      type="number" min="0" max="100" className="text-md py-4" 
+                      value={rule.deduction}
+                      onChange={(e) => {
+                        const newRules = [...cancellationRules];
+                        newRules[index].deduction = parseInt(e.target.value) || 0;
+                        setCustomValue('cancellationRules', newRules);
+                      }}
+                      placeholder="e.g. 50" 
+                    />
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const newRules = cancellationRules.filter((_: any, i: number) => i !== index);
+                      setCustomValue('cancellationRules', newRules);
+                    }}
+                    className="p-3 text-red-500 hover:bg-red-50 rounded-md mb-[2px]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+              ))}
+              
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomValue('cancellationRules', [...cancellationRules, { days: 0, deduction: 0 }]);
+                }}
+                className="mt-2 text-sm font-semibold text-[#F97316] hover:text-[#EA580C] text-left"
+              >
+                + Add another rule
+              </button>
+            </div>
+            
+            <div className="mt-4">
+              <Label className="text-sm font-semibold">Policy Description (Shown to guests)</Label>
+              <Input className="mt-2 text-lg py-6" {...register("cancellationPolicy", { required: true })} placeholder="e.g. Free cancellation before 7 days. 50% penalty within 7 days, 80% within 1 day." />
+            </div>
           </div>
 
           <div className="flex flex-col gap-4 mt-2">
@@ -847,7 +903,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
               <button 
                 type="button"
                 onClick={() => setCustomValue('smokingAllowed', !smokingAllowed)}
-                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${smokingAllowed ? 'bg-[#0f3d30] justify-end' : 'bg-neutral-300 justify-start'}`}
+                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${smokingAllowed ? 'bg-[#F97316] justify-end' : 'bg-neutral-300 justify-start'}`}
               >
                 <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
               </button>
@@ -858,7 +914,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
               <button 
                 type="button"
                 onClick={() => setCustomValue('petsAllowed', !petsAllowed)}
-                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${petsAllowed ? 'bg-[#0f3d30] justify-end' : 'bg-neutral-300 justify-start'}`}
+                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${petsAllowed ? 'bg-[#F97316] justify-end' : 'bg-neutral-300 justify-start'}`}
               >
                 <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
               </button>
@@ -869,7 +925,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
               <button 
                 type="button"
                 onClick={() => setCustomValue('partyAllowed', !partyAllowed)}
-                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${partyAllowed ? 'bg-[#0f3d30] justify-end' : 'bg-neutral-300 justify-start'}`}
+                className={`w-14 h-8 rounded-full flex items-center transition px-1 ${partyAllowed ? 'bg-[#F97316] justify-end' : 'bg-neutral-300 justify-start'}`}
               >
                 <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
               </button>
@@ -893,6 +949,63 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
     );
   }
 
+  if (step === STEPS.CONTACT) {
+    leftContent = (
+      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-3xl font-semibold">Host Contact Details</h2>
+          <p className="text-xl text-gray-500 font-light">This information is strictly for our internal verification process and will <strong className="text-black">not</strong> be shown to guests.</p>
+        </div>
+        
+        <div className="flex flex-col gap-6">
+          <div>
+            <Label className="text-lg font-semibold">Full Name *</Label>
+            <Input className="mt-2 text-lg py-6" {...register("hostContactDetails.name", { required: true })} placeholder="e.g. John Doe" />
+          </div>
+          <div>
+            <Label className="text-lg font-semibold">Email Address *</Label>
+            <Input type="email" className="mt-2 text-lg py-6" {...register("hostContactDetails.email", { required: true })} placeholder="e.g. host@example.com" />
+          </div>
+          <div>
+            <Label className="text-lg font-semibold">Mobile Number *</Label>
+            <Input type="tel" className="mt-2 text-lg py-6" {...register("hostContactDetails.phone", { required: true })} placeholder="e.g. +91 9876543210" />
+          </div>
+          <div>
+            <Label className="text-lg font-semibold">Alternate Mobile Number (Optional)</Label>
+            <Input type="tel" className="mt-2 text-lg py-6" {...register("hostContactDetails.alternatePhone")} placeholder="e.g. +91 9123456789" />
+          </div>
+          <div>
+            <Label className="text-lg font-semibold">Company / Legal Name (Optional)</Label>
+            <Input className="mt-2 text-lg py-6" {...register("hostContactDetails.companyName")} placeholder="e.g. Couup Resorts" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === STEPS.SUCCESS) {
+    leftContent = (
+      <div className="flex flex-col justify-center items-center h-full px-10 md:px-20 max-w-2xl text-center w-full mx-auto">
+        <div className="w-24 h-24 bg-[#F97316]/10 rounded-full flex items-center justify-center mb-8">
+          <Check size={48} className="text-[#F97316]" />
+        </div>
+        <h1 className="text-4xl font-semibold mb-6">Property Submitted!</h1>
+        <p className="text-xl text-neutral-600 leading-relaxed font-light mb-12">
+          Your property is under verification and will be approved in 24 hours. Once approved, it will be visible to guests.
+        </p>
+        <button
+          onClick={() => {
+            router.push('/host/properties');
+            router.refresh();
+          }}
+          className="px-8 py-4 bg-[#F97316] text-[#FFFFFF] rounded-xl font-semibold text-lg hover:bg-[#EA580C] transition shadow-lg"
+        >
+          View My Properties
+        </button>
+      </div>
+    );
+  }
+
   // Calculate progress percentage
   const progress = ((step + 1) / (Object.keys(STEPS).length / 2)) * 100;
 
@@ -903,21 +1016,21 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
   return (
     <div className="fixed inset-0 bg-white z-[999] flex flex-col">
       {/* Top Navbar */}
-      <div className="h-24 w-full flex items-center justify-between px-10 bg-[#0f3d30] shadow-md border-b-[1px] border-[#0a2a21]">
+      <div className="h-24 w-full flex items-center justify-between px-10 bg-white shadow-sm border-b-[1px] border-neutral-200">
         <div 
           onClick={() => router.push('/')}
-          className="flex flex-col cursor-pointer transition text-[#D4AF37]"
+          className="flex flex-col cursor-pointer transition text-[#F97316]"
         >
           <div className="font-serif text-3xl tracking-[0.2em] font-medium uppercase drop-shadow-sm">Couup</div>
-          <div className="text-[9px] tracking-[0.3em] font-light uppercase text-center mt-1 text-[#D4AF37]/80">Hotels & Resorts</div>
+          <div className="text-[9px] tracking-[0.3em] font-light uppercase text-center mt-1 text-neutral-500">Hotels & Resorts</div>
         </div>
         <div className="flex gap-4">
-          <button className="px-4 py-2 border-[1px] border-[#D4AF37]/50 text-[#D4AF37] rounded-full font-semibold text-sm hover:bg-[#D4AF37]/10 transition">
+          <button className="px-4 py-2 border-[1px] border-neutral-300 text-neutral-600 rounded-full font-semibold text-sm hover:bg-neutral-50 transition">
             Questions?
           </button>
           <button 
             onClick={() => router.push('/')}
-            className="px-4 py-2 border-[1px] border-[#D4AF37]/50 text-[#D4AF37] rounded-full font-semibold text-sm hover:bg-[#D4AF37]/10 transition"
+            className="px-4 py-2 border-[1px] border-neutral-300 text-neutral-600 rounded-full font-semibold text-sm hover:bg-neutral-50 transition"
           >
             Save & exit
           </button>
@@ -940,32 +1053,34 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
       </div>
 
       {/* Bottom Fixed Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 h-24 bg-[#0f3d30] border-t-[1px] border-[#0a2a21] z-[1000] flex flex-col justify-between">
-        {/* Progress bar */}
-        <div className="w-full h-2 bg-[#0a2a21]">
-          <div 
-            className="h-full bg-[#D4AF37] transition-all duration-300 ease-in-out shadow-[0_0_10px_rgba(212,175,55,0.5)]" 
-            style={{ width: `${progress}%` }}
-          ></div>
+      {step !== STEPS.SUCCESS && (
+        <div className="fixed bottom-0 left-0 right-0 h-24 bg-white border-t-[1px] border-neutral-200 z-[1000] flex flex-col justify-between">
+          {/* Progress bar */}
+          <div className="w-full h-2 bg-neutral-100">
+            <div 
+              className="h-full bg-[#F97316] transition-all duration-300 ease-in-out shadow-[0_0_10px_rgba(249,115,22,0.5)]" 
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          
+          {/* Buttons */}
+          <div className="flex-1 flex items-center justify-between px-10">
+            <button
+              onClick={step === STEPS.INTRO ? undefined : onBack}
+              className={`font-semibold text-lg text-neutral-500 hover:text-neutral-900 transition ${step === STEPS.INTRO ? 'opacity-0 cursor-default' : 'hover:bg-neutral-100 px-4 py-2 rounded-lg'}`}
+            >
+              Back
+            </button>
+            <button
+              onClick={handleSubmit(onSubmit)}
+              disabled={isLoading}
+              className={`px-8 py-3 rounded-lg font-semibold text-lg transition shadow-md ${isLoading ? 'bg-neutral-500 cursor-not-allowed text-white' : 'bg-[#FFFFFF] text-[#F97316] hover:bg-[#F3F4F6]'}`}
+            >
+              {actionLabel}
+            </button>
+          </div>
         </div>
-        
-        {/* Buttons */}
-        <div className="flex-1 flex items-center justify-between px-10">
-          <button
-            onClick={step === STEPS.INTRO ? undefined : onBack}
-            className={`font-semibold text-lg text-white/80 hover:text-white transition ${step === STEPS.INTRO ? 'opacity-0 cursor-default' : 'hover:bg-white/10 px-4 py-2 rounded-lg'}`}
-          >
-            Back
-          </button>
-          <button
-            onClick={handleSubmit(onSubmit)}
-            disabled={isLoading}
-            className={`px-8 py-3 rounded-lg font-semibold text-lg transition shadow-md ${isLoading ? 'bg-neutral-500 cursor-not-allowed text-white' : 'bg-[#D4AF37] text-[#0f3d30] hover:bg-[#c4a133]'}`}
-          >
-            {actionLabel}
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

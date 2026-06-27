@@ -38,7 +38,7 @@ const ListingRooms: React.FC<ListingRoomsProps> = ({
                 <img 
                   src={room.images[0]} 
                   alt={room.type} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                  className="w-full h-full object-cover transition duration-500" 
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-neutral-400">
@@ -84,7 +84,7 @@ const ListingRooms: React.FC<ListingRoomsProps> = ({
                 {room.inclusions?.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {room.inclusions.slice(0, 2).map((inc: string, i: number) => (
-                      <span key={i} className="px-3 py-1 bg-[#0f3d30]/10 text-[#0f3d30] text-sm rounded-full font-medium">
+                      <span key={i} className="px-3 py-1 bg-[#F97316]/10 text-[#F97316] text-sm rounded-full font-medium">
                         ✓ {inc}
                       </span>
                     ))}
@@ -107,8 +107,8 @@ const ListingRooms: React.FC<ListingRoomsProps> = ({
                   onClick={() => onSelectRoom(room)}
                   className={`w-full sm:w-auto px-8 py-3 rounded-lg font-semibold transition-all duration-200 ${
                     selectedRoomId === room.id 
-                      ? 'bg-[#0f3d30] text-white shadow-lg shadow-[#0f3d30]/30 scale-[1.02]' 
-                      : 'bg-white border-2 border-[#0f3d30] text-[#0f3d30] hover:bg-[#0f3d30] hover:text-white'
+                      ? 'bg-[#F97316] text-white shadow-lg shadow-[#F97316]/30 scale-[1.02]' 
+                      : 'bg-white border-2 border-[#F97316] text-[#F97316] hover:bg-[#F97316] hover:text-white'
                   }`}
                 >
                   {selectedRoomId === room.id ? 'Selected' : 'Select Room'}

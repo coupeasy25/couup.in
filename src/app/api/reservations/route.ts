@@ -17,7 +17,8 @@ export async function POST(request: Request) {
   const body = await request.json();
   const { 
     listingId, startDate, endDate, totalPrice, basePrice, taxes, roomType, guests, gstState,
-    razorpay_order_id, razorpay_payment_id, razorpay_signature 
+    guestContact, guestEmail,
+    razorpay_order_id, razorpay_payment_id, razorpay_signature, roomsCount 
   } = body;
 
   if (!listingId || !startDate || !endDate || !totalPrice || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -46,8 +47,10 @@ export async function POST(request: Request) {
   const maxCount = room ? (room.count || 1) : 1;
 
   // Find all existing reservations that overlap with the requested dates for this roomType
+  // ONLY look for non-cancelled reservations
   const query: any = {
     listingId,
+    status: { $ne: 'Cancelled' },
     $or: [
       { endDate: { $gte: new Date(startDate) }, startDate: { $lte: new Date(startDate) } },
       { startDate: { $lte: new Date(endDate) }, endDate: { $gte: new Date(endDate) } },
@@ -61,29 +64,37 @@ export async function POST(request: Request) {
 
   const overlappingReservations = await Reservation.find(query);
 
-  // Check if any date in the requested range exceeds maxCount
+  // Check against blocked dates from Listing model
   const requestedStart = new Date(startDate);
   const requestedEnd = new Date(endDate);
-  
   let currentDate = new Date(requestedStart);
   
   while (currentDate <= requestedEnd) {
-    let count = 0;
+    // Check if this date is in the blockedDates array
+    const isBlocked = listing.blockedDates?.some((bd: Date) => {
+      const bDate = new Date(bd);
+      return bDate.getDate() === currentDate.getDate() && 
+             bDate.getMonth() === currentDate.getMonth() && 
+             bDate.getFullYear() === currentDate.getFullYear();
+    });
     
+    if (isBlocked) {
+      return new NextResponse("Selected dates are blocked by the host", { status: 400 });
+    }
+
+    let count = 0;
     for (const res of overlappingReservations) {
       const resStart = new Date(res.startDate);
       const resEnd = new Date(res.endDate);
-      
-      // If currentDate falls within the reservation
       if (currentDate >= resStart && currentDate <= resEnd) {
-        count++;
+        count += (res.roomsCount || 1);
       }
     }
     
-    if (count >= maxCount) {
+    const requestedRooms = roomsCount || 1;
+    if (count + requestedRooms > maxCount) {
       return new NextResponse("Not enough rooms available for these dates", { status: 400 });
     }
-    
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
@@ -97,7 +108,11 @@ export async function POST(request: Request) {
     totalPrice,
     roomType,
     guests: guests || [],
+    guestContact: guestContact || (currentUser as any).phone || '',
+    guestEmail: guestEmail || currentUser.email || '',
+    status: 'Pending',
     gstState: gstState || '',
+    roomsCount: roomsCount || 1,
     razorpay_payment_id,
     razorpay_order_id,
     razorpay_signature

@@ -6,15 +6,20 @@ interface IParams {
   listingId?: string;
   userId?: string;
   authorId?: string;
+  status?: string;
 }
 
 export default async function getReservations(params: IParams) {
   try {
     await connectToDatabase();
     
-    const { listingId, userId, authorId } = params;
+    const { listingId, userId, authorId, status } = params;
 
     let query: any = {};
+
+    if (status) {
+      query.status = status;
+    }
 
     if (listingId) {
       query.listingId = listingId;
@@ -51,21 +56,21 @@ export default async function getReservations(params: IParams) {
         emailVerified: reservation.userId.emailVerified?.toISOString() || null,
         favoriteIds: reservation.userId.favoriteIds?.map((favId: any) => favId.toString()) || [],
       } : null,
-      listingId: reservation.listingId._id.toString(),
-      createdAt: reservation.createdAt.toISOString(),
-      startDate: reservation.startDate.toISOString(),
-      endDate: reservation.endDate.toISOString(),
-      listing: {
+      listingId: reservation.listingId?._id?.toString() || reservation.listingId,
+      createdAt: reservation.createdAt?.toISOString() || new Date().toISOString(),
+      startDate: reservation.startDate?.toISOString(),
+      endDate: reservation.endDate?.toISOString(),
+      listing: reservation.listingId ? {
         ...reservation.listingId,
-        id: reservation.listingId._id.toString(),
-        _id: reservation.listingId._id.toString(),
-        createdAt: reservation.listingId.createdAt.toISOString(),
-        userId: reservation.listingId.userId.toString(),
+        id: reservation.listingId._id?.toString(),
+        _id: reservation.listingId._id?.toString(),
+        createdAt: reservation.listingId.createdAt?.toISOString(),
+        userId: reservation.listingId.userId?.toString(),
         rooms: reservation.listingId.rooms ? reservation.listingId.rooms.map((room: any) => ({
           ...room,
           _id: room._id ? room._id.toString() : undefined
         })) : []
-      },
+      } : null,
       guests: reservation.guests ? reservation.guests.map((guest: any) => ({
         ...guest,
         _id: guest._id ? guest._id.toString() : undefined

@@ -101,23 +101,23 @@ const ListingHead: React.FC<ListingHeadProps> = ({
             fill
             priority={true}
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover w-full group-hover:scale-105 transition duration-500"
+            className="object-cover w-full transition duration-500"
           />
         </div>
 
         {/* Small 2x2 Right Grid */}
         <div className="w-1/2 h-full grid grid-cols-2 grid-rows-2 gap-2">
           <div onClick={() => setShowGallery(true)} className="relative h-full w-full cursor-pointer hover:opacity-90 transition group overflow-hidden">
-            <Image alt="Image 2" src={displayImages[1]} fill className="object-cover group-hover:scale-105 transition duration-500" />
+            <Image alt="Image 2" src={displayImages[1]} fill className="object-cover transition duration-500" />
           </div>
           <div onClick={() => setShowGallery(true)} className="relative h-full w-full cursor-pointer hover:opacity-90 transition group overflow-hidden">
-            <Image alt="Image 3" src={displayImages[2]} fill className="object-cover group-hover:scale-105 transition duration-500" />
+            <Image alt="Image 3" src={displayImages[2]} fill className="object-cover transition duration-500" />
           </div>
           <div onClick={() => setShowGallery(true)} className="relative h-full w-full cursor-pointer hover:opacity-90 transition group overflow-hidden">
-            <Image alt="Image 4" src={displayImages[3]} fill className="object-cover group-hover:scale-105 transition duration-500" />
+            <Image alt="Image 4" src={displayImages[3]} fill className="object-cover transition duration-500" />
           </div>
           <div onClick={() => setShowGallery(true)} className="relative h-full w-full cursor-pointer hover:opacity-90 transition group overflow-hidden">
-            <Image alt="Image 5" src={displayImages[4]} fill className="object-cover group-hover:scale-105 transition duration-500" />
+            <Image alt="Image 5" src={displayImages[4]} fill className="object-cover transition duration-500" />
           </div>
         </div>
 

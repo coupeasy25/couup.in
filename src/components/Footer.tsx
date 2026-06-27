@@ -72,9 +72,10 @@ const Footer = () => {
                 <li><Link href="/privacy" className="hover:text-white transition hover:underline">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition hover:underline">Terms & Conditions</Link></li>
                 <li><Link href="/cancellation-policy" className="hover:text-white transition hover:underline">Cancellation Policy</Link></li>
+                <li><Link href="/cookie-policy" className="hover:text-white transition hover:underline">Cookie Policy</Link></li>
                 <li><Link href="/faqs" className="hover:text-white transition hover:underline">FAQs</Link></li>
                 <li className="mt-2">
-                  <Link href="/become-a-host" className="inline-block text-[#D4AF37] font-semibold border border-[#D4AF37] px-4 py-2 rounded-lg hover:bg-[#D4AF37] hover:text-neutral-900 transition duration-300">
+                  <Link href="/become-a-host" className="inline-block text-[#FFFFFF] font-semibold border border-[#FFFFFF] px-4 py-2 rounded-lg hover:bg-[#FFFFFF] hover:text-neutral-900 transition duration-300">
                     Partner With Us
                   </Link>
                 </li>

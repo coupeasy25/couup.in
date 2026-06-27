@@ -54,7 +54,7 @@ export async function POST(request: Request) {
           <h2>Host Email Verification</h2>
           <p>Thank you for choosing to become a host on Couup.</p>
           <p>Your One-Time Password (OTP) is:</p>
-          <h1 style="color: #0f3d30; letter-spacing: 2px;">${otp}</h1>
+          <h1 style="color: #F97316; letter-spacing: 2px;">${otp}</h1>
           <p>This code is valid for 10 minutes.</p>
         </div>
       `

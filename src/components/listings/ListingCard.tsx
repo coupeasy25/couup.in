@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import HeartButton from "../HeartButton";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ListingCardProps {
   data: any;
@@ -77,6 +78,24 @@ const ListingCard: React.FC<ListingCardProps> = ({
     return `${format(start, "PP")} - ${format(end, "PP")}`;
   }, [reservation]);
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const images = data.imageSrc && data.imageSrc.length > 0 ? data.imageSrc : ["/images/placeholder.jpg"];
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentImageIndex < images.length - 1) {
+      setCurrentImageIndex((prev) => prev + 1);
+    }
+  };
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex((prev) => prev - 1);
+    }
+  };
+
   const rating = useMemo(() => {
     if (data?.averageRating) {
       return Number(data.averageRating).toFixed(2);
@@ -104,20 +123,62 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <div className="aspect-[4/3] w-full relative overflow-hidden rounded-xl">
           <Image
             fill
-            className="object-cover h-full w-full group-hover:scale-110 transition"
-            src={data.imageSrc?.[0] || "/images/placeholder.jpg"}
+            className="object-cover h-full w-full transition"
+            src={images[currentImageIndex]}
             alt="Listing"
           />
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-3 z-10">
             <HeartButton 
               listingId={data.id || data._id} 
               currentUser={currentUser}
             />
           </div>
+          
+          {images.length > 1 && (
+            <>
+              {currentImageIndex > 0 && (
+                <div 
+                  onClick={handlePrev}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition duration-300 z-10"
+                >
+                  <ChevronLeft size={20} />
+                </div>
+              )}
+              {currentImageIndex < images.length - 1 && (
+                <div 
+                  onClick={handleNext}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition duration-300 z-10"
+                >
+                  <ChevronRight size={20} />
+                </div>
+              )}
+              
+              {/* Dots indicator */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 z-10">
+                {images.map((_: any, index: number) => (
+                  <div 
+                    key={index} 
+                    className={`rounded-full transition-all duration-300 ${index === currentImageIndex ? 'bg-white w-2 h-2 opacity-100' : 'bg-white/60 w-1.5 h-1.5 opacity-60'}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
         <div className="flex flex-col mt-1">
-          <div className="font-semibold text-[15px] truncate">
-            {data.title}
+          <div className="font-semibold text-[15px] flex items-center justify-between">
+            <span className="truncate">{data.title}</span>
+            {reservation && reservation.status && (
+              <span className={`ml-2 flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                reservation.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
+                reservation.status === 'Checked-in' ? 'bg-green-100 text-green-700' :
+                reservation.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                reservation.status === 'Checked-out' ? 'bg-neutral-200 text-neutral-700' :
+                'bg-yellow-100 text-yellow-700'
+              }`}>
+                {reservation.status}
+              </span>
+            )}
           </div>
           <div className="font-light text-neutral-500 text-[15px]">
             {reservationDate || `₹${price} for 1 night · ★ ${rating}`}
@@ -127,7 +188,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <button
             disabled={disabled}
             onClick={handleEdit}
-            className="w-full mt-2 bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-[#0f3d30] rounded-md py-2 font-semibold transition disabled:opacity-50"
+            className="w-full mt-2 bg-[#FFFFFF] hover:bg-[#F97316]/90 text-[#F97316] rounded-md py-2 font-semibold transition disabled:opacity-50"
           >
             Edit property
           </button>
@@ -136,7 +197,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           <button
             disabled={disabled}
             onClick={handleCancel}
-            className="w-full mt-2 bg-[#FF5A5F] hover:bg-[#FF5A5F]/90 text-white rounded-md py-2 font-semibold transition disabled:opacity-50"
+            className="w-full mt-2 bg-[#F97316] hover:bg-[#F97316]/90 text-white rounded-md py-2 font-semibold transition disabled:opacity-50"
           >
             {actionLabel}
           </button>

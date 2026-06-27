@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Heart } from "lucide-react";
+import { Menu, Heart, Briefcase, CalendarDays, Home, LayoutDashboard, PlusCircle, LogOut, LogIn, UserPlus } from "lucide-react";
 import { useCallback, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -91,28 +91,30 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, isScrolledStyle = true
                     </div>
                   </div>
                   
-                  <MenuItem onClick={() => { setIsOpen(false); router.push('/trips'); }} label="My trips" />
-                  <MenuItem onClick={() => { setIsOpen(false); router.push('/favorites'); }} label="My favorites" />
-                  
-                  <hr className="my-2 border-neutral-100" />
-                  
-                  {currentUser?.isHost && (
+                  {!currentUser?.isHost && (
                     <>
-                      <MenuItem onClick={() => { setIsOpen(false); router.push('/host/reservations'); }} label="My reservations" />
-                      <MenuItem onClick={() => { setIsOpen(false); router.push('/host/properties'); }} label="My properties" />
-                      <MenuItem onClick={() => { setIsOpen(false); router.push('/host/dashboard'); }} label="Host Dashboard" />
-                      <MenuItem onClick={() => { setIsOpen(false); onRent(); }} label="Couup a new property" />
+                      <MenuItem icon={<Briefcase size={16} />} onClick={() => { setIsOpen(false); router.push('/trips'); }} label="My trips" />
+                      <MenuItem icon={<Heart size={16} />} onClick={() => { setIsOpen(false); router.push('/favorites'); }} label="My favorites" />
+                      <hr className="my-2 border-neutral-100" />
                     </>
                   )}
                   
-                  <hr className="my-2 border-neutral-100" />
+                  {currentUser?.isHost && (
+                    <>
+                      <MenuItem icon={<CalendarDays size={16} />} onClick={() => { setIsOpen(false); router.push('/host/reservations'); }} label="My reservations" />
+                      <MenuItem icon={<Home size={16} />} onClick={() => { setIsOpen(false); router.push('/host/properties'); }} label="My properties" />
+                      <MenuItem icon={<LayoutDashboard size={16} />} onClick={() => { setIsOpen(false); router.push('/host/dashboard'); }} label="Host Dashboard" />
+                      <MenuItem icon={<PlusCircle size={16} />} onClick={() => { setIsOpen(false); onRent(); }} label="Couup a new property" />
+                      <hr className="my-2 border-neutral-100" />
+                    </>
+                  )}
                   
-                  <MenuItem onClick={() => { setIsOpen(false); signOut(); }} label="Logout" />
+                  <MenuItem icon={<LogOut size={16} />} isDanger onClick={() => { setIsOpen(false); signOut(); }} label="Logout" />
                 </>
               ) : (
                 <>
-                  <MenuItem onClick={() => { setIsOpen(false); loginModal.onOpen(); }} label="Log in" />
-                  <MenuItem onClick={() => { setIsOpen(false); registerModal.onOpen(); }} label="Sign up" />
+                  <MenuItem icon={<LogIn size={16} />} onClick={() => { setIsOpen(false); loginModal.onOpen(); }} label="Log in" />
+                  <MenuItem icon={<UserPlus size={16} />} onClick={() => { setIsOpen(false); registerModal.onOpen(); }} label="Sign up" />
                 </>
               )}
             </div>

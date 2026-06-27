@@ -22,7 +22,7 @@ const Calendar: React.FC<CalendarProps> = ({
 }) => {
   return (
     <DateRange
-      rangeColors={["#0f3d30"]}
+      rangeColors={["#F97316"]}
       ranges={[value]}
       date={new Date()}
       onChange={onChange}

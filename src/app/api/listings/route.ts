@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Listing } from "@/models/Listing";
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
     amenities, standoutAmenities, safetyItems,
     checkInTime, checkOutTime, cancellationPolicy,
     smokingAllowed, petsAllowed, partyAllowed, locationValue,
-    rooms, coordinates
+    rooms, coordinates, hostContactDetails
   } = body;
 
   if (!imageSrc || imageSrc.length < 5 || imageSrc.length > 15) {
@@ -55,6 +57,7 @@ export async function POST(request: Request) {
       roomCount: 1,
       bathroomCount: 1,
       guestCount: parseInt(peoplePerRoom, 10) || 1,
+      hostContactDetails,
     });
 
     return NextResponse.json(listing);

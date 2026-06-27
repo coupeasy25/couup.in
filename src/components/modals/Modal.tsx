@@ -98,7 +98,7 @@ const Modal: React.FC<ModalProps> = ({
             <Button 
               disabled={disabled} 
               onClick={handleSubmit}
-              className="w-full bg-[#FF5A5F] hover:bg-[#FF5A5F]/90 text-white"
+              className="w-full bg-[#F97316] hover:bg-[#F97316]/90 text-white"
             >
               {actionLabel}
             </Button>

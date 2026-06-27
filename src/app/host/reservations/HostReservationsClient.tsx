@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import ListingCard from "@/components/listings/ListingCard";
 import ReservationDetailsModal from "@/components/modals/ReservationDetailsModal";
 
+import { ChevronLeft } from "lucide-react";
+
 interface HostReservationsClientProps {
   reservations: any[];
   currentUser?: any | null;
@@ -45,9 +47,14 @@ const HostReservationsClient: React.FC<HostReservationsClientProps> = ({
         reservation={selectedReservation}
       />
       <div className="flex flex-col gap-8">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Reservations on your properties</h2>
-          <div className="font-light text-neutral-500">View and manage bookings made by guests. Click a card to view guest details.</div>
+        <div className="flex flex-row items-start gap-4 mb-4">
+          <button onClick={() => router.back()} className="p-2 -ml-2 mt-[-4px] rounded-full hover:bg-neutral-100 transition cursor-pointer">
+            <ChevronLeft size={28} />
+          </button>
+          <div className="flex flex-col">
+            <h2 className="text-2xl font-bold mb-1">Reservations on your properties</h2>
+            <div className="font-light text-neutral-500">View and manage bookings made by guests. Click a card to view guest details.</div>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           {reservations.map((reservation: any) => (

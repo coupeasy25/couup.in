@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createAdminBanner, deleteAdminBanner, toggleAdminBannerStatus } from "@/actions/admin/adminBanners";
 import { toast } from "react-hot-toast";
-import { Trash2, Plus, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import ImageUpload from "@/components/inputs/ImageUpload";
 
 interface Banner {
   _id: string;
@@ -80,7 +81,7 @@ export default function BannersClient({ initialBanners }: { initialBanners: Bann
         <h1 className="text-2xl font-bold">Banner Management</h1>
         <button
           onClick={() => setIsAdding(!isAdding)}
-          className="flex items-center gap-2 bg-[#0f3d30] text-white px-4 py-2 rounded-xl hover:bg-[#0f3d30]/90 transition"
+          className="flex items-center gap-2 bg-[#F97316] text-white px-4 py-2 rounded-xl hover:bg-[#F97316]/90 transition"
         >
           <Plus size={20} />
           {isAdding ? "Cancel" : "Add New Banner"}
@@ -92,15 +93,16 @@ export default function BannersClient({ initialBanners }: { initialBanners: Bann
           <h2 className="text-lg font-semibold mb-4">Add New Banner</h2>
           <form onSubmit={handleAddBanner} className="flex flex-col gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Image URL *</label>
-              <input
-                type="text"
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Image *</label>
+              <ImageUpload
                 value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#0f3d30] outline-none"
-                required
+                onChange={(value) => setImageUrl(value)}
               />
+              {imageUrl && (
+                <div className="mt-4 w-full h-40 relative rounded-xl overflow-hidden border border-neutral-200">
+                  <img src={imageUrl} alt="Upload" className="w-full h-full object-cover" />
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Title (Optional)</label>
@@ -109,14 +111,14 @@ export default function BannersClient({ initialBanners }: { initialBanners: Bann
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Summer Sale 2026"
-                className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#0f3d30] outline-none"
+                className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#F97316] outline-none"
               />
             </div>
             <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="bg-[#0f3d30] text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50"
+                className="bg-[#F97316] text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50"
               >
                 {isLoading ? "Saving..." : "Save Banner"}
               </button>

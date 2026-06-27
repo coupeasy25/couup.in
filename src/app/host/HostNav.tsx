@@ -23,6 +23,11 @@ const HostNav = () => {
       label: "Properties",
       active: pathname === "/host/properties",
     },
+    {
+      href: "/host/cancellations",
+      label: "Cancellations",
+      active: pathname === "/host/cancellations",
+    },
   ];
 
   return (

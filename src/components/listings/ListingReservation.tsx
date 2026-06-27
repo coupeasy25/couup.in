@@ -33,7 +33,7 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
 }) => {
   const [showCalendar, setShowCalendar] = useState(false);
   const nights = Math.max(1, totalPrice / price);
-  
+
   const couupFeePercentage = settings?.couupFeePercentage ?? 5;
   const gstPercentage = settings?.gstPercentage ?? 18;
 
@@ -51,7 +51,7 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
       <div className="relative">
         <div className="border-[1px] border-neutral-400 rounded-lg overflow-hidden mb-4">
           <div className="flex flex-row items-center w-full border-b-[1px] border-neutral-400">
-            <div 
+            <div
               onClick={() => setShowCalendar(!showCalendar)}
               className="w-1/2 p-3 flex flex-col justify-center border-r-[1px] border-neutral-400 cursor-pointer hover:bg-neutral-50 transition"
             >
@@ -60,7 +60,7 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
                 {dateRange.startDate ? format(dateRange.startDate, 'dd/MM/yyyy') : 'Add date'}
               </span>
             </div>
-            <div 
+            <div
               onClick={() => setShowCalendar(!showCalendar)}
               className="w-1/2 p-3 flex flex-col justify-center cursor-pointer hover:bg-neutral-50 transition"
             >
@@ -85,7 +85,7 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
               onChange={(value) => onChangeDate(value.selection)}
             />
             <div className="w-full flex justify-end mt-4">
-              <button 
+              <button
                 onClick={() => setShowCalendar(false)}
                 className="underline font-semibold text-black hover:bg-neutral-100 px-4 py-2 rounded-lg transition"
               >
@@ -96,10 +96,10 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
         )}
       </div>
 
-      <Button 
-        disabled={disabled} 
+      <Button
+        disabled={disabled}
         onClick={onSubmit}
-        className="w-full bg-[#0f3d30] hover:bg-[#0a2a21] text-[#D4AF37] font-bold py-6 text-lg rounded-lg transition"
+        className="w-full bg-[#F97316] hover:bg-[#EA580C] text-[#FFFFFF] font-bold py-6 text-lg rounded-lg transition"
       >
         Reserve
       </Button>
@@ -120,12 +120,8 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
           <div className="no-underline text-neutral-800">₹{totalPrice.toLocaleString('en-IN')}</div>
         </div>
         <div className="flex flex-row items-center justify-between font-light text-neutral-600 underline decoration-1 text-[15px]">
-          <div>Couup service fee ({couupFeePercentage}%)</div>
-          <div className="no-underline text-neutral-800">₹{serviceFee.toLocaleString('en-IN')}</div>
-        </div>
-        <div className="flex flex-row items-center justify-between font-light text-neutral-600 underline decoration-1 text-[15px]">
-          <div>GST ({gstPercentage}%)</div>
-          <div className="no-underline text-neutral-800">₹{gstAmount.toLocaleString('en-IN')}</div>
+          <div>Taxes & Service Fee</div>
+          <div className="no-underline text-neutral-800">₹{(serviceFee + gstAmount).toLocaleString('en-IN')}</div>
         </div>
       </div>
 

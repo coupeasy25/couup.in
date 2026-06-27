@@ -80,8 +80,14 @@ const ListingClient: React.FC<ListingClientProps> = ({
       }
     });
 
+    if (listing.blockedDates && Array.isArray(listing.blockedDates)) {
+      listing.blockedDates.forEach((blockedDate: any) => {
+        disabledDatesList.push(new Date(blockedDate));
+      });
+    }
+
     return disabledDatesList;
-  }, [reservations, selectedRoom]);
+  }, [reservations, selectedRoom, listing.blockedDates]);
 
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
@@ -141,18 +147,30 @@ const ListingClient: React.FC<ListingClientProps> = ({
 
   useEffect(() => {
     if (dateRange.startDate && dateRange.endDate) {
-      const dayCount = differenceInCalendarDays(
-        dateRange.endDate,
-        dateRange.startDate
-      );
+      let currentDate = new Date(dateRange.startDate);
+      const end = new Date(dateRange.endDate);
+      let calculatedBasePrice = 0;
 
-      if (dayCount && currentPrice) {
-        setTotalPrice(dayCount * currentPrice);
+      if (currentDate.getTime() === end.getTime()) {
+        calculatedBasePrice = currentPrice;
       } else {
-        setTotalPrice(currentPrice);
+        while (currentDate < end) {
+          const dayOfWeek = currentDate.getDay();
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+          
+          let dailyPrice = currentPrice;
+          if (isWeekend && listing.weekendPrice) {
+            dailyPrice = Number(listing.weekendPrice);
+          }
+          calculatedBasePrice += dailyPrice;
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
       }
+      
+      const welcomeDiscount = listing.hasWelcomeOffer ? 500 : 0;
+      setTotalPrice(Math.max(0, calculatedBasePrice - welcomeDiscount));
     }
-  }, [dateRange, currentPrice]);
+  }, [dateRange, currentPrice, listing.weekendPrice, listing.hasWelcomeOffer]);
 
   return (
     <Container>
@@ -212,6 +230,9 @@ const ListingClient: React.FC<ListingClientProps> = ({
                   checkInTime={listing.checkInTime}
                   checkOutTime={listing.checkOutTime}
                   cancellationPolicy={listing.cancellationPolicy}
+                  cancellationRules={listing.cancellationRules}
+                  cancellationDays={listing.cancellationDays}
+                  cancellationDeduction={listing.cancellationDeduction}
                   smokingAllowed={listing.smokingAllowed}
                   petsAllowed={listing.petsAllowed}
                   partyAllowed={listing.partyAllowed}

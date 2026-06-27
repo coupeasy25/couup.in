@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Search, MapPin, Building2, Trees, Mountain } from "lucide-react";
+import { Search, MapPin, Calendar as CalendarIcon, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Range } from "react-date-range";
-import { formatISO, format } from "date-fns";
+import { formatISO, format, addDays, isSameDay } from "date-fns";
+import toast from "react-hot-toast";
 import useSearchModal from "@/hooks/useSearchModal";
 import Calendar from "../inputs/Calendar";
 
@@ -18,14 +19,18 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
   const params = useSearchParams();
   const searchModal = useSearchModal();
 
-  const [activeTab, setActiveTab] = useState<"where" | "when" | "who" | null>(null);
+  const [activeTab, setActiveTab] = useState<"where" | "checkin" | "checkout" | "who" | null>(null);
   const [locationValue, setLocationValue] = useState(params?.get('locationValue') || "");
-  const [adults, setAdults] = useState(0);
+  const urlGuestCount = params?.get('guestCount') ? parseInt(params.get('guestCount') as string, 10) : 0;
+  const urlStartDate = params?.get('startDate') ? new Date(params.get('startDate') as string) : undefined;
+  const urlEndDate = params?.get('endDate') ? new Date(params.get('endDate') as string) : undefined;
+
+  const [adults, setAdults] = useState(urlGuestCount);
   const [children, setChildren] = useState(0);
   
   const [dateRange, setDateRange] = useState<Range>({
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: urlStartDate,
+    endDate: urlEndDate,
     key: "selection",
   });
 
@@ -44,10 +49,10 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
         name: loc,
         desc: "Available destination",
         icon: MapPin,
-        color: "bg-[#0f3d30]/10 text-[#0f3d30]"
+        color: "bg-[#F97316]/10 text-[#F97316]"
       }))
     : [
-        { name: "Nearby", desc: "Find what's around you", icon: MapPin, color: "bg-[#0f3d30]/10 text-[#0f3d30]" },
+        { name: "Nearby", desc: "Find what's around you", icon: MapPin, color: "bg-[#F97316]/10 text-[#F97316]" },
       ];
 
   const filteredDestinations = locationValue 
@@ -60,7 +65,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
       name: locationValue,
       desc: "Search for this specific location",
       icon: MapPin,
-      color: "bg-[#D4AF37]/20 text-[#D4AF37]"
+      color: "bg-[#FFFFFF]/20 text-[#FFFFFF]"
     });
   }
 
@@ -77,6 +82,11 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
       locationValue,
       guestCount,
     };
+
+    if (dateRange.startDate && dateRange.endDate && isSameDay(dateRange.startDate, dateRange.endDate)) {
+      toast.error("Please select a valid date range (Check-out must be after Check-in).");
+      return;
+    }
 
     if (dateRange.startDate) {
       updatedQuery.startDate = formatISO(dateRange.startDate);
@@ -95,8 +105,26 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
     router.push(`/?${urlParams.toString()}`);
   };
 
+  const setDatesToToday = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDateRange({
+      startDate: new Date(),
+      endDate: new Date(),
+      key: "selection"
+    });
+  };
+
+  const setDatesToTomorrow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDateRange({
+      startDate: addDays(new Date(), 1),
+      endDate: addDays(new Date(), 2),
+      key: "selection"
+    });
+  };
+
   return (
-    <div className={isHero ? "w-full flex justify-center z-20" : "absolute top-[80px] left-0 w-full flex justify-center z-50"}>
+    <div className={isHero ? "w-full flex justify-center z-20 pb-10" : "absolute top-[80px] left-0 w-full flex justify-center z-50 pb-10"}>
       {/* Background overlay - only show if not in hero */}
       {!isHero && (
         <div 
@@ -105,83 +133,81 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
         ></div>
       )}
 
-      <div 
-        onMouseLeave={() => setActiveTab(null)}
-        onMouseEnter={() => {
-          if (!activeTab) setActiveTab("where");
-        }}
-        className={`${isHero ? 'bg-white/95 backdrop-blur-md' : 'bg-neutral-100/90 backdrop-blur-sm'} rounded-full flex flex-row items-center border-[1px] border-neutral-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-300 relative w-full max-w-4xl mx-4`}
-      >
-        
-        {/* Where */}
-        <div 
-          onClick={() => setActiveTab("where")}
-          onMouseEnter={() => setActiveTab("where")}
-          className={`flex-1 flex flex-col px-8 py-3.5 rounded-full cursor-pointer transition-all duration-300 ease-out ${activeTab === "where" ? "bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-black/5"}`}
-        >
-          <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#0f3d30] pb-0.5">Where</div>
-          <input 
-            type="text"
-            value={locationValue}
-            onChange={(e) => setLocationValue(e.target.value)}
-            placeholder="Search destinations"
-            className="text-[15px] bg-transparent outline-none truncate w-full text-neutral-800 font-medium placeholder:text-neutral-500 placeholder:font-normal"
-            suppressHydrationWarning
-          />
-        </div>
-
-        {/* Separator */}
-        {activeTab !== "where" && activeTab !== "when" && (
-          <div className="h-10 border-l-[1px] border-neutral-300/80"></div>
-        )}
-
-        {/* When */}
-        <div 
-          onClick={() => setActiveTab("when")}
-          onMouseEnter={() => setActiveTab("when")}
-          className={`flex-1 flex flex-col px-8 py-3.5 rounded-full cursor-pointer transition-all duration-300 ease-out ${activeTab === "when" ? "bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-black/5"}`}
-        >
-          <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#0f3d30] pb-0.5">When</div>
-          <div className={`text-[15px] ${dateRange.startDate && dateRange.endDate && dateRange.startDate !== dateRange.endDate ? 'font-medium text-neutral-800' : 'font-normal text-neutral-500'}`}>
-            {dateRange.startDate && dateRange.endDate && dateRange.startDate !== dateRange.endDate
-              ? `${format(dateRange.startDate, "MMM d")} - ${format(dateRange.endDate, "MMM d")}`
-              : "Add dates"}
-          </div>
-        </div>
-
-        {/* Separator */}
-        {activeTab !== "when" && activeTab !== "who" && (
-          <div className="h-10 border-l-[1px] border-neutral-300/80"></div>
-        )}
-
-        {/* Who & Search Button */}
-        <div 
-          onClick={() => setActiveTab("who")}
-          onMouseEnter={() => setActiveTab("who")}
-          className={`flex-1 flex flex-row items-center justify-between pl-8 pr-2 py-2 rounded-full cursor-pointer transition-all duration-300 ease-out ${activeTab === "who" ? "bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] scale-[1.02]" : "hover:bg-black/5"}`}
-        >
-          <div className="flex flex-col">
-            <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#0f3d30] pb-0.5">Who</div>
-            <div className={`text-[15px] ${guestCount > 0 ? 'font-medium text-neutral-800' : 'font-normal text-neutral-500'}`}>
-              {guestCount > 0 ? `${guestCount} guest${guestCount !== 1 ? 's' : ''}` : "Add guests"}
-            </div>
-          </div>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSearch();
-            }}
-            className="flex flex-row items-center gap-2 bg-[#0f3d30] hover:bg-[#082b20] text-[#D4AF37] border-[1px] border-[#D4AF37]/30 px-7 py-3.5 rounded-full font-bold transition-all duration-300 shadow-[0_4px_15px_rgba(212,175,55,0.15)] hover:shadow-[0_6px_20px_rgba(212,175,55,0.25)] hover:scale-[1.02] active:scale-95 ml-4 uppercase tracking-wider text-[13px]"
-            suppressHydrationWarning
+      <div className="relative w-full max-w-[1150px] mx-4" onMouseLeave={() => setActiveTab(null)}>
+        <div className="bg-white rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.16)] border border-neutral-300 flex flex-col md:flex-row w-full h-[88px] items-center">
+          
+          {/* Location */}
+          <div 
+            onClick={() => setActiveTab("where")}
+            onMouseEnter={() => setActiveTab("where")}
+            className={`flex-1 flex flex-col justify-center px-8 h-full hover:bg-neutral-100 cursor-pointer rounded-l-full transition ${activeTab === "where" ? "bg-neutral-100 shadow-md z-10" : ""}`}
           >
-            <Search size={16} strokeWidth={2.5} />
-            <span>Search</span>
-          </button>
+            <span className="text-[13px] text-black font-medium">Where to?</span>
+            <input 
+              type="text" 
+              value={locationValue}
+              onChange={(e) => setLocationValue(e.target.value)}
+              placeholder="Search your destination..." 
+              className="text-[17px] font-bold text-neutral-900 bg-transparent outline-none w-full placeholder:text-neutral-400 placeholder:font-normal"
+              suppressHydrationWarning
+            />
+          </div>
+
+          {/* Check In */}
+          <div 
+            onClick={() => setActiveTab("checkin")}
+            onMouseEnter={() => setActiveTab("checkin")}
+            className={`flex-[0.6] flex flex-col justify-center px-6 h-full hover:bg-neutral-100 cursor-pointer transition ${activeTab === "checkin" ? "bg-neutral-100 shadow-md z-10 rounded-full" : ""}`}
+          >
+            <span className="text-[13px] text-black font-medium">Check in</span>
+            <span className={`text-[17px] ${dateRange.startDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
+              {dateRange.startDate ? format(dateRange.startDate, "MMM d") : "Add check-in"}
+            </span>
+          </div>
+
+          {/* Check Out */}
+          <div 
+            onClick={() => setActiveTab("checkout")}
+            onMouseEnter={() => setActiveTab("checkout")}
+            className={`flex-[0.6] flex flex-col justify-center px-6 h-full hover:bg-neutral-100 cursor-pointer transition ${activeTab === "checkout" ? "bg-neutral-100 shadow-md z-10 rounded-full" : ""}`}
+          >
+            <span className="text-[13px] text-black font-medium">Check out</span>
+            <span className={`text-[17px] ${dateRange.endDate && dateRange.startDate !== dateRange.endDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
+              {dateRange.endDate && dateRange.startDate !== dateRange.endDate ? format(dateRange.endDate, "MMM d") : "Add check-out"}
+            </span>
+          </div>
+
+          {/* Guests */}
+          <div 
+            onClick={() => setActiveTab("who")}
+            onMouseEnter={() => setActiveTab("who")}
+            className={`flex-[0.8] flex flex-row items-center justify-between pl-6 pr-2 h-full hover:bg-neutral-100 cursor-pointer rounded-r-full transition relative ${activeTab === "who" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+          >
+            <div className="flex flex-col justify-center flex-1">
+              <span className="text-[13px] text-black font-medium">Guests</span>
+              <span className={`text-[17px] ${guestCount > 0 ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
+                {guestCount > 0 ? `${guestCount} guests` : "Who's coming?"}
+              </span>
+            </div>
+            
+            {/* Search Button */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSearch();
+              }}
+              className="bg-[#F97316] hover:bg-[#EA580C] text-white h-[68px] w-[68px] rounded-full flex items-center justify-center transition-transform hover:scale-105"
+            >
+              <Search size={26} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
 
+        {/* Dropdowns */}
+        
         {/* Location Dropdown */}
         {activeTab === "where" && (
-          <div className="absolute top-full left-0 w-full max-w-[450px] pt-4 z-50">
+          <div className="absolute top-full left-0 w-full max-w-[450px] pt-3 z-50">
             <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-200">
               <div className="text-xs font-bold text-black">Suggested destinations</div>
               
@@ -192,7 +218,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
                     onClick={() => {
                       const searchName = dest.name === "Nearby" ? "Ahmedabad" : dest.name.split(",")[0];
                       setLocationValue(searchName);
-                      setActiveTab(null);
+                      setActiveTab("checkin"); // Auto advance to when
                     }}
                     className="flex flex-row items-center gap-4 hover:bg-neutral-100 p-3 rounded-xl cursor-pointer transition"
                   >
@@ -211,26 +237,33 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
         )}
 
         {/* Calendar Dropdown */}
-        {activeTab === "when" && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 w-[850px] pt-4 z-50">
+        {(activeTab === "checkin" || activeTab === "checkout") && (
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-[850px] pt-3 z-50">
             <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-8 flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-200">
-              <div className="flex bg-neutral-100 rounded-full p-1 mb-8">
-                <button className="bg-[#0f3d30] text-[#D4AF37] rounded-full px-6 py-2 shadow-sm font-semibold text-sm">Dates</button>
-                <button className="rounded-full px-6 py-2 font-semibold text-sm text-neutral-500 hover:text-[#0f3d30] transition">Flexible</button>
+              <div className="transform scale-[1.15] origin-top pb-8 mt-4">
+                <Calendar
+                  onChange={(value) => setDateRange(value.selection)}
+                  value={dateRange}
+                  months={2}
+                  direction="horizontal"
+                />
               </div>
-              <Calendar
-                onChange={(value) => setDateRange(value.selection)}
-                value={dateRange}
-                months={2}
-                direction="horizontal"
-              />
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab("who");
+                }}
+                className="mt-6 bg-neutral-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-neutral-800 transition"
+              >
+                Continue
+              </button>
             </div>
           </div>
         )}
 
         {/* Who Dropdown */}
         {activeTab === "who" && (
-          <div className="absolute top-full right-0 w-[400px] pt-4 z-50">
+          <div className="absolute top-full right-0 w-[400px] pt-3 z-50">
             <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-8 flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-200">
               
               {/* Adults */}
@@ -242,14 +275,14 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
                 <div className="flex flex-row items-center gap-4">
                   <button 
                     onClick={() => setAdults((prev) => Math.max(0, prev - 1))}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
+                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
                   >
                     -
                   </button>
                   <div className="font-light text-neutral-600 w-4 text-center">{adults}</div>
                   <button 
                     onClick={() => setAdults((prev) => prev + 1)}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
+                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
                   >
                     +
                   </button>
@@ -265,14 +298,14 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
                 <div className="flex flex-row items-center gap-4">
                   <button 
                     onClick={() => setChildren((prev) => Math.max(0, prev - 1))}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
+                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
                   >
                     -
                   </button>
                   <div className="font-light text-neutral-600 w-4 text-center">{children}</div>
                   <button 
                     onClick={() => setChildren((prev) => prev + 1)}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#0f3d30] hover:text-[#0f3d30] hover:bg-[#0f3d30]/5 transition"
+                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
                   >
                     +
                   </button>

@@ -34,14 +34,14 @@ const AdminDataModal: React.FC<AdminDataModalProps> = ({ isOpen, onClose, title,
         <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
           
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-neutral-200 bg-[#0f3d30] text-white">
+          <div className="flex items-center justify-between p-6 border-b border-neutral-200 bg-white text-neutral-900">
             <div>
               <h3 className="text-xl font-bold">{title}</h3>
-              <p className="text-sm text-neutral-300 mt-1">Total Records: {data.length}</p>
+              <p className="text-sm text-neutral-500 mt-1">Total Records: {data.length}</p>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-full transition"
+              className="p-2 hover:bg-neutral-100 rounded-full transition text-neutral-500"
             >
               <X size={24} />
             </button>
@@ -121,7 +121,7 @@ const AdminDataModal: React.FC<AdminDataModalProps> = ({ isOpen, onClose, title,
                             </td>
                             <td className="p-4 text-neutral-600">{item.locationValue}</td>
                             <td className="p-4 text-neutral-600 capitalize">{item.category}</td>
-                            <td className="p-4 font-semibold text-[#0f3d30]">₹{item.price} / night</td>
+                            <td className="p-4 font-semibold text-[#F97316]">₹{item.price} / night</td>
                           </>
                         ) : (
                           <>
@@ -132,7 +132,7 @@ const AdminDataModal: React.FC<AdminDataModalProps> = ({ isOpen, onClose, title,
                             <td className="p-4 text-neutral-600 whitespace-nowrap">
                               {item.startDate ? new Date(item.startDate).toLocaleDateString() : ''} - {item.endDate ? new Date(item.endDate).toLocaleDateString() : ''}
                             </td>
-                            <td className="p-4 font-semibold text-[#0f3d30]">₹{item.totalPrice}</td>
+                            <td className="p-4 font-semibold text-[#F97316]">₹{item.totalPrice}</td>
                           </>
                         )}
                       </tr>

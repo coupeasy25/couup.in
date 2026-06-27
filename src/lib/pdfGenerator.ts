@@ -27,7 +27,7 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       } = reservationData;
 
       // --- BACKGROUND HEADER ---
-      doc.rect(0, 0, 595, 120).fill('#0f3d30');
+      doc.rect(0, 0, 595, 120).fill('#F97316');
 
       // --- BRANDING ---
       doc
@@ -49,14 +49,14 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       doc.moveDown(5);
 
       // --- BOOKING INFO (Left) ---
-      doc.fillColor('#0f3d30').fontSize(14).font('Helvetica-Bold').text('Booking Details', 50, 150);
+      doc.fillColor('#F97316').fontSize(14).font('Helvetica-Bold').text('Booking Details', 50, 150);
       doc.fillColor('#4b5563').fontSize(10).font('Helvetica')
         .text(`Date: ${new Date(bookingDate).toLocaleString()}`, 50, 170)
         .text(`Payment ID: ${paymentId || 'N/A'}`, 50, 185)
         .text(`Order ID: ${orderId || 'N/A'}`, 50, 200);
 
       // --- CUSTOMER INFO (Right) ---
-      doc.fillColor('#0f3d30').fontSize(14).font('Helvetica-Bold').text('Billed To', 350, 150, { align: 'right' });
+      doc.fillColor('#F97316').fontSize(14).font('Helvetica-Bold').text('Billed To', 350, 150, { align: 'right' });
       doc.fillColor('#4b5563').fontSize(10).font('Helvetica')
         .text(`${userName}`, 350, 170, { align: 'right' })
         .text(`${userEmail}`, 350, 185, { align: 'right' });
@@ -65,7 +65,7 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       doc.moveTo(50, 230).lineTo(545, 230).strokeColor('#e2e8f0').stroke();
 
       // --- PROPERTY DETAILS TABLE ---
-      doc.fillColor('#0f3d30').fontSize(14).font('Helvetica-Bold').text('Stay Information', 50, 250);
+      doc.fillColor('#F97316').fontSize(14).font('Helvetica-Bold').text('Stay Information', 50, 250);
       
       // Table Header
       const tableTop = 275;
@@ -88,7 +88,7 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       // --- GUESTS ---
       let currentY = tableTop + 100;
       if (guests && guests.length > 0) {
-        doc.fillColor('#0f3d30').fontSize(14).font('Helvetica-Bold').text('Guest Details', 50, currentY);
+        doc.fillColor('#F97316').fontSize(14).font('Helvetica-Bold').text('Guest Details', 50, currentY);
         currentY += 20;
         doc.fillColor('#4b5563').fontSize(10).font('Helvetica');
         guests.forEach((guest: any, index: number) => {
@@ -101,7 +101,7 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       }
 
       // --- SUMMARY ---
-      doc.fillColor('#0f3d30').fontSize(14).font('Helvetica-Bold').text('Payment Summary', 350, currentY, { align: 'right' });
+      doc.fillColor('#F97316').fontSize(14).font('Helvetica-Bold').text('Payment Summary', 350, currentY, { align: 'right' });
       currentY += 25;
 
       doc.fillColor('#4b5563').fontSize(10).font('Helvetica')
@@ -114,7 +114,7 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       currentY += 25;
 
       // Total Box
-      doc.rect(345, currentY, 200, 40).fill('#0f3d30');
+      doc.rect(345, currentY, 200, 40).fill('#F97316');
       doc.fillColor('#ffffff').fontSize(12).font('Helvetica-Bold')
         .text('TOTAL PAID', 355, currentY + 14)
         .fontSize(14)

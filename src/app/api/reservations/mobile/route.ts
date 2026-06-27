@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
-      userId, listingId, startDate, endDate, totalPrice, basePrice, taxes, roomType, guests, gstState
+      userId, listingId, startDate, endDate, totalPrice, basePrice, taxes, roomType, guests, gstState, roomsCount
     } = body;
 
     // We require userId from the mobile app payload since it uses JWT or similar custom auth
@@ -43,8 +43,29 @@ export async function POST(request: Request) {
 
     const conflictingReservations = await Reservation.find(query);
 
-    if (conflictingReservations.length >= maxCount) {
-      return new NextResponse("These dates are already reserved for this room type", { status: 400 });
+    const requestedStart = new Date(startDate);
+    const requestedEnd = new Date(endDate);
+    
+    let currentDate = new Date(requestedStart);
+    const requestedRooms = roomsCount || 1;
+    
+    while (currentDate <= requestedEnd) {
+      let count = 0;
+      
+      for (const res of conflictingReservations) {
+        const resStart = new Date(res.startDate);
+        const resEnd = new Date(res.endDate);
+        
+        if (currentDate >= resStart && currentDate <= resEnd) {
+          count += (res.roomsCount || 1);
+        }
+      }
+      
+      if (count + requestedRooms > maxCount) {
+        return new NextResponse("These dates are already reserved for this room type", { status: 400 });
+      }
+      
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
     // Bypass Razorpay logic for mobile
@@ -59,6 +80,7 @@ export async function POST(request: Request) {
       roomType,
       guests,
       gstState,
+      roomsCount: roomsCount || 1,
       razorpay_order_id: "mobile_mock_order_" + Date.now(),
       razorpay_payment_id: "mobile_mock_payment_" + Date.now(),
       razorpay_signature: "mobile_mock_signature"
@@ -110,7 +132,14 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error("MOBILE RESERVATION ERROR:", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse(error.message || "Internal Error", { 
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
+    });
   }
 }
 

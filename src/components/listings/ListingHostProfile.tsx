@@ -17,7 +17,7 @@ const ListingHostProfile: React.FC<ListingHostProfileProps> = ({ user }) => {
         <div className="bg-white rounded-3xl shadow-lg p-8 flex flex-col items-center justify-center min-w-[300px]">
           <div className="w-24 h-24 relative mb-4">
             <Avatar src={user?.image} />
-            <div className="absolute bottom-0 right-0 bg-[#E51D53] w-8 h-8 rounded-full flex items-center justify-center text-white font-bold border-2 border-white">
+            <div className="absolute bottom-0 right-0 bg-[#F97316] w-8 h-8 rounded-full flex items-center justify-center text-white font-bold border-2 border-white">
               🛡️
             </div>
           </div>

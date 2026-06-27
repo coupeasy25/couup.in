@@ -52,7 +52,7 @@ const HostEmailVerification: React.FC<HostEmailVerificationProps> = ({ currentUs
     <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-50 px-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full flex flex-col gap-6 text-center">
         <div>
-          <h1 className="text-2xl font-bold text-[#0f3d30]">Host Verification</h1>
+          <h1 className="text-2xl font-bold text-[#F97316]">Host Verification</h1>
           <p className="text-neutral-500 mt-2 font-light">
             Before you can list your property, we need to verify your email address.
           </p>
@@ -66,7 +66,7 @@ const HostEmailVerification: React.FC<HostEmailVerificationProps> = ({ currentUs
           <button
             onClick={handleSendOtp}
             disabled={isLoading}
-            className="w-full bg-[#0f3d30] text-[#D4AF37] font-bold py-4 rounded-xl hover:bg-[#082b20] transition shadow-md disabled:opacity-50"
+            className="w-full bg-[#F97316] text-[#FFFFFF] font-bold py-4 rounded-xl hover:bg-[#EA580C] transition shadow-md disabled:opacity-50"
           >
             {isLoading ? "Sending..." : "Send Verification Code"}
           </button>
@@ -86,7 +86,7 @@ const HostEmailVerification: React.FC<HostEmailVerificationProps> = ({ currentUs
             <button
               onClick={handleVerifyOtp}
               disabled={isLoading || otp.length !== 6}
-              className="w-full bg-[#D4AF37] text-[#0f3d30] font-bold py-4 rounded-xl hover:bg-[#b0912e] transition shadow-md disabled:opacity-50"
+              className="w-full bg-[#FFFFFF] text-[#F97316] font-bold py-4 rounded-xl hover:bg-[#F3F4F6] transition shadow-md disabled:opacity-50"
             >
               {isLoading ? "Verifying..." : "Verify & Continue"}
             </button>

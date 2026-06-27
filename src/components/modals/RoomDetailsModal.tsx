@@ -45,7 +45,7 @@ const RoomDetailsModal: React.FC<RoomDetailsModalProps> = ({ isOpen, onClose, ro
                     <div className="grid grid-cols-2 gap-3">
                       {room.images.map((img: string, index: number) => (
                         <div key={index} className={`relative w-full ${index === 0 && room.images.length % 2 !== 0 ? 'col-span-2 aspect-[16/10]' : 'aspect-square'} overflow-hidden rounded-xl shadow-sm`}>
-                          <img src={img} alt="Room" className="object-cover w-full h-full hover:scale-105 transition duration-500" />
+                          <img src={img} alt="Room" className="object-cover w-full h-full transition duration-500" />
                         </div>
                       ))}
                     </div>
@@ -54,7 +54,7 @@ const RoomDetailsModal: React.FC<RoomDetailsModalProps> = ({ isOpen, onClose, ro
                   <div className="flex flex-col gap-3">
                     <div className="text-2xl font-semibold text-neutral-800">Room Overview</div>
                     <div className="text-lg text-neutral-500 font-light">Capacity: Up to {room.capacity} guests</div>
-                    <div className="text-xl text-[#0f3d30] font-bold mt-1">₹{room.price} <span className="text-lg font-normal text-neutral-500">/ night</span></div>
+                    <div className="text-xl text-[#F97316] font-bold mt-1">₹{room.price} <span className="text-lg font-normal text-neutral-500">/ night</span></div>
                   </div>
 
                   {room.facilities?.length > 0 && (
@@ -76,7 +76,7 @@ const RoomDetailsModal: React.FC<RoomDetailsModalProps> = ({ isOpen, onClose, ro
                       <div className="flex flex-col gap-3 mt-1">
                         {room.inclusions.map((inc: string, i: number) => (
                           <div key={i} className="flex items-center gap-3 text-neutral-700 text-lg">
-                            <div className="w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                            <div className="w-2 h-2 bg-[#FFFFFF] rounded-full"></div>
                             {inc}
                           </div>
                         ))}
@@ -93,7 +93,7 @@ const RoomDetailsModal: React.FC<RoomDetailsModalProps> = ({ isOpen, onClose, ro
                     onSelect();
                     onClose();
                   }}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition shadow-md ${isSelected ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed shadow-none' : 'bg-[#0f3d30] text-[#D4AF37] hover:bg-[#0a2a21] hover:shadow-lg hover:-translate-y-0.5'}`}
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition shadow-md ${isSelected ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed shadow-none' : 'bg-[#F97316] text-[#FFFFFF] hover:bg-[#EA580C] hover:shadow-lg hover:-translate-y-0.5'}`}
                   disabled={isSelected}
                 >
                   {isSelected ? "Room Selected" : "Select this room"}

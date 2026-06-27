@@ -33,6 +33,9 @@ export interface IListing extends Document {
   checkInTime: string;
   checkOutTime: string;
   cancellationPolicy: string;
+  cancellationRules: { days: number; deduction: number }[];
+  cancellationDays?: number;
+  cancellationDeduction?: number;
   smokingAllowed: boolean;
   petsAllowed: boolean;
   partyAllowed: boolean;
@@ -41,6 +44,18 @@ export interface IListing extends Document {
     lat: number;
     lng: number;
   };
+  status: string;
+  hostContactDetails?: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    companyName?: string;
+  };
+  weekendPrice?: number;
+  festivalPrice?: number;
+  hasWelcomeOffer?: boolean;
+  blockedDates?: Date[];
 }
 
 const ListingSchema = new Schema<IListing>({
@@ -53,6 +68,10 @@ const ListingSchema = new Schema<IListing>({
   guestCount: { type: Number, required: false, default: 1 },
   locationValue: { type: String, required: false, default: '' },
   price: { type: Number, required: true },
+  weekendPrice: { type: Number, required: false },
+  festivalPrice: { type: Number, required: false },
+  hasWelcomeOffer: { type: Boolean, required: false, default: false },
+  blockedDates: { type: [Date], default: [] },
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   propertyType: { type: String, required: true },
   fullAddress: { type: String, required: true },
@@ -64,6 +83,15 @@ const ListingSchema = new Schema<IListing>({
   checkInTime: { type: String, required: false, default: '2:00 PM' },
   checkOutTime: { type: String, required: false, default: '11:00 AM' },
   cancellationPolicy: { type: String, required: false, default: 'Flexible' },
+  cancellationRules: {
+    type: [{
+      days: { type: Number, required: true },
+      deduction: { type: Number, required: true }
+    }],
+    default: []
+  },
+  cancellationDays: { type: Number, required: false },
+  cancellationDeduction: { type: Number, required: false },
   smokingAllowed: { type: Boolean, required: false, default: false },
   petsAllowed: { type: Boolean, required: false, default: false },
   partyAllowed: { type: Boolean, required: false, default: false },
@@ -83,6 +111,14 @@ const ListingSchema = new Schema<IListing>({
   coordinates: {
     lat: { type: Number, required: false, default: 0 },
     lng: { type: Number, required: false, default: 0 }
+  },
+  status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
+  hostContactDetails: {
+    name: { type: String, required: false },
+    email: { type: String, required: false },
+    phone: { type: String, required: false },
+    alternatePhone: { type: String, required: false },
+    companyName: { type: String, required: false },
   }
 }, { timestamps: true });
 // Force Mongoose to recompile the schema to fix Next.js HMR dropping new fields

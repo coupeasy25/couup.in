@@ -28,7 +28,7 @@ const SeeAllCard: React.FC<SeeAllCardProps> = ({ locationName, images }) => {
     >
       <div className="flex flex-col gap-2 w-full">
         {/* Top Image Container (Matches ListingCard aspect-[4/3]) */}
-        <div className="aspect-[4/3] w-full relative overflow-hidden rounded-xl bg-neutral-100 flex items-center justify-center group-hover:bg-neutral-200 transition duration-300">
+        <div className="aspect-[4/3] w-full relative overflow-hidden rounded-xl bg-white flex items-center justify-center group-hover:bg-neutral-50 transition duration-300">
 
           {/* Collage Container */}
           <div className="relative w-full h-full flex items-center justify-center scale-90">
@@ -44,14 +44,14 @@ const SeeAllCard: React.FC<SeeAllCardProps> = ({ locationName, images }) => {
             </div>
 
             {/* Front Center Image */}
-            <div className="absolute w-[60%] aspect-[4/3] rounded-xl overflow-hidden shadow-md translate-y-4 border-4 border-white z-20 transition duration-300 group-hover:scale-110">
+            <div className="absolute w-[60%] aspect-[4/3] rounded-xl overflow-hidden shadow-md translate-y-4 border-4 border-white z-20 transition duration-300">
               <Image src={displayImages[2]} alt="Listing" fill className="object-cover" />
             </div>
           </div>
         </div>
 
         {/* Text Container (Matches ListingCard text block) */}
-        <div className="flex flex-col mt-1">
+        <div className="flex flex-col items-center mt-1">
           <div className="font-semibold text-[15px] underline underline-offset-2">
             See all in {locationName}
           </div>
