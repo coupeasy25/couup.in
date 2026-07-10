@@ -85,7 +85,9 @@ export default async function RootLayout({
         <Toaster />
         <RegisterModal />
         <LoginModal />
-        <FilterModal amenities={amenities} />
+        <Suspense fallback={null}>
+          <FilterModal amenities={amenities} />
+        </Suspense>
         <BookingSuccessModal />
         
         {/* JSON-LD Schema for Rich Results */}

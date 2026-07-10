@@ -25,13 +25,13 @@ export default function FilterBar({ amenities: initialAmenities = [] }: FilterBa
   const freeCancellation = params?.get("freeCancellation") === "true";
 
   const dynamicQuickFilters = useMemo(() => {
-    const filters = activeAmenities
+    const filters: Array<{ label: string; type: "amenity" | "custom"; key?: string }> = activeAmenities
       .filter((a) => a.isQuickFilter && a.isActive)
       .map((a) => ({ label: a.name, type: "amenity" as const }));
 
     // Always include these specific custom filters
-    filters.push({ label: "Allows pets", type: "custom" as const, key: "petsAllowed" as any });
-    filters.push({ label: "Free cancellation", type: "custom" as const, key: "freeCancellation" as any });
+    filters.push({ label: "Allows pets", type: "custom" as const, key: "petsAllowed" });
+    filters.push({ label: "Free cancellation", type: "custom" as const, key: "freeCancellation" });
 
     return filters;
   }, [activeAmenities]);
