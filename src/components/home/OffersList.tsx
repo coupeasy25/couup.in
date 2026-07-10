@@ -38,8 +38,27 @@ const TABS = [
 const OffersList = () => {
   const [activeTab, setActiveTab] = useState("All Offers");
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    "name": "COUUP Special Offers",
+    "itemListElement": OFFERS.map((offer, index) => ({
+      "@type": "Offer",
+      "name": offer.title,
+      "description": offer.description,
+      "url": "https://www.couup.in/offers",
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock",
+      "validFrom": new Date().toISOString()
+    }))
+  };
+
   return (
     <div className="w-full bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 mb-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header section with tabs */}
       <div className="flex flex-row items-center gap-6 border-b border-neutral-200 mb-6 overflow-x-auto custom-scrollbar">
         <h2 className="text-3xl font-extrabold text-neutral-900 pr-4 flex-shrink-0 pb-4">Offers</h2>
@@ -63,10 +82,10 @@ const OffersList = () => {
         <div className="hidden md:flex flex-row items-center gap-4 pl-4 pb-4 flex-shrink-0">
           <button className="text-[#008cff] font-bold text-sm hover:underline tracking-wide">VIEW ALL &rarr;</button>
           <div className="flex flex-row gap-2">
-            <button className="p-1 rounded-full border border-neutral-300 text-neutral-400 hover:text-[#008cff] hover:border-[#008cff] transition">
+            <button aria-label="Scroll left" className="p-1 rounded-full border border-neutral-300 text-neutral-400 hover:text-[#008cff] hover:border-[#008cff] transition">
               <ChevronLeft size={16} />
             </button>
-            <button className="p-1 rounded-full border border-neutral-300 text-neutral-400 hover:text-[#008cff] hover:border-[#008cff] transition">
+            <button aria-label="Scroll right" className="p-1 rounded-full border border-neutral-300 text-neutral-400 hover:text-[#008cff] hover:border-[#008cff] transition">
               <ChevronRight size={16} />
             </button>
           </div>

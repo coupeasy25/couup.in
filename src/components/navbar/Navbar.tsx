@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useState, useEffect, useMemo } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { differenceInDays } from "date-fns";
@@ -64,15 +66,15 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
   return (
     <div
       className={`fixed w-full z-50 transition-all duration-300 border-b-[1px] ${isScrolledStyle
-        ? "bg-white shadow-md border-neutral-200 py-3"
+        ? "bg-white shadow-sm border-neutral-100 py-4"
         : "bg-transparent border-transparent py-4"
         }`}
     >
       <Container>
         <div className="flex flex-row items-center justify-between gap-3 md:gap-0">
           {/* Logo */}
-          <div
-            onClick={() => router.push('/')}
+          <Link
+            href="/"
             className="flex items-center cursor-pointer transition"
           >
             <Image
@@ -82,7 +84,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
               height={45}
               className="object-contain"
             />
-          </div>
+          </Link>
 
           {/* Center Content */}
           <div className="hidden md:flex flex-1 items-center justify-center">

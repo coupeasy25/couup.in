@@ -1,4 +1,10 @@
 import Container from "@/components/Container";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "Read COUUP's privacy policy to understand how we protect your data.",
+};
 
 const PrivacyPage = () => {
   return (

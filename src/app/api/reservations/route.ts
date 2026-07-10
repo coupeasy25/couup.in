@@ -6,6 +6,7 @@ import getCurrentUser from "@/actions/getCurrentUser";
 import crypto from "crypto";
 import { generateBookingPDF } from "@/lib/pdfGenerator";
 import { sendBookingConfirmationEmail } from "@/lib/mailer";
+import Razorpay from "razorpay";
 
 export async function POST(request: Request) {
   const currentUser = await getCurrentUser();
@@ -18,7 +19,8 @@ export async function POST(request: Request) {
   const { 
     listingId, startDate, endDate, totalPrice, basePrice, taxes, roomType, guests, gstState,
     guestContact, guestEmail,
-    razorpay_order_id, razorpay_payment_id, razorpay_signature, roomsCount 
+    razorpay_order_id, razorpay_payment_id, razorpay_signature, roomsCount,
+    couponCode, couponDiscount
   } = body;
 
   if (!listingId || !startDate || !endDate || !totalPrice || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -98,6 +100,43 @@ export async function POST(request: Request) {
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
+  // Fetch payment details from Razorpay
+  let paymentMethod = 'Unknown';
+  let paymentDetails = {};
+  try {
+    const razorpay = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID as string,
+      key_secret: process.env.RAZORPAY_KEY_SECRET as string,
+    });
+    
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+    if (payment) {
+      paymentMethod = payment.method || 'Unknown';
+      if (payment.method === 'card' && payment.card) {
+        paymentDetails = {
+          network: payment.card.network,
+          last4: payment.card.last4,
+          issuer: payment.card.issuer,
+          name: payment.card.name
+        };
+      } else if (payment.method === 'upi') {
+        paymentDetails = {
+          vpa: payment.vpa
+        };
+      } else if (payment.method === 'netbanking') {
+        paymentDetails = {
+          bank: payment.bank
+        };
+      } else if (payment.method === 'wallet') {
+         paymentDetails = {
+           wallet: payment.wallet
+         }
+      }
+    }
+  } catch (err) {
+    console.error("Failed to fetch Razorpay payment details:", err);
+  }
+
   const reservation = await Reservation.create({
     userId: currentUser._id,
     listingId,
@@ -115,8 +154,21 @@ export async function POST(request: Request) {
     roomsCount: roomsCount || 1,
     razorpay_payment_id,
     razorpay_order_id,
-    razorpay_signature
+    razorpay_signature,
+    couponCode: couponCode || null,
+    couponDiscount: couponDiscount || 0,
+    paymentMethod,
+    paymentDetails
   });
+
+  if (couponCode) {
+    try {
+      const { Coupon } = require("@/models/Coupon");
+      await Coupon.findOneAndUpdate({ code: couponCode }, { $inc: { timesUsed: 1 } });
+    } catch (err) {
+      console.error("Error updating coupon usage:", err);
+    }
+  }
 
   // Generate PDF and Send Email asynchronously (do not block the response)
   const sendConfirmation = async () => {

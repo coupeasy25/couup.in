@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   const reservations = await getReservations({ authorId: currentUser.id });
 
   return (
-    <DashboardClient 
+    <DashboardClient
       listings={listings}
       allReservations={reservations}
       currentUser={currentUser}

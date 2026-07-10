@@ -30,6 +30,10 @@ export interface IReservation extends Document {
   razorpay_order_id?: string;
   razorpay_signature?: string;
   roomsCount?: number;
+  couponCode?: string;
+  couponDiscount?: number;
+  paymentMethod?: string;
+  paymentDetails?: any;
 }
 
 const GuestSchema = new Schema<IGuest>({
@@ -59,7 +63,11 @@ const ReservationSchema = new Schema<IReservation>({
   razorpay_payment_id: { type: String, required: false },
   razorpay_order_id: { type: String, required: false },
   razorpay_signature: { type: String, required: false },
-  roomsCount: { type: Number, required: false, default: 1 }
+  roomsCount: { type: Number, required: false, default: 1 },
+  couponCode: { type: String, required: false },
+  couponDiscount: { type: Number, required: false, default: 0 },
+  paymentMethod: { type: String, required: false },
+  paymentDetails: { type: Schema.Types.Mixed, required: false }
 }, { timestamps: true });
 
 export const Reservation: Model<IReservation> = mongoose.models.Reservation || mongoose.model<IReservation>("Reservation", ReservationSchema);

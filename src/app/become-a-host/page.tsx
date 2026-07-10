@@ -1,5 +1,6 @@
 import EmptyState from "@/components/EmptyState";
 import getCurrentUser from "@/actions/getCurrentUser";
+import getFilterSettings from "@/actions/getFilterSettings";
 import BecomeHostClient from "./BecomeHostClient";
 
 const BecomeHostPage = async () => {
@@ -14,7 +15,9 @@ const BecomeHostPage = async () => {
     );
   }
 
-  return <BecomeHostClient currentUser={currentUser} />;
+  const filterSettings = await getFilterSettings();
+
+  return <BecomeHostClient currentUser={currentUser} filterSettings={filterSettings} />;
 };
 
 export default BecomeHostPage;

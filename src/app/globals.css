@@ -121,9 +121,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
@@ -165,7 +167,10 @@
 
 /* --- Seamless Range Styling --- */
 
-.rdrInRange, .rdrStartEdge, .rdrEndEdge, .rdrSelected {
+.rdrInRange,
+.rdrStartEdge,
+.rdrEndEdge,
+.rdrSelected {
   top: 0 !important;
   bottom: 0 !important;
 }
@@ -196,13 +201,13 @@
   right: 0 !important;
 }
 
-.rdrDay:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span {
+.rdrDay:not(.rdrDayPassive) .rdrInRange~.rdrDayNumber span {
   color: #F97316 !important;
 }
 
-.rdrDay:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span,
-.rdrDay:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span,
-.rdrDay:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span {
+.rdrDay:not(.rdrDayPassive) .rdrStartEdge~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrEndEdge~.rdrDayNumber span,
+.rdrDay:not(.rdrDayPassive) .rdrSelected~.rdrDayNumber span {
   color: #FFFFFF !important;
   font-weight: bold !important;
 }
@@ -210,4 +215,15 @@
 /* Custom navigation buttons */
 .rdrNextPrevButton {
   @apply bg-transparent hover:bg-neutral-100 transition rounded-full;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

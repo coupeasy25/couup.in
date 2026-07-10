@@ -1,6 +1,7 @@
 import { connectToDatabase } from "@/lib/mongodb";
 import { Review } from "@/models/Review";
 import { User } from "@/models/User";
+import mongoose from "mongoose";
 
 interface IParams {
   listingId?: string;
@@ -10,7 +11,7 @@ export default async function getReviews(params: IParams) {
   try {
     const { listingId } = params;
 
-    if (!listingId) {
+    if (!listingId || !mongoose.Types.ObjectId.isValid(listingId)) {
       return [];
     }
 
@@ -30,9 +31,9 @@ export default async function getReviews(params: IParams) {
       createdAt: review.createdAt.toISOString(),
       updatedAt: review.updatedAt.toISOString(),
       user: review.userId ? {
-        id: review.userId._id.toString(),
-        name: review.userId.name,
-        image: review.userId.image,
+        id: review.userId._id ? review.userId._id.toString() : review.userId.toString(),
+        name: review.userId.name || 'Unknown User',
+        image: review.userId.image || null,
       } : null,
       userId: undefined
     }));

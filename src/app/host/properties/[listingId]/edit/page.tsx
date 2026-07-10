@@ -1,5 +1,6 @@
 import getCurrentUser from "@/actions/getCurrentUser";
 import getListingById from "@/actions/getListingById";
+import getFilterSettings from "@/actions/getFilterSettings";
 import EmptyState from "@/components/EmptyState";
 import BecomeHostClient from "@/app/become-a-host/BecomeHostClient";
 
@@ -25,11 +26,14 @@ export default async function EditPropertyPage({ params }: { params: Promise<IPa
     return <EmptyState title="Unauthorized" subtitle="You are not authorized to edit this property" />;
   }
 
+  const filterSettings = await getFilterSettings();
+
   return (
     <div className="pt-24 min-h-screen bg-white">
       <BecomeHostClient 
         currentUser={currentUser} 
         initialData={listing} 
+        filterSettings={filterSettings}
       />
     </div>
   );

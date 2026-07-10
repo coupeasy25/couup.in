@@ -5,6 +5,8 @@ import getCurrentUser from "@/actions/getCurrentUser";
 import getListingById from "@/actions/getListingById";
 import getReservations from "@/actions/getReservations";
 
+export const dynamic = 'force-dynamic';
+
 export async function DELETE(
   request: Request, 
   { params }: { params: Promise<{ listingId?: string }> }

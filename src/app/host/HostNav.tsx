@@ -32,13 +32,13 @@ const HostNav = () => {
 
   return (
     <nav className="flex items-center space-x-6 border-b border-neutral-200 pb-4">
-      {routes.map((route) => (
+      {routes.map((route) =>  (
         <Link
           key={route.href}
           href={route.href}
           className={cn(
             "text-sm font-semibold transition-colors hover:text-black",
-            route.active ? "text-black border-b-2 border-black pb-4 -mb-[17px]" : "text-neutral-500"
+            route.active ? "text-black border-b-2  border-black pb-4 -mb-[17px]" : "text-neutral-500"
           )}
         >
           {route.label}

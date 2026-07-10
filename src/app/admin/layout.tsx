@@ -1,7 +1,7 @@
 import { isAdminAuthenticated } from "@/actions/admin/adminAuth";
 import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
-import { LayoutDashboard, Users, Building, CalendarCheck, CreditCard, Settings, Image as ImageIcon, MapPin, Bell, XCircle } from "lucide-react";
+import { LayoutDashboard, Users, Building, CalendarCheck, CreditCard, Settings, Image as ImageIcon, MapPin, Bell, XCircle, Filter, Tag, Coffee } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -24,6 +24,10 @@ export default async function AdminLayout({
                 <Link href="/admin" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <LayoutDashboard size={20} />
                   Dashboard
+                </Link>
+                <Link href="/admin/coupons" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
+                  <Tag size={20} />
+                  Coupons
                 </Link>
                 <Link href="/admin/users" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <Users size={20} />
@@ -49,9 +53,17 @@ export default async function AdminLayout({
                   <Settings size={20} />
                   Settings
                 </Link>
+                <Link href="/admin/settings/filters" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
+                  <Filter size={20} />
+                  Filters
+                </Link>
                 <Link href="/admin/banners" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <ImageIcon size={20} />
                   Banners
+                </Link>
+                <Link href="/admin/offers" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
+                  <Coffee size={20} />
+                  Offers
                 </Link>
                 <Link href="/admin/destinations" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <MapPin size={20} />

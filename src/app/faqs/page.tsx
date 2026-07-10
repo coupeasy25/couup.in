@@ -1,4 +1,7 @@
+"use client";
+
 import Container from "@/components/Container";
+import { useState } from "react";
 
 const FAQsPage = () => {
   const faqs = [

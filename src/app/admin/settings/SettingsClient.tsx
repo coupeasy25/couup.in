@@ -53,7 +53,7 @@ const SettingsClient: React.FC<SettingsClientProps> = ({
         <div className="mb-6">
           <h2 className="text-2xl font-bold tracking-tight text-neutral-900 mb-2">Featured Cities on Homepage</h2>
           <p className="text-neutral-500 text-sm max-w-2xl">
-            Select which cities should be featured on the main landing page. If no cities are selected, all cities will be shown. This helps highlight popular destinations.
+            Select which cities should be featured on the main landing page. Only the cities you select here will be displayed as carousels.
           </p>
         </div>
 

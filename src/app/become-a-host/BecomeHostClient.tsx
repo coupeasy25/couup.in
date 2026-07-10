@@ -40,9 +40,10 @@ const CITIES = [
 interface BecomeHostClientProps {
   currentUser?: any;
   initialData?: any;
+  filterSettings?: any;
 }
 
-const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initialData }) => {
+const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initialData, filterSettings }) => {
   const router = useRouter();
 
   const [step, setStep] = useState(STEPS.INTRO);
@@ -62,7 +63,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
       title: initialData?.title || '',
       description: initialData?.description || '',
       imageSrc: initialData?.imageSrc || [],
-      propertyType: initialData?.propertyType || 'Hotel',
+      propertyType: initialData?.propertyType || (filterSettings?.propertyTypes?.[0] || 'Hotel'),
       fullAddress: initialData?.fullAddress || '',
       locationValue: initialData?.locationValue || '',
       peoplePerRoom: initialData?.peoplePerRoom || 1,
@@ -74,6 +75,8 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
       checkOutTime: initialData?.checkOutTime || '11:00 AM',
       cancellationPolicy: initialData?.cancellationPolicy || 'Free cancellation before 48 hours',
       cancellationRules: initialData?.cancellationRules || [{ days: 2, deduction: 50 }],
+      hourlyCancellationPolicy: initialData?.hourlyCancellationPolicy || 'Free cancellation before 2 hours',
+      hourlyCancellationRules: initialData?.hourlyCancellationRules || [{ hours: 2, deduction: 50 }],
       smokingAllowed: initialData?.smokingAllowed || false,
       petsAllowed: initialData?.petsAllowed || false,
       partyAllowed: initialData?.partyAllowed || false,
@@ -87,6 +90,8 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
         alternatePhone: '',
         companyName: '',
       },
+      allowsHourlyBooking: initialData?.allowsHourlyBooking || false,
+      hourlyRates: initialData?.hourlyRates || { twoHours: '', threeHours: '', fourHours: '' },
     }
   });
 
@@ -97,6 +102,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
   const standoutAmenities = watch('standoutAmenities') || [];
   const safetyItems = watch('safetyItems') || [];
   const cancellationRules = watch('cancellationRules') || [];
+  const hourlyCancellationRules = watch('hourlyCancellationRules') || [];
   const smokingAllowed = watch('smokingAllowed');
   const petsAllowed = watch('petsAllowed');
   const partyAllowed = watch('partyAllowed');
@@ -133,8 +139,8 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   const onNext = () => {
     if (step === STEPS.BASICS) {
-      if (imageSrc.length < 5 || imageSrc.length > 15) {
-        toast.error("Please add between 5 and 15 photos.");
+      if (imageSrc.length < 5 || imageSrc.length > 30) {
+        toast.error("Please add between 5 and 30 photos.");
         return;
       }
     }
@@ -225,7 +231,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.BASICS) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">The Basics</h2>
           <p className="text-xl text-gray-500 font-light">Give your place a name, description, and some photos.</p>
@@ -235,21 +241,21 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
           <Input className="text-lg py-6" {...register("description", { required: true })} placeholder="Describe your place..." />
           
           <div className="mt-4">
-            <Label className="text-lg font-semibold">Photos (Min 5, Max 15)</Label>
+            <Label className="text-lg font-semibold">Photos (Min 5, Max 30)</Label>
             
             <div className="mt-4 mb-4">
               <ImageUpload
                 value={imageSrc}
                 onChange={(value) => {
                   const currentImages = getValues('imageSrc') || [];
-                  if (currentImages.length < 15) {
+                  if (currentImages.length < 30) {
                     setCustomValue('imageSrc', [...currentImages, value]);
                   }
                 }}
               />
             </div>
 
-            <p className="text-sm text-neutral-500 mt-2 font-medium">Added: {imageSrc.length}/15</p>
+            <p className="text-sm text-neutral-500 mt-2 font-medium">Added: {imageSrc.length}/30</p>
             <div className="flex flex-wrap gap-4 mt-4">
               {imageSrc.map((src: string, index: number) => (
                 <div key={index} className="relative group w-24 h-24 rounded-lg overflow-hidden bg-neutral-100 border-[1px] border-neutral-200">
@@ -276,7 +282,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.DETAILS) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Property Details</h2>
           <p className="text-xl text-gray-500 font-light">Tell us more about the property.</p>
@@ -286,18 +292,15 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
           <div>
             <Label className="text-xl font-semibold">Is this a Hotel or Resort?</Label>
             <div className="grid grid-cols-2 gap-4 mt-4">
-              <div 
-                onClick={() => setCustomValue('propertyType', 'Hotel')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Hotel' ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
-              >
-                <div className="font-semibold text-lg">Hotel</div>
-              </div>
-              <div 
-                onClick={() => setCustomValue('propertyType', 'Resort')}
-                className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === 'Resort' ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
-              >
-                <div className="font-semibold text-lg">Resort</div>
-              </div>
+              {(filterSettings?.propertyTypes || ['Hotel', 'Resort']).map((type: string) => (
+                <div 
+                  key={type}
+                  onClick={() => setCustomValue('propertyType', type)}
+                  className={`p-6 border-2 rounded-xl cursor-pointer transition ${propertyType === type ? 'border-[#FFFFFF] bg-[#F97316]/5 shadow-[0_0_0_1px_#FFFFFF]' : 'border-neutral-200 hover:border-neutral-300'}`}
+                >
+                  <div className="font-semibold text-lg">{type}</div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -360,7 +363,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.ROOMS) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Rooms Available</h2>
           <p className="text-xl text-gray-500 font-light">Add the different types of rooms available at your property.</p>
@@ -620,13 +623,13 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.AMENITIES) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Tell guests what your place has to offer</h2>
           <p className="text-xl text-gray-500 font-light">Select all amenities available.</p>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {AMENITIES_LIST.map((item) => {
+          {(filterSettings?.amenities || AMENITIES_LIST).map((item: string) => {
             const isSelected = amenities.includes(item);
             return (
               <div 
@@ -639,7 +642,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
               </div>
             )
           })}
-          {amenities.filter((a: string) => !AMENITIES_LIST.includes(a)).map((item: string) => (
+          {amenities.filter((a: string) => !(filterSettings?.amenities || AMENITIES_LIST).includes(a)).map((item: string) => (
             <div 
               key={item}
               onClick={() => toggleArrayItem('amenities', amenities, item)}
@@ -685,7 +688,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.STANDOUTS) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Do you have any standout amenities?</h2>
           <p className="text-xl text-gray-500 font-light">Guests love these special features.</p>
@@ -750,7 +753,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.SAFETY) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Do you have any of these safety items?</h2>
           <p className="text-xl text-gray-500 font-light">Help keep your guests safe.</p>
@@ -815,7 +818,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.POLICIES) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">House Rules & Policies</h2>
           <p className="text-xl text-gray-500 font-light">Set your timing, cancellation rules, and allowed activities.</p>
@@ -834,7 +837,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
           </div>
 
           <div className="flex flex-col gap-4 p-4 border-[1px] border-neutral-200 rounded-lg bg-neutral-50/50">
-            <Label className="text-lg font-semibold text-[#F97316]">Cancellation Policy Settings</Label>
+            <Label className="text-lg font-semibold text-[#F97316]">Daily Booking Cancellation Policy</Label>
             
             <div className="flex flex-col gap-3">
               {cancellationRules.map((rule: any, index: number) => (
@@ -895,6 +898,70 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
             </div>
           </div>
 
+          {watch('allowsHourlyBooking') && (
+            <div className="flex flex-col gap-4 p-4 border-[1px] border-neutral-200 rounded-lg bg-neutral-50/50">
+              <Label className="text-lg font-semibold text-[#F97316]">Hourly Booking Cancellation Policy</Label>
+            
+            <div className="flex flex-col gap-3">
+              {hourlyCancellationRules.map((rule: any, index: number) => (
+                <div key={index} className="flex gap-4 items-end bg-white p-3 border border-neutral-200 rounded-md">
+                  <div className="flex-1">
+                    <Label className="text-xs font-semibold text-neutral-500 mb-1 block">Hours before check-in</Label>
+                    <Input 
+                      type="number" min="0" className="text-md py-4" 
+                      value={rule.hours}
+                      onChange={(e) => {
+                        const newRules = [...hourlyCancellationRules];
+                        newRules[index].hours = parseInt(e.target.value) || 0;
+                        setCustomValue('hourlyCancellationRules', newRules);
+                      }}
+                      placeholder="e.g. 2" 
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-xs font-semibold text-neutral-500 mb-1 block">Penalty Deduction (%)</Label>
+                    <Input 
+                      type="number" min="0" max="100" className="text-md py-4" 
+                      value={rule.deduction}
+                      onChange={(e) => {
+                        const newRules = [...hourlyCancellationRules];
+                        newRules[index].deduction = parseInt(e.target.value) || 0;
+                        setCustomValue('hourlyCancellationRules', newRules);
+                      }}
+                      placeholder="e.g. 50" 
+                    />
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const newRules = hourlyCancellationRules.filter((_: any, i: number) => i !== index);
+                      setCustomValue('hourlyCancellationRules', newRules);
+                    }}
+                    className="p-3 text-red-500 hover:bg-red-50 rounded-md mb-[2px]"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+              ))}
+              
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomValue('hourlyCancellationRules', [...hourlyCancellationRules, { hours: 0, deduction: 0 }]);
+                }}
+                className="mt-2 text-sm font-semibold text-[#F97316] hover:text-[#EA580C] text-left"
+              >
+                + Add another rule
+              </button>
+            </div>
+            
+            <div className="mt-4">
+              <Label className="text-sm font-semibold">Policy Description (Shown to guests)</Label>
+              <Input className="mt-2 text-lg py-6" {...register("hourlyCancellationPolicy", { required: true })} placeholder="e.g. Free cancellation before 2 hours. 50% penalty within 2 hours." />
+            </div>
+          </div>
+          )}
+
           <div className="flex flex-col gap-4 mt-2">
             <Label className="text-lg font-semibold">Allowed Activities</Label>
             
@@ -939,19 +1006,54 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
 
   if (step === STEPS.PRICE) {
     leftContent = (
-      <div className="flex flex-col justify-center h-full px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start h-full px-10 md:px-20 max-w-2xl gap-8 overflow-y-auto py-12">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Now, set your price</h2>
           <p className="text-xl text-gray-500 font-light">How much do you charge per night?</p>
         </div>
         <Input className="text-2xl py-8 font-semibold" type="number" {...register("price", { required: true, min: 1 })} placeholder="Price per night (₹)" />
+        
+        {/* Hourly Bookings */}
+        <div className="mt-4 pt-8 border-t-[1px] border-neutral-200">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-semibold">Hourly Bookings</h2>
+            <p className="text-lg text-gray-500 font-light">Do you allow guests to book your property by the hour for short stays?</p>
+          </div>
+          <div className="flex items-center justify-between p-4 mt-4 border-[1px] border-neutral-200 rounded-lg">
+            <span className="font-medium text-lg">Allow Hourly Booking</span>
+            <button 
+              type="button"
+              onClick={() => setCustomValue('allowsHourlyBooking', !watch('allowsHourlyBooking'))}
+              className={`w-14 h-8 rounded-full flex items-center transition px-1 ${watch('allowsHourlyBooking') ? 'bg-[#F97316] justify-end' : 'bg-neutral-300 justify-start'}`}
+            >
+              <div className="w-6 h-6 bg-white rounded-full shadow-sm"></div>
+            </button>
+          </div>
+          
+          {watch('allowsHourlyBooking') && (
+            <div className="mt-6 flex flex-col gap-6 p-6 bg-neutral-50 border border-neutral-200 rounded-xl">
+              <div>
+                <Label className="text-lg font-semibold">2-Hour Rate (₹)</Label>
+                <Input type="number" className="mt-2 text-lg py-6" {...register("hourlyRates.twoHours", { required: watch('allowsHourlyBooking'), valueAsNumber: true })} placeholder="e.g. 500" />
+              </div>
+              <div>
+                <Label className="text-lg font-semibold">3-Hour Rate (₹)</Label>
+                <Input type="number" className="mt-2 text-lg py-6" {...register("hourlyRates.threeHours", { required: watch('allowsHourlyBooking'), valueAsNumber: true })} placeholder="e.g. 700" />
+              </div>
+              <div>
+                <Label className="text-lg font-semibold">4-Hour Rate (₹)</Label>
+                <Input type="number" className="mt-2 text-lg py-6" {...register("hourlyRates.fourHours", { required: watch('allowsHourlyBooking'), valueAsNumber: true })} placeholder="e.g. 900" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
 
   if (step === STEPS.CONTACT) {
     leftContent = (
-      <div className="flex flex-col justify-center min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
+      <div className="flex flex-col justify-start min-h-[100%] py-12 px-10 md:px-20 max-w-2xl gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-3xl font-semibold">Host Contact Details</h2>
           <p className="text-xl text-gray-500 font-light">This information is strictly for our internal verification process and will <strong className="text-black">not</strong> be shown to guests.</p>
@@ -1040,7 +1142,7 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Form Area */}
-        <div className={`h-full w-full ${rightContent ? 'md:w-1/2' : 'flex justify-center items-center'} overflow-y-auto pb-32`}>
+        <div className={`h-full w-full ${rightContent ? 'md:w-1/2' : 'flex justify-center items-start'} overflow-y-auto pb-32`}>
           {leftContent}
         </div>
         

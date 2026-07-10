@@ -23,6 +23,7 @@ interface ModalProps {
   disabled?: boolean;
   secondaryAction?: () => void;
   secondaryActionLabel?: string;
+  className?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -36,6 +37,7 @@ const Modal: React.FC<ModalProps> = ({
   disabled,
   secondaryAction,
   secondaryActionLabel,
+  className,
 }) => {
   const [showModal, setShowModal] = useState(isOpen);
 
@@ -76,11 +78,11 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={className || "sm:max-w-[425px]"}>
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
         </DialogHeader>
-        <div className="relative p-6 flex-auto">
+        <div className="relative p-6 flex-auto max-h-[65vh] overflow-y-auto">
           {body}
         </div>
         <div className="flex flex-col gap-2 p-6">

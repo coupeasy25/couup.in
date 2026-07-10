@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 
+interface FooterProps {
+  amenities?: any[];
+  destinations?: any[];
+}
 
-const Footer = () => {
+const Footer: React.FC<FooterProps> = ({ amenities = [], destinations = [] }) => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-neutral-900 text-neutral-300 w-full pt-16 pb-8 border-t border-neutral-800">
+    <footer className="bg-[#0f3d30] text-neutral-300 w-full pt-16 pb-8 border-t border-[#0f3d30]">
       <div className="max-w-[2520px] mx-auto xl:px-20 md:px-10 sm:px-2 px-4">
         
         {/* Main Footer Content */}
@@ -39,11 +43,16 @@ const Footer = () => {
             <h3 className="text-white font-semibold tracking-wide uppercase text-sm">Top Destinations</h3>
             <nav>
               <ul className="flex flex-col gap-3 text-sm">
-                <li><Link href="/?locationValue=Goa" className="hover:text-white transition hover:underline">Hotels in Goa</Link></li>
-                <li><Link href="/?locationValue=Udaipur" className="hover:text-white transition hover:underline">Resorts in Udaipur</Link></li>
-                <li><Link href="/?locationValue=Mumbai" className="hover:text-white transition hover:underline">Weekend Getaways near Mumbai</Link></li>
-                <li><Link href="/?locationValue=Manali" className="hover:text-white transition hover:underline">Villas in Manali</Link></li>
-                <li><Link href="/?locationValue=Kerala" className="hover:text-white transition hover:underline">Houseboats in Kerala</Link></li>
+                {destinations.slice(0, 5).map((dest) => (
+                  <li key={dest._id}>
+                    <Link href={`/?locationValue=${encodeURIComponent(dest.name)}`} className="hover:text-white transition hover:underline">
+                      Stays in {dest.name}
+                    </Link>
+                  </li>
+                ))}
+                {destinations.length === 0 && (
+                  <li className="text-neutral-500">No destinations available.</li>
+                )}
               </ul>
             </nav>
           </div>
@@ -53,11 +62,16 @@ const Footer = () => {
             <h3 className="text-white font-semibold tracking-wide uppercase text-sm">Categories</h3>
             <nav>
               <ul className="flex flex-col gap-3 text-sm">
-                <li><Link href="/?category=Luxury+Resorts" className="hover:text-white transition hover:underline">Luxury Resorts</Link></li>
-                <li><Link href="/?category=Couple+Friendly" className="hover:text-white transition hover:underline">Couple Friendly Hotels</Link></li>
-                <li><Link href="/?category=Private+Pool" className="hover:text-white transition hover:underline">Villas with Private Pool</Link></li>
-                <li><Link href="/?category=Budget+Stays" className="hover:text-white transition hover:underline">Budget Stays</Link></li>
-                <li><Link href="/?category=Pet+Friendly" className="hover:text-white transition hover:underline">Pet Friendly Properties</Link></li>
+                {amenities.slice(0, 5).map((amenity) => (
+                  <li key={amenity._id}>
+                    <Link href={`/?category=${encodeURIComponent(amenity.name)}`} className="hover:text-white transition hover:underline">
+                      {amenity.name}
+                    </Link>
+                  </li>
+                ))}
+                {amenities.length === 0 && (
+                  <li className="text-neutral-500">No categories available.</li>
+                )}
               </ul>
             </nav>
           </div>
@@ -86,7 +100,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-neutral-500">
+        <div className="pt-8 border-t border-[#0a2e24] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-neutral-400">
           <p>© {currentYear} Couup. All rights reserved.</p>
           <div className="flex gap-4">
             <span>Secured with SSL</span>

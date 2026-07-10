@@ -18,13 +18,15 @@ export async function POST(request: Request) {
     title, description, imageSrc, price,
     propertyType, fullAddress, peoplePerRoom, bathroomType,
     amenities, standoutAmenities, safetyItems,
-    checkInTime, checkOutTime, cancellationPolicy,
+    checkInTime, checkOutTime, cancellationPolicy, cancellationRules,
+    hourlyCancellationPolicy, hourlyCancellationRules,
     smokingAllowed, petsAllowed, partyAllowed, locationValue,
-    rooms, coordinates, hostContactDetails
+    rooms, coordinates, hostContactDetails,
+    allowsHourlyBooking, hourlyRates
   } = body;
 
-  if (!imageSrc || imageSrc.length < 5 || imageSrc.length > 15) {
-    return new NextResponse("Please provide between 5 and 15 images.", { status: 400 });
+  if (!imageSrc || imageSrc.length < 5 || imageSrc.length > 30) {
+    return new NextResponse("Please provide between 5 and 30 images.", { status: 400 });
   }
 
   try {
@@ -46,6 +48,9 @@ export async function POST(request: Request) {
       checkInTime: checkInTime || '2:00 PM',
       checkOutTime: checkOutTime || '11:00 AM',
       cancellationPolicy: cancellationPolicy || 'Flexible',
+      cancellationRules: cancellationRules || [],
+      hourlyCancellationPolicy: hourlyCancellationPolicy || '',
+      hourlyCancellationRules: hourlyCancellationRules || [],
       smokingAllowed: smokingAllowed || false,
       petsAllowed: petsAllowed || false,
       partyAllowed: partyAllowed || false,
@@ -58,6 +63,8 @@ export async function POST(request: Request) {
       bathroomCount: 1,
       guestCount: parseInt(peoplePerRoom, 10) || 1,
       hostContactDetails,
+      allowsHourlyBooking: allowsHourlyBooking || false,
+      hourlyRates: hourlyRates || undefined,
     });
 
     return NextResponse.json(listing);

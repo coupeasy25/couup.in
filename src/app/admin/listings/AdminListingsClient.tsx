@@ -236,6 +236,37 @@ export default function AdminListingsClient({ initialListings }: AdminListingsCl
                   )}
                 </div>
 
+                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                  <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    Hourly Bookings
+                  </h3>
+                  <div className="text-sm text-blue-800 mb-3">
+                    <span className="font-medium">Status: </span>
+                    {selectedListing.allowsHourlyBooking ? (
+                      <span className="text-green-700 font-semibold">Enabled</span>
+                    ) : (
+                      <span className="text-neutral-500 font-semibold">Disabled</span>
+                    )}
+                  </div>
+                  
+                  {selectedListing.allowsHourlyBooking && selectedListing.hourlyRates && (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between items-center text-sm text-blue-800 bg-blue-100/50 p-2 rounded border border-blue-100">
+                        <span>2-Hour Slot</span>
+                        <span className="font-semibold">₹{selectedListing.hourlyRates.twoHours || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm text-blue-800 bg-blue-100/50 p-2 rounded border border-blue-100">
+                        <span>3-Hour Slot</span>
+                        <span className="font-semibold">₹{selectedListing.hourlyRates.threeHours || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm text-blue-800 bg-blue-100/50 p-2 rounded border border-blue-100">
+                        <span>4-Hour Slot</span>
+                        <span className="font-semibold">₹{selectedListing.hourlyRates.fourHours || 'N/A'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div>
                   <h3 className="font-semibold text-neutral-800 mb-2">Images ({selectedListing.imageSrc?.length})</h3>
                   <div className="grid grid-cols-3 gap-2">

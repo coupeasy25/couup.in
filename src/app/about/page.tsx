@@ -1,4 +1,10 @@
 import Container from "@/components/Container";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Learn more about COUUP's mission and how we connect guests with extraordinary accommodations.",
+};
 
 const AboutPage = () => {
   return (

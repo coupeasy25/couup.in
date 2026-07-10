@@ -5,6 +5,8 @@ import { Inter } from "next/font/google";
 import Navbar from "@/components/navbar/Navbar";
 import RegisterModal from "@/components/modals/RegisterModal";
 import LoginModal from "@/components/modals/LoginModal";
+import FilterModal from "@/components/modals/FilterModal";
+import BookingSuccessModal from "@/components/modals/BookingSuccessModal";
 import getCurrentUser from "@/actions/getCurrentUser";
 import Footer from "@/components/Footer";
 
@@ -15,13 +17,13 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.couup.in'),
   title: {
-    template: "%s | Couup Hotels & Resorts",
-    default: "Couup Hotels & Resorts - Book the best stays",
+    template: "%s | COUUP",
+    default: "COUUP | Exclusive Hotels & Resorts in India",
   },
-  description: "Discover and book exclusive hotels, resorts, and unforgettable experiences curated for your perfect getaway in India.",
+  description: "Discover and book exclusive hotels, resorts, and vacation rentals curated for your perfect getaway in India.",
   keywords: ["hotels", "resorts", "vacation rentals", "travel", "booking", "Couup", "India stays", "luxury stays"],
-  authors: [{ name: "Couup" }],
-  creator: "Couup",
+  authors: [{ name: "COUUP" }],
+  creator: "COUUP",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -58,7 +60,15 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
+  icons: {
+    icon: '/images/logo-2.jpeg',
+    apple: '/images/logo-2.png',
+  }
 };
+
+import ClientLayout from "@/components/ClientLayout";
+import { getActiveAmenities } from "@/actions/getAmenities";
+import getDestinations from "@/actions/getDestinations";
 
 export default async function RootLayout({
   children,
@@ -66,6 +76,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const currentUser = await getCurrentUser();
+  const amenities = await getActiveAmenities();
+  const destinations = await getDestinations();
 
   return (
     <html lang="en">
@@ -73,13 +85,44 @@ export default async function RootLayout({
         <Toaster />
         <RegisterModal />
         <LoginModal />
-        <Suspense fallback={null}>
-          <Navbar currentUser={currentUser} />
-        </Suspense>
-        <div className="pb-20 min-h-screen">
+        <FilterModal amenities={amenities} />
+        <BookingSuccessModal />
+        
+        {/* JSON-LD Schema for Rich Results */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "COUUP",
+                "url": "https://www.couup.in",
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": "https://www.couup.in/?locationValue={search_term_string}",
+                  "query-input": "required name=search_term_string"
+                }
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "COUUP",
+                "url": "https://www.couup.in",
+                "logo": "https://www.couup.in/images/logo-2.png",
+                "sameAs": [
+                  "https://www.facebook.com/couup",
+                  "https://www.instagram.com/couup",
+                  "https://twitter.com/couup"
+                ]
+              }
+            ])
+          }}
+        />
+
+        <ClientLayout currentUser={currentUser} amenities={amenities} destinations={destinations}>
           {children}
-        </div>
-        <Footer />
+        </ClientLayout>
       </body>
     </html>
   );

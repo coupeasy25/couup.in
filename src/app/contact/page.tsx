@@ -1,4 +1,10 @@
 import Container from "@/components/Container";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description: "Get in touch with COUUP's 24/7 support team for assistance with bookings or partnering with us.",
+};
 
 const ContactPage = () => {
   return (

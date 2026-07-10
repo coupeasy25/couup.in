@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Listing } from "@/models/Listing";
+import { User } from "@/models/User";
 import { isAdminAuthenticated } from "@/actions/admin/adminAuth";
 
 export async function PATCH(
@@ -38,6 +39,19 @@ export async function PATCH(
 
     if (!listing) {
       return new NextResponse("Listing not found", { status: 404 });
+    }
+
+    if (status === 'APPROVED') {
+      await User.findByIdAndUpdate(listing.userId, { isHost: true });
+    } else {
+      const approvedListingsCount = await Listing.countDocuments({
+        userId: listing.userId,
+        status: 'APPROVED'
+      });
+      
+      if (approvedListingsCount === 0) {
+        await User.findByIdAndUpdate(listing.userId, { isHost: false });
+      }
     }
 
     return NextResponse.json(listing);

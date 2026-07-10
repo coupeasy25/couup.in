@@ -71,8 +71,6 @@ const ListingInfo: React.FC<ListingInfoProps> = ({
         </div>
         <div className="flex flex-row items-center gap-2 text-[15px] font-light text-neutral-800">
           <div>Up to {peoplePerRoom} guests per room</div>
-          <span>·</span>
-          <div>{bathroomType} bathrooms</div>
         </div>
       </div>
 

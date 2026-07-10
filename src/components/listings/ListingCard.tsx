@@ -54,9 +54,9 @@ const ListingCard: React.FC<ListingCardProps> = ({
         return;
       }
 
-      onEdit?.(data.id);
+      onEdit?.(data.id || data._id);
     },
-    [onEdit, data.id, disabled]
+    [onEdit, data.id, data._id, disabled]
   );
 
   const price = useMemo(() => {
@@ -74,6 +74,10 @@ const ListingCard: React.FC<ListingCardProps> = ({
 
     const start = new Date(reservation.startDate);
     const end = new Date(reservation.endDate);
+
+    if (reservation.isHourlyBooking) {
+      return `${format(start, "PP")} (${reservation.checkInTime} for ${reservation.hourlyDuration} hours)`;
+    }
 
     return `${format(start, "PP")} - ${format(end, "PP")}`;
   }, [reservation]);
@@ -107,12 +111,12 @@ const ListingCard: React.FC<ListingCardProps> = ({
     if (onViewDetails && reservation) {
       return onViewDetails(reservation);
     }
-    let url = `/listings/${data.id}`;
+    let url = `/listings/${data.id || data._id}`;
     if (searchParams && searchParams.toString()) {
       url += `?${searchParams.toString()}`;
     }
     router.push(url);
-  }, [router, data.id, searchParams, onViewDetails, reservation]);
+  }, [router, data.id, data._id, searchParams, onViewDetails, reservation]);
 
   return (
     <div
@@ -123,65 +127,90 @@ const ListingCard: React.FC<ListingCardProps> = ({
         <div className="aspect-[4/3] w-full relative overflow-hidden rounded-xl">
           <Image
             fill
-            className="object-cover h-full w-full transition"
+            className="object-cover h-full w-full group-hover:scale-105 transition-transform duration-500 ease-in-out"
             src={images[currentImageIndex]}
             alt="Listing"
           />
+          {/* Subtle gradient for dots visibility */}
+          {images.length > 1 && (
+            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent z-0"></div>
+          )}
+          
           <div className="absolute top-3 right-3 z-10">
-            <HeartButton 
-              listingId={data.id || data._id} 
+            <HeartButton
+              listingId={data.id || data._id}
               currentUser={currentUser}
             />
           </div>
-          
+
           {images.length > 1 && (
             <>
               {currentImageIndex > 0 && (
-                <div 
+                <div
                   onClick={handlePrev}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition duration-300 z-10"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
                 >
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={18} className="text-neutral-700" />
                 </div>
               )}
               {currentImageIndex < images.length - 1 && (
-                <div 
+                <div
                   onClick={handleNext}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition duration-300 z-10"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white hover:scale-110 rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
                 >
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} className="text-neutral-700" />
                 </div>
               )}
-              
+
               {/* Dots indicator */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 z-10">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 z-10">
                 {images.map((_: any, index: number) => (
-                  <div 
-                    key={index} 
-                    className={`rounded-full transition-all duration-300 ${index === currentImageIndex ? 'bg-white w-2 h-2 opacity-100' : 'bg-white/60 w-1.5 h-1.5 opacity-60'}`}
+                  <div
+                    key={index}
+                    className={`rounded-full transition-all duration-300 shadow-sm ${index === currentImageIndex ? 'bg-white w-2 h-2 opacity-100' : 'bg-white/70 w-1.5 h-1.5 opacity-60 hover:bg-white/90'}`}
                   />
                 ))}
               </div>
             </>
           )}
         </div>
-        <div className="flex flex-col mt-1">
-          <div className="font-semibold text-[15px] flex items-center justify-between">
-            <span className="truncate">{data.title}</span>
+        <div className="flex flex-col mt-2 gap-0.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="font-semibold text-[16px] text-neutral-900 truncate">
+              {data.title}
+            </div>
+            <div className="flex items-center gap-1 text-[14px] font-medium text-neutral-800 shrink-0 mt-0.5">
+              <span>★</span>
+              <span>{rating}</span>
+            </div>
+          </div>
+          
+          {data.locationValue && (
+            <div className="font-light text-neutral-500 text-[14px]">
+              {data.locationValue}
+            </div>
+          )}
+          
+          <div className="font-light text-neutral-500 text-[14px] mt-1 flex items-center justify-between">
+            {reservationDate ? (
+              <span>{reservationDate}</span>
+            ) : (
+              <div className="flex items-center gap-1">
+                <span className="font-semibold text-[15px] text-neutral-900">₹{price}</span>
+                <span>night</span>
+              </div>
+            )}
+            
             {reservation && reservation.status && (
-              <span className={`ml-2 flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                reservation.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
+              <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${reservation.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
                 reservation.status === 'Checked-in' ? 'bg-green-100 text-green-700' :
-                reservation.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                reservation.status === 'Checked-out' ? 'bg-neutral-200 text-neutral-700' :
-                'bg-yellow-100 text-yellow-700'
-              }`}>
+                  reservation.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                    reservation.status === 'Checked-out' ? 'bg-neutral-200 text-neutral-700' :
+                      'bg-yellow-100 text-yellow-700'
+                }`}>
                 {reservation.status}
               </span>
             )}
-          </div>
-          <div className="font-light text-neutral-500 text-[15px]">
-            {reservationDate || `₹${price} for 1 night · ★ ${rating}`}
           </div>
         </div>
         {onEdit && (

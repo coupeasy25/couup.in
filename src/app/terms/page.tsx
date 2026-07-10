@@ -1,4 +1,10 @@
 import Container from "@/components/Container";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
+  description: "Read the terms and conditions for using COUUP's platform.",
+};
 
 const TermsPage = () => {
   return (

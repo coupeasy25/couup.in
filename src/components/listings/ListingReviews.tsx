@@ -1,61 +1,22 @@
 "use client";
 
 import Avatar from "../Avatar";
-import { useState, useMemo } from "react";
-import axios from "axios";
-import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
+import { useMemo } from "react";
 import { formatDistanceToNow } from "date-fns";
 
 interface ListingReviewsProps {
   reviews?: any[];
   listingId?: string;
   currentUser?: any | null;
+  hasBooked?: boolean;
 }
 
-const ListingReviews: React.FC<ListingReviewsProps> = ({ reviews = [], listingId, currentUser }) => {
-  const router = useRouter();
-  const [rating, setRating] = useState<number>(5);
-  const [comment, setComment] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
+const ListingReviews: React.FC<ListingReviewsProps> = ({ reviews = [], listingId, currentUser, hasBooked = false }) => {
   const averageRating = useMemo(() => {
     if (reviews.length === 0) return "0.00";
     const sum = reviews.reduce((acc, rev) => acc + rev.rating, 0);
     return (sum / reviews.length).toFixed(2);
   }, [reviews]);
-
-  const onSubmit = () => {
-    if (!currentUser) {
-      toast.error("You must be logged in to leave a review.");
-      return;
-    }
-    if (!comment.trim()) {
-      toast.error("Please enter a comment.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    axios.post("/api/reviews", {
-      listingId,
-      rating,
-      comment
-    })
-    .then(() => {
-      toast.success("Review submitted!");
-      setComment("");
-      setRating(5);
-      router.refresh();
-    })
-    .catch(() => {
-      toast.error("Something went wrong.");
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-  };
 
   return (
     <div className="flex flex-col gap-8 pb-10">
@@ -74,43 +35,6 @@ const ListingReviews: React.FC<ListingReviewsProps> = ({ reviews = [], listingId
         )}
       </div>
 
-      {/* Write a Review */}
-      {currentUser && (
-        <div className="bg-neutral-50 rounded-2xl p-6 mb-8 border-[1px] border-neutral-200">
-          <h3 className="text-lg font-semibold mb-4">Write a review</h3>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-row items-center gap-2">
-              <span className="font-light text-sm text-neutral-600">Rating:</span>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    onClick={() => setRating(star)}
-                    className={`text-2xl ${rating >= star ? 'text-yellow-400' : 'text-neutral-300'} transition hover:scale-110`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-            </div>
-            <textarea
-              disabled={isLoading}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="What did you think about this place?"
-              className="w-full rounded-xl border-[1px] border-neutral-300 p-4 font-light min-h-[100px] focus:outline-none focus:border-black transition"
-            />
-            <Button
-              disabled={isLoading}
-              onClick={onSubmit}
-              className="w-max bg-[#F97316] hover:bg-[#EA580C] text-white font-semibold"
-            >
-              Submit Review
-            </Button>
-          </div>
-        </div>
-      )}
-
       {/* Reviews Grid */}
       {reviews.length === 0 ? (
         <div className="text-center font-light text-neutral-500 my-8">
@@ -123,7 +47,7 @@ const ListingReviews: React.FC<ListingReviewsProps> = ({ reviews = [], listingId
               <div className="flex flex-row items-center gap-4">
                 <Avatar src={review.user?.image} />
                 <div className="flex flex-col">
-                  <div className="font-semibold">{review.user?.name || 'User'}</div>
+                  <div className="font-semibold">{review.customName || review.user?.name || 'User'}</div>
                   <div className="text-sm font-light text-neutral-500">
                     {formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })}
                   </div>

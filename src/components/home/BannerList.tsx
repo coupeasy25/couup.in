@@ -57,6 +57,7 @@ const BannerList: React.FC<BannerListProps> = ({ banners }) => {
               alt={banner.title || "Banner"}
               fill
               priority
+              sizes="100vw"
               className="object-cover"
             />
           </div>
@@ -68,6 +69,8 @@ const BannerList: React.FC<BannerListProps> = ({ banners }) => {
         {banners.map((_, index) => (
           <button
             key={index}
+            suppressHydrationWarning
+            aria-label={`Go to slide ${index + 1}`}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${index === activeIndex ? "w-6 bg-[#F97316]" : "bg-white/50 hover:bg-white/80"
               }`}
             onClick={() => {

@@ -6,6 +6,7 @@ import Image from "next/image";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { differenceInCalendarDays, format } from "date-fns";
+import useBookingSuccessModal from "@/hooks/useBookingSuccessModal";
 
 import Container from "@/components/Container";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ const INDIAN_STATES = [
 const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const bookingSuccessModal = useBookingSuccessModal();
 
   const startDateParam = searchParams?.get('startDate');
   const endDateParam = searchParams?.get('endDate');
@@ -55,14 +57,23 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
     return null;
   }, [startDateParam, endDateParam]);
 
-  const [guests, setGuests] = useState([{ firstName: '', lastName: '', gender: 'Male', age: '' }]);
+  const maxRoomsAllowed = Math.min(6, roomCountAvailable);
+
+  const [guestsPerRoom, setGuestsPerRoom] = useState([
+    [{ firstName: '', lastName: '', gender: 'Male', age: '' }]
+  ]);
   const [guestContact, setGuestContact] = useState(currentUser?.phone || '');
   const [guestEmail, setGuestEmail] = useState(currentUser?.email || '');
   const [gstState, setGstState] = useState('');
   const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const requiredRooms = Math.ceil(guests.length / roomCapacity) || 1;
+  const requiredRooms = guestsPerRoom.length;
+  const flatGuests = guestsPerRoom.flat();
+  const totalGuestsCount = flatGuests.length;
 
   const { basePrice, dayCount } = useMemo(() => {
     if (!dateRange?.startDate || !dateRange?.endDate) return { basePrice: 0, dayCount: 1 };
@@ -106,7 +117,8 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
 
   const taxes = serviceFee + gstAmount; // Combined fees + taxes
   const welcomeDiscount = listing.hasWelcomeOffer ? 500 : 0;
-  const totalPrice = Math.max(0, basePrice + taxes - welcomeDiscount);
+  const preDiscountTotal = Math.max(0, basePrice + taxes - welcomeDiscount);
+  const totalPrice = Math.max(0, preDiscountTotal - couponDiscount);
 
   useEffect(() => {
     const loadRazorpayScript = () => {
@@ -125,32 +137,91 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
     loadRazorpayScript();
   }, []);
 
-  const addGuest = () => {
-    if (guests.length < maxGuests) {
-      setGuests([...guests, { firstName: '', lastName: '', gender: 'Male', age: '' }]);
+  const addRoom = () => {
+    if (guestsPerRoom.length < maxRoomsAllowed) {
+      setGuestsPerRoom([...guestsPerRoom, [{ firstName: '', lastName: '', gender: 'Male', age: '' }]]);
+    } else {
+      toast.error(`You can only book up to ${maxRoomsAllowed} room(s) for this property.`);
     }
   };
 
-  const removeGuest = (index: number) => {
-    if (guests.length > 1) {
-      setGuests(guests.filter((_, i) => i !== index));
+  const removeRoom = (roomIndex: number) => {
+    if (guestsPerRoom.length > 1) {
+      const updated = [...guestsPerRoom];
+      updated.splice(roomIndex, 1);
+      setGuestsPerRoom(updated);
     }
   };
 
-  const updateGuest = (index: number, field: string, value: string) => {
-    const updatedGuests = [...guests];
-    updatedGuests[index] = { ...updatedGuests[index], [field]: value };
-    setGuests(updatedGuests);
+  const addGuestToRoom = (roomIndex: number) => {
+    const roomGuests = guestsPerRoom[roomIndex];
+    if (totalGuestsCount >= maxGuests) {
+      toast.error(`Maximum allowed guests (${maxGuests}) for this booking reached.`);
+      return;
+    }
+    if (roomGuests.length >= roomCapacity) {
+      toast.error(`Maximum capacity (${roomCapacity}) for this room reached.`);
+      return;
+    }
+    const updated = [...guestsPerRoom];
+    updated[roomIndex] = [...roomGuests, { firstName: '', lastName: '', gender: 'Male', age: '' }];
+    setGuestsPerRoom(updated);
   };
 
-  const handleApplyCoupon = () => {
-    if (!couponCode) return;
-    toast.error('Invalid or expired coupon code.');
+  const removeGuestFromRoom = (roomIndex: number, guestIndex: number) => {
+    const roomGuests = guestsPerRoom[roomIndex];
+    if (roomGuests.length > 1) {
+      const updated = [...guestsPerRoom];
+      updated[roomIndex] = roomGuests.filter((_, i) => i !== guestIndex);
+      setGuestsPerRoom(updated);
+    }
+  };
+
+  const updateGuest = (roomIndex: number, guestIndex: number, field: string, value: string) => {
+    const updated = [...guestsPerRoom];
+    updated[roomIndex][guestIndex] = { ...updated[roomIndex][guestIndex], [field]: value };
+    setGuestsPerRoom(updated);
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code.');
+      return;
+    }
+    
+    setIsApplyingCoupon(true);
+    
+    try {
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: couponCode.trim(),
+          totalAmount: preDiscountTotal,
+          userId: (currentUser as any)?.id || (currentUser as any)?._id
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setAppliedCoupon({ code: couponCode.trim(), id: data.couponId });
+        setCouponDiscount(data.discountAmount);
+        toast.success(`Coupon applied! (₹${data.discountAmount.toLocaleString('en-IN')} off)`);
+      } else {
+        setAppliedCoupon(null);
+        setCouponDiscount(0);
+        toast.error(data.message || 'Invalid coupon.');
+      }
+    } catch (error) {
+      toast.error('Failed to validate coupon.');
+    } finally {
+      setIsApplyingCoupon(false);
+    }
   };
 
   const onSubmit = useCallback(async () => {
     // Validation
-    const emptyGuest = guests.find(g => !g.firstName || !g.lastName || !g.age);
+    const emptyGuest = flatGuests.find(g => !g.firstName || !g.lastName || !g.age);
     if (emptyGuest) {
       return toast.error("Please fill in all guest details.");
     }
@@ -164,6 +235,21 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
     setIsLoading(true);
 
     try {
+      // 0. Check Availability First
+      const checkRes = await axios.post('/api/reservations/check', {
+        listingId: listing?.id,
+        startDate: dateRange?.startDate,
+        endDate: dateRange?.endDate,
+        roomType: selectedRoom ? selectedRoom.type : undefined,
+        roomsCount: requiredRooms
+      });
+
+      if (!checkRes.data.available) {
+        toast.error(checkRes.data.message || 'Rooms not available for selected dates.');
+        setIsLoading(false);
+        return;
+      }
+
       // 1. Create Razorpay Order
       const orderResponse = await axios.post('/api/razorpay/order', { amount: totalPrice });
       const order = orderResponse.data;
@@ -179,7 +265,7 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
         handler: async function (response: any) {
           // 3. Verify Payment and Create Reservation
           try {
-            await axios.post('/api/reservations', {
+            const responseData = await axios.post('/api/reservations', {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
@@ -190,20 +276,37 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
               endDate: dateRange?.endDate,
               listingId: listing?.id,
               roomType: selectedRoom ? selectedRoom.type : undefined,
-              guests,
+              guests: flatGuests,
               guestContact,
               guestEmail,
               gstState,
+              roomsCount: requiredRooms,
+              isHourlyBooking: false,
+              hourlyDuration: 0,
+              checkInTime: listing.checkInTime || '2 PM',
+              couponCode: appliedCoupon?.code || null,
+              couponDiscount: couponDiscount || 0
+            });
+            
+            toast.success('Payment successful!');
+            
+            // Open Success Modal
+            bookingSuccessModal.onOpen({
+              id: responseData.data.id || responseData.data._id,
+              listingTitle: listing.title,
+              startDate: dateRange?.startDate as Date,
+              endDate: dateRange?.endDate as Date,
+              totalPrice: totalPrice,
+              guests: flatGuests,
               roomsCount: requiredRooms
             });
-            toast.success('Reservation confirmed!');
-            router.push('/trips');
+            
           } catch (err: any) {
             toast.error(err?.response?.data || 'Payment verification failed.');
           }
         },
         prefill: {
-          name: currentUser?.name || guests[0].firstName + ' ' + guests[0].lastName,
+          name: currentUser?.name || flatGuests[0].firstName + ' ' + flatGuests[0].lastName,
           email: currentUser?.email || '',
         },
         theme: {
@@ -224,7 +327,7 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
     } finally {
       setIsLoading(false);
     }
-  }, [totalPrice, basePrice, taxes, dateRange, listing?.id, selectedRoom, guests, gstState, router, currentUser]);
+  }, [totalPrice, basePrice, taxes, dateRange, listing?.id, selectedRoom, flatGuests, gstState, router, currentUser]);
 
   if (!dateRange) {
     return (
@@ -296,78 +399,97 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
 
             {/* Guest Details Box */}
             <div className="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-neutral-100 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-xl font-bold">Guest Details</h2>
-                <div className="text-sm text-neutral-500">{guests.length} / {maxGuests} Guests Allowed</div>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <h2 className="text-xl font-bold">Guest & Room Details</h2>
+                <div className="flex gap-4">
+                  <div className="text-sm font-semibold text-[#F97316] bg-[#F97316]/10 px-3 py-1.5 rounded-lg border border-[#F97316]/20">
+                    Rooms: {requiredRooms} / {maxRoomsAllowed}
+                  </div>
+                  <div className="text-sm font-semibold text-neutral-600 bg-neutral-100 px-3 py-1.5 rounded-lg border border-neutral-200">
+                    Guests: {totalGuestsCount} / {maxGuests}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-8">
-                {Array.from({ length: requiredRooms }).map((_, roomIndex) => {
-                  const startIdx = roomIndex * roomCapacity;
-                  const endIdx = Math.min(startIdx + roomCapacity, guests.length);
-                  const roomGuests = guests.slice(startIdx, endIdx);
-
-                  return (
-                    <div key={`room-${roomIndex}`} className="flex flex-col gap-4">
-                      <h3 className="text-lg font-bold text-neutral-800 border-b border-neutral-100 pb-2">Room {roomIndex + 1}</h3>
-                      <div className="flex flex-col gap-6">
-                        {roomGuests.map((guest, idx) => {
-                          const globalIndex = startIdx + idx;
-                          return (
-                            <div key={globalIndex} className="flex flex-col gap-5 p-6 border-[1px] border-neutral-100 bg-neutral-50/50 rounded-2xl">
-                              <div className="flex justify-between items-center">
-                                <div className="font-semibold text-sm uppercase text-neutral-500">
-                                  {globalIndex === 0 ? "Primary Guest" : `Guest ${globalIndex + 1}`}
-                                </div>
-                                {globalIndex !== 0 && (
-                                  <button onClick={() => removeGuest(globalIndex)} className="text-red-500 hover:bg-red-50 p-1 rounded-md transition">
-                                    <Minus size={16} />
-                                  </button>
-                                )}
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-xs font-semibold mb-1 block">First Name</label>
-                                  <Input value={guest.firstName} onChange={(e) => updateGuest(globalIndex, 'firstName', e.target.value)} placeholder="e.g. John" />
-                                </div>
-                                <div>
-                                  <label className="text-xs font-semibold mb-1 block">Last Name</label>
-                                  <Input value={guest.lastName} onChange={(e) => updateGuest(globalIndex, 'lastName', e.target.value)} placeholder="e.g. Doe" />
-                                </div>
-                                <div>
-                                  <label className="text-xs font-semibold mb-1.5 text-neutral-600 block">Gender</label>
-                                  <select
-                                    value={guest.gender}
-                                    onChange={(e) => updateGuest(globalIndex, 'gender', e.target.value)}
-                                    className="flex h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 py-2 text-sm focus:border-[#F97316] focus:ring-4 focus:ring-[#F97316]/10 transition-all outline-none"
-                                  >
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                  </select>
-                                </div>
-                                <div>
-                                  <label className="text-xs font-semibold mb-1 block">Age</label>
-                                  <Input type="number" value={guest.age} onChange={(e) => updateGuest(globalIndex, 'age', e.target.value)} placeholder="e.g. 25" />
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+              <div className="flex flex-col gap-6">
+                {guestsPerRoom.map((roomGuests, roomIndex) => (
+                  <div key={`room-${roomIndex}`} className="flex flex-col gap-4 border-[1.5px] border-neutral-200 p-6 rounded-2xl bg-neutral-50/30 relative">
+                    <div className="flex justify-between items-center border-b border-neutral-200/60 pb-3 mb-2">
+                      <h3 className="text-lg font-bold text-neutral-800">Room {roomIndex + 1}</h3>
+                      {guestsPerRoom.length > 1 && (
+                        <button onClick={() => removeRoom(roomIndex)} className="text-sm text-red-500 hover:bg-red-50 hover:text-red-600 font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                          <Minus size={14} /> Remove Room
+                        </button>
+                      )}
                     </div>
-                  );
-                })}
+                    
+                    <div className="flex flex-col gap-5">
+                      {roomGuests.map((guest, guestIndex) => (
+                        <div key={`room-${roomIndex}-guest-${guestIndex}`} className="flex flex-col gap-4 p-5 border-[1px] border-white bg-white shadow-sm rounded-xl relative group">
+                          <div className="flex justify-between items-center">
+                            <div className="font-semibold text-[11px] tracking-wider uppercase text-neutral-400">
+                              {guestIndex === 0 ? "Primary Guest" : `Guest ${guestIndex + 1}`}
+                            </div>
+                            {guestIndex !== 0 && (
+                              <button onClick={() => removeGuestFromRoom(roomIndex, guestIndex)} className="text-neutral-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-md transition absolute top-3 right-3 opacity-0 group-hover:opacity-100">
+                                <Minus size={16} />
+                              </button>
+                            )}
+                          </div>
 
-                {guests.length < maxGuests && (
-                  <button 
-                    onClick={addGuest}
-                    className="flex items-center justify-center gap-2 text-[#F97316] font-semibold text-sm py-3 px-6 border border-[#F97316]/50 bg-[#F97316]/5 rounded-xl w-full hover:border-[#F97316] transition-all mt-2"
-                  >
-                    <Plus size={16} /> Add Another Guest
-                  </button>
-                )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                              <label className="text-[11px] font-semibold mb-1 text-neutral-600 block uppercase tracking-wider">First Name</label>
+                              <Input value={guest.firstName} onChange={(e) => updateGuest(roomIndex, guestIndex, 'firstName', e.target.value)} placeholder="John" className="h-10 text-sm rounded-lg" />
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-semibold mb-1 text-neutral-600 block uppercase tracking-wider">Last Name</label>
+                              <Input value={guest.lastName} onChange={(e) => updateGuest(roomIndex, guestIndex, 'lastName', e.target.value)} placeholder="Doe" className="h-10 text-sm rounded-lg" />
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-semibold mb-1.5 text-neutral-600 block uppercase tracking-wider">Gender</label>
+                              <select
+                                value={guest.gender}
+                                onChange={(e) => updateGuest(roomIndex, guestIndex, 'gender', e.target.value)}
+                                className="flex h-10 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-[#F97316] focus:ring-2 focus:ring-[#F97316]/20 transition-all outline-none"
+                              >
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[11px] font-semibold mb-1 text-neutral-600 block uppercase tracking-wider">Age</label>
+                              <Input type="number" value={guest.age} onChange={(e) => updateGuest(roomIndex, guestIndex, 'age', e.target.value)} placeholder="25" className="h-10 text-sm rounded-lg" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button 
+                      onClick={() => addGuestToRoom(roomIndex)}
+                      className={`flex items-center justify-center gap-2 font-semibold text-sm py-2 px-4 border rounded-xl w-fit transition-all mt-1 ${
+                        (roomGuests.length >= roomCapacity || totalGuestsCount >= maxGuests) 
+                          ? 'text-neutral-400 border-neutral-200 bg-neutral-50 cursor-not-allowed'
+                          : 'text-[#F97316] border-[#F97316]/30 bg-white hover:border-[#F97316] hover:bg-[#F97316]/5'
+                      }`}
+                    >
+                      <Plus size={16} /> Add Guest to Room {roomIndex + 1}
+                    </button>
+                  </div>
+                ))}
+
+                <button 
+                  onClick={addRoom}
+                  className={`flex items-center justify-center gap-2 font-semibold text-sm py-3.5 px-6 rounded-2xl w-full transition-all shadow-md shadow-neutral-200 mt-2 ${
+                    guestsPerRoom.length >= maxRoomsAllowed
+                      ? 'text-neutral-400 bg-neutral-100 cursor-not-allowed border border-neutral-200'
+                      : 'text-white bg-neutral-800 hover:bg-black hover:-translate-y-0.5'
+                  }`}
+                >
+                  <Plus size={18} /> Add Another Room
+                </button>
               </div>
             </div>
 
@@ -414,6 +536,12 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
                     <span>-₹{welcomeDiscount.toLocaleString('en-IN')}</span>
                   </div>
                 )}
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between items-center text-sm text-green-600 font-semibold">
+                    <span>Coupon ({appliedCoupon?.code})</span>
+                    <span>-₹{couponDiscount.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
                 <hr className="border-neutral-200" />
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total Amount</span>
@@ -427,15 +555,23 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
                 <div className="flex gap-3">
                   <Input
                     value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value);
+                      if (appliedCoupon) {
+                        setAppliedCoupon(null);
+                        setCouponDiscount(0);
+                      }
+                    }}
+                    disabled={isApplyingCoupon}
                     placeholder="Enter Coupon Code"
                     className="h-12 rounded-xl focus-visible:ring-[#F97316]"
                   />
                   <button
                     onClick={handleApplyCoupon}
-                    className="bg-[#F97316] text-white px-6 rounded-xl font-semibold text-sm hover:bg-[#EA580C] transition"
+                    disabled={isApplyingCoupon || appliedCoupon !== null}
+                    className="bg-[#F97316] text-white px-6 rounded-xl font-semibold text-sm hover:bg-[#EA580C] transition disabled:opacity-70"
                   >
-                    Apply
+                    {isApplyingCoupon ? '...' : appliedCoupon ? 'Applied' : 'Apply'}
                   </button>
                 </div>
               </div>

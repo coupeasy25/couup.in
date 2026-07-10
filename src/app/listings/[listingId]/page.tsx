@@ -19,16 +19,16 @@ export async function generateMetadata({ params }: { params: Promise<IParams> })
 
   if (!listing) {
     return {
-      title: "Property Not Found | Couup",
+      title: "Property Not Found | COUUP",
       description: "The property you are looking for does not exist.",
     };
   }
 
   return {
-    title: `${listing.title} in ${listing.locationValue} | Couup`,
+    title: `${listing.title} in ${listing.locationValue} | COUUP`,
     description: `Book ${listing.title} in ${listing.locationValue}. ${listing.description.substring(0, 150)}...`,
     openGraph: {
-      title: `${listing.title} | Couup Hotels`,
+      title: `${listing.title} | COUUP`,
       description: listing.description.substring(0, 150),
       images: [{ url: listing.imageSrc[0] || "/images/placeholder.jpg" }],
     },

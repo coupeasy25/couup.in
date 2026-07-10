@@ -36,6 +36,8 @@ export interface IListing extends Document {
   cancellationRules: { days: number; deduction: number }[];
   cancellationDays?: number;
   cancellationDeduction?: number;
+  hourlyCancellationPolicy?: string;
+  hourlyCancellationRules?: { hours: number; deduction: number }[];
   smokingAllowed: boolean;
   petsAllowed: boolean;
   partyAllowed: boolean;
@@ -56,6 +58,13 @@ export interface IListing extends Document {
   festivalPrice?: number;
   hasWelcomeOffer?: boolean;
   blockedDates?: Date[];
+  allowsHourlyBooking?: boolean;
+  hourlyRates?: {
+    twoHours?: number;
+    threeHours?: number;
+    fourHours?: number;
+  };
+  hourlyRoomCount?: number;
 }
 
 const ListingSchema = new Schema<IListing>({
@@ -92,6 +101,14 @@ const ListingSchema = new Schema<IListing>({
   },
   cancellationDays: { type: Number, required: false },
   cancellationDeduction: { type: Number, required: false },
+  hourlyCancellationPolicy: { type: String, required: false },
+  hourlyCancellationRules: {
+    type: [{
+      hours: { type: Number, required: true },
+      deduction: { type: Number, required: true }
+    }],
+    default: []
+  },
   smokingAllowed: { type: Boolean, required: false, default: false },
   petsAllowed: { type: Boolean, required: false, default: false },
   partyAllowed: { type: Boolean, required: false, default: false },
@@ -112,6 +129,13 @@ const ListingSchema = new Schema<IListing>({
     lat: { type: Number, required: false, default: 0 },
     lng: { type: Number, required: false, default: 0 }
   },
+  allowsHourlyBooking: { type: Boolean, required: false, default: false },
+  hourlyRates: {
+    twoHours: { type: Number, required: false },
+    threeHours: { type: Number, required: false },
+    fourHours: { type: Number, required: false }
+  },
+  hourlyRoomCount: { type: Number, required: false, default: 1 },
   status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
   hostContactDetails: {
     name: { type: String, required: false },

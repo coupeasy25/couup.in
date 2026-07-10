@@ -1,6 +1,7 @@
 import { connectToDatabase } from "@/lib/mongodb";
 import { Reservation } from "@/models/Reservation";
 import { Listing } from "@/models/Listing";
+import mongoose from "mongoose";
 
 interface IParams {
   listingId?: string;
@@ -22,6 +23,9 @@ export default async function getReservations(params: IParams) {
     }
 
     if (listingId) {
+      if (!mongoose.Types.ObjectId.isValid(listingId)) {
+        return [];
+      }
       query.listingId = listingId;
     }
 
@@ -51,20 +55,20 @@ export default async function getReservations(params: IParams) {
         ...reservation.userId,
         _id: reservation.userId._id?.toString(),
         id: reservation.userId._id?.toString(),
-        createdAt: reservation.userId.createdAt?.toISOString(),
-        updatedAt: reservation.userId.updatedAt?.toISOString(),
-        emailVerified: reservation.userId.emailVerified?.toISOString() || null,
+        createdAt: reservation.userId.createdAt?.toISOString ? reservation.userId.createdAt.toISOString() : null,
+        updatedAt: reservation.userId.updatedAt?.toISOString ? reservation.userId.updatedAt.toISOString() : null,
+        emailVerified: reservation.userId.emailVerified?.toISOString ? reservation.userId.emailVerified.toISOString() : null,
         favoriteIds: reservation.userId.favoriteIds?.map((favId: any) => favId.toString()) || [],
       } : null,
       listingId: reservation.listingId?._id?.toString() || reservation.listingId,
-      createdAt: reservation.createdAt?.toISOString() || new Date().toISOString(),
-      startDate: reservation.startDate?.toISOString(),
-      endDate: reservation.endDate?.toISOString(),
+      createdAt: reservation.createdAt?.toISOString ? reservation.createdAt.toISOString() : (new Date().toISOString()),
+      startDate: reservation.startDate?.toISOString ? reservation.startDate.toISOString() : null,
+      endDate: reservation.endDate?.toISOString ? reservation.endDate.toISOString() : null,
       listing: reservation.listingId ? {
         ...reservation.listingId,
         id: reservation.listingId._id?.toString(),
         _id: reservation.listingId._id?.toString(),
-        createdAt: reservation.listingId.createdAt?.toISOString(),
+        createdAt: reservation.listingId.createdAt?.toISOString ? reservation.listingId.createdAt.toISOString() : null,
         userId: reservation.listingId.userId?.toString(),
         rooms: reservation.listingId.rooms ? reservation.listingId.rooms.map((room: any) => ({
           ...room,

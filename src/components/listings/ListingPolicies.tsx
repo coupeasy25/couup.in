@@ -9,6 +9,9 @@ interface ListingPoliciesProps {
   cancellationRules?: { days: number; deduction: number }[];
   cancellationDays?: number;
   cancellationDeduction?: number;
+  allowsHourlyBooking?: boolean;
+  hourlyCancellationPolicy?: string;
+  hourlyCancellationRules?: { hours: number; deduction: number }[];
   smokingAllowed?: boolean;
   petsAllowed?: boolean;
   partyAllowed?: boolean;
@@ -21,6 +24,9 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
   cancellationRules = [],
   cancellationDays = 0,
   cancellationDeduction = 0,
+  allowsHourlyBooking = false,
+  hourlyCancellationPolicy = "Not specified",
+  hourlyCancellationRules = [],
   smokingAllowed = false,
   petsAllowed = false,
   partyAllowed = false,
@@ -50,10 +56,11 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
             Cancellation
           </div>
           <div className="text-neutral-600 font-light text-base leading-relaxed">
+            <div className="font-semibold text-neutral-800 mb-1">Daily Bookings</div>
             {cancellationPolicy}
 
             {((cancellationRules?.length > 0) || (cancellationDays !== undefined && cancellationDays > 0)) && (
-              <div className="mt-5 flex flex-col gap-3 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+              <div className="mt-3 flex flex-col gap-3 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
                 {cancellationRules?.length > 0 ? (
                   cancellationRules.map((rule: any, idx: number) => (
                     <div key={idx} className={`flex justify-between items-center text-sm ${idx !== cancellationRules.length - 1 ? 'pb-3 border-b border-neutral-200' : ''}`}>
@@ -65,6 +72,24 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-neutral-600">Cancel {cancellationDays} days before</span>
                     <span className="font-semibold text-neutral-900">{cancellationDeduction || 0}% Penalty</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {allowsHourlyBooking && (
+              <div className="mt-6">
+                <div className="font-semibold text-neutral-800 mb-1">Hourly Bookings</div>
+                {hourlyCancellationPolicy}
+
+                {hourlyCancellationRules?.length > 0 && (
+                  <div className="mt-3 flex flex-col gap-3 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
+                    {hourlyCancellationRules.map((rule: any, idx: number) => (
+                      <div key={idx} className={`flex justify-between items-center text-sm ${idx !== hourlyCancellationRules.length - 1 ? 'pb-3 border-b border-neutral-200' : ''}`}>
+                        <span className="text-neutral-600">Cancel {rule.hours} hours before</span>
+                        <span className="font-semibold text-neutral-900">{rule.deduction}% Penalty</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

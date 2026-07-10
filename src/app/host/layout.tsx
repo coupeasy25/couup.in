@@ -14,9 +14,9 @@ export default async function HostLayout({
   }
 
   return (
-    <div className="max-w-[2520px] mx-auto xl:px-20 md:px-10 sm:px-2 px-4 pt-24">
+    <div className="max-w-[2520px] mx-auto xl:px-20 md:px-10 sm:px-2 px-4 pt-4">
       <HostNav />
-      <div className="mt-8">
+      <div className="mt-4">
         {children}
       </div>
     </div>

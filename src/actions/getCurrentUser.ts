@@ -22,8 +22,8 @@ export default async function getCurrentUser() {
       ...currentUser,
       id: currentUser._id.toString(),
       _id: currentUser._id.toString(),
-      createdAt: currentUser.createdAt.toISOString(),
-      updatedAt: currentUser.updatedAt.toISOString(),
+      createdAt: currentUser.createdAt?.toISOString ? currentUser.createdAt.toISOString() : null,
+      updatedAt: currentUser.updatedAt?.toISOString ? currentUser.updatedAt.toISOString() : null,
     };
   } catch (error: any) {
     return null;

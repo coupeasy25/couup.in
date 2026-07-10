@@ -25,14 +25,29 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
         <h3 className="font-bold text-lg">{listing?.title}</h3>
         <p className="text-sm text-neutral-500">{listing?.locationValue}</p>
         <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="font-semibold block">Check In:</span>
-            {format(new Date(startDate), 'PP')}
-          </div>
-          <div>
-            <span className="font-semibold block">Check Out:</span>
-            {format(new Date(endDate), 'PP')}
-          </div>
+          {reservation.isHourlyBooking ? (
+            <>
+              <div>
+                <span className="font-semibold block">Date:</span>
+                {format(new Date(startDate), 'PP')}
+              </div>
+              <div>
+                <span className="font-semibold block">Time Slot:</span>
+                {reservation.checkInTime} ({reservation.hourlyDuration} hours)
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <span className="font-semibold block">Check In:</span>
+                {format(new Date(startDate), 'PP')}
+              </div>
+              <div>
+                <span className="font-semibold block">Check Out:</span>
+                {format(new Date(endDate), 'PP')}
+              </div>
+            </>
+          )}
           <div>
             <span className="font-semibold block">Room Type:</span>
             {roomType || 'Entire Property'}
@@ -70,7 +85,7 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
         <h3 className="font-bold text-lg mb-3">Payment Summary</h3>
         <div className="p-4 bg-neutral-50 rounded-xl border-[1px] border-neutral-200 text-sm flex flex-col gap-2">
           <div className="flex justify-between">
-            <span className="text-neutral-500">Base Price:</span>
+            <span className="text-neutral-500">{reservation.isHourlyBooking ? 'Base Price (Hourly):' : 'Base Price:'}</span>
             <span>₹{(basePrice || 0).toLocaleString('en-IN')}</span>
           </div>
           <div className="flex justify-between">

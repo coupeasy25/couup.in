@@ -7,7 +7,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
-      userId, listingId, startDate, endDate, totalPrice, basePrice, taxes, roomType, guests, gstState, roomsCount
+      userId, listingId, startDate, endDate, totalPrice, basePrice, taxes, roomType, guests, gstState, roomsCount,
+      couponCode, couponDiscount
     } = body;
 
     // We require userId from the mobile app payload since it uses JWT or similar custom auth
@@ -83,9 +84,19 @@ export async function POST(request: Request) {
       roomsCount: roomsCount || 1,
       razorpay_order_id: "mobile_mock_order_" + Date.now(),
       razorpay_payment_id: "mobile_mock_payment_" + Date.now(),
-      razorpay_signature: "mobile_mock_signature"
+      razorpay_signature: "mobile_mock_signature",
+      couponCode: couponCode || null,
+      couponDiscount: couponDiscount || 0
     });
 
+    if (couponCode) {
+      try {
+        const { Coupon } = require("@/models/Coupon");
+        await Coupon.findOneAndUpdate({ code: couponCode }, { $inc: { timesUsed: 1 } });
+      } catch (err) {
+        console.error("Error updating coupon usage:", err);
+      }
+    }
     try {
       const { generateBookingPDF } = require("@/lib/pdfGenerator");
       const { sendBookingConfirmationEmail } = require("@/lib/mailer");

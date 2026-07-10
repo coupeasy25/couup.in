@@ -12,6 +12,8 @@ export interface IUser extends Document {
   updatedAt: Date;
   favoriteIds: string[];
   isHost?: boolean;
+  age?: number;
+  mobileNumber?: string;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -24,6 +26,8 @@ const UserSchema = new Schema<IUser>({
   hashedPassword: String,
   favoriteIds: { type: [String], default: [] },
   isHost: { type: Boolean, default: false },
+  age: Number,
+  mobileNumber: String,
 }, { timestamps: true });
 
 // Force Mongoose to recompile the schema to fix Next.js HMR dropping new fields

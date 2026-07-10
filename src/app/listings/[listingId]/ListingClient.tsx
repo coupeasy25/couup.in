@@ -92,6 +92,14 @@ const ListingClient: React.FC<ListingClientProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const searchParams = useSearchParams();
 
+  // Check if current user has booked this listing
+  const hasBooked = useMemo(() => {
+    if (!currentUser) return false;
+    return reservations.some((res: any) => 
+      (res.userId === currentUser.id || res.userId === currentUser._id) && res.status !== 'Cancelled'
+    );
+  }, [reservations, currentUser]);
+
   const [dateRange, setDateRange] = useState<Range>(() => {
     const startDateParam = searchParams?.get('startDate');
     const endDateParam = searchParams?.get('endDate');
@@ -132,17 +140,43 @@ const ListingClient: React.FC<ListingClientProps> = ({
     return currentPrice;
   });
 
-  const onCreateReservation = useCallback(() => {
+  const onCreateReservation = useCallback(async () => {
     if (!currentUser) {
       return loginModal.onOpen();
     }
 
-    const start = dateRange.startDate?.toISOString() || '';
-    const end = dateRange.endDate?.toISOString() || '';
-    const roomType = selectedRoom ? selectedRoom.type : '';
+    if (!dateRange.startDate || !dateRange.endDate) {
+      toast.error('Please select check-in and checkout dates.');
+      return;
+    }
 
-    const url = `/book/${listing?.id}?startDate=${start}&endDate=${end}&roomType=${encodeURIComponent(roomType)}`;
-    router.push(url);
+    setIsLoading(true);
+
+    try {
+      const roomType = selectedRoom ? selectedRoom.type : '';
+      const checkRes = await axios.post('/api/reservations/check', {
+        listingId: listing?.id,
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        roomType: roomType,
+        roomsCount: 1 // Default to 1 for the initial check on listing page
+      });
+
+      if (!checkRes.data.available) {
+        toast.error(checkRes.data.message || 'Rooms not available for selected dates.');
+        setIsLoading(false);
+        return;
+      }
+
+      const start = dateRange.startDate.toISOString();
+      const end = dateRange.endDate.toISOString();
+      const url = `/book/${listing?.id}?startDate=${start}&endDate=${end}&roomType=${encodeURIComponent(roomType)}`;
+      router.push(url);
+    } catch (error) {
+      toast.error('Failed to check availability.');
+    } finally {
+      setIsLoading(false);
+    }
   }, [dateRange, listing?.id, router, currentUser, loginModal, selectedRoom]);
 
   useEffect(() => {
@@ -233,6 +267,9 @@ const ListingClient: React.FC<ListingClientProps> = ({
                   cancellationRules={listing.cancellationRules}
                   cancellationDays={listing.cancellationDays}
                   cancellationDeduction={listing.cancellationDeduction}
+                  allowsHourlyBooking={listing.allowsHourlyBooking}
+                  hourlyCancellationPolicy={listing.hourlyCancellationPolicy}
+                  hourlyCancellationRules={listing.hourlyCancellationRules}
                   smokingAllowed={listing.smokingAllowed}
                   petsAllowed={listing.petsAllowed}
                   partyAllowed={listing.partyAllowed}
@@ -259,7 +296,6 @@ const ListingClient: React.FC<ListingClientProps> = ({
             </div>
           </div>
 
-          <hr className="border-neutral-200 mb-8" />
           <ListingReviews reviews={reviews} listingId={listing.id} currentUser={currentUser} />
 
         </div>

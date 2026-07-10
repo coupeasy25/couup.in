@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Heart, Briefcase, CalendarDays, Home, LayoutDashboard, PlusCircle, LogOut, LogIn, UserPlus } from "lucide-react";
+import { Menu, Heart, Briefcase, CalendarDays, Home, LayoutDashboard, PlusCircle, LogOut, LogIn, UserPlus, User, Tag, HelpCircle } from "lucide-react";
 import { useCallback, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -45,34 +45,44 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, isScrolledStyle = true
   }, [currentUser, loginModal, router]);
 
   return (
-    <div className={`flex flex-row items-center gap-3 ${isScrolledStyle ? 'text-black' : 'text-white'}`}>
+    <div className={`flex flex-row items-center gap-1 ${isScrolledStyle ? 'text-neutral-800' : 'text-white'}`}>
+      <div 
+        onClick={() => {
+          if (!currentUser) return loginModal.onOpen();
+          router.push('/trips');
+        }}
+        className={`hidden md:flex flex-row items-center gap-2 text-[14px] font-medium py-2.5 px-4 rounded-full transition cursor-pointer ${isScrolledStyle ? 'hover:bg-neutral-100' : 'hover:bg-white/10'}`}
+      >
+        <Briefcase size={16} strokeWidth={2.5} />
+        <span>Trips</span>
+      </div>
       <div 
         onClick={() => {
           if (!currentUser) return loginModal.onOpen();
           router.push('/favorites');
         }}
-        className={`hidden md:flex flex-row items-center gap-2 text-[15px] font-bold py-3 px-5 rounded-full transition cursor-pointer ${isScrolledStyle ? 'hover:bg-neutral-100' : 'hover:bg-white/10'}`}
+        className={`hidden md:flex flex-row items-center gap-2 text-[14px] font-medium py-2.5 px-4 rounded-full transition cursor-pointer ${isScrolledStyle ? 'hover:bg-neutral-100' : 'hover:bg-white/10'}`}
       >
-        <Heart size={18} strokeWidth={2.5} />
+        <Heart size={16} strokeWidth={2.5} />
         <span>Wishlist</span>
       </div>
       <div 
         onClick={onRent}
-        className={`hidden md:block text-[15px] font-bold py-3 px-5 rounded-full transition cursor-pointer ${isScrolledStyle ? 'hover:bg-neutral-100' : 'hover:bg-white/10'}`}
+        className={`hidden md:block text-[14px] font-medium py-2.5 px-4 rounded-full transition cursor-pointer ${isScrolledStyle ? 'hover:bg-neutral-100' : 'hover:bg-white/10'}`}
       >
         Become a host
       </div>
 
       <div 
-        className="relative"
+        className="relative ml-2"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <div 
           onClick={toggleOpen}
-          className={`p-4 md:py-2 md:px-3 border-[1px] flex flex-row items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition ${isScrolledStyle ? 'border-neutral-200 bg-white text-black' : 'border-white/50 bg-black/20 backdrop-blur-sm text-white hover:bg-black/40 hover:border-white/80'}`}
+          className={`p-4 md:py-[7px] md:pl-3 md:pr-2 border-[1px] shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.1)] flex flex-row items-center gap-3 rounded-full cursor-pointer transition ${isScrolledStyle ? 'border-neutral-200 bg-white text-neutral-800' : 'border-white/50 bg-black/20 backdrop-blur-sm text-white hover:bg-black/40 hover:border-white/80'}`}
         >
-          <Menu size={20} strokeWidth={2.5} />
+          <Menu size={18} strokeWidth={2.5} className="ml-1" />
           <div className="hidden md:block">
             <Avatar src={currentUser?.image} />
           </div>
@@ -91,17 +101,14 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, isScrolledStyle = true
                     </div>
                   </div>
                   
-                  {!currentUser?.isHost && (
-                    <>
-                      <MenuItem icon={<Briefcase size={16} />} onClick={() => { setIsOpen(false); router.push('/trips'); }} label="My trips" />
-                      <MenuItem icon={<Heart size={16} />} onClick={() => { setIsOpen(false); router.push('/favorites'); }} label="My favorites" />
-                      <hr className="my-2 border-neutral-100" />
-                    </>
-                  )}
+                  <MenuItem icon={<User size={16} />} onClick={() => { setIsOpen(false); router.push('/profile'); }} label="Personal Information" />
+                  <MenuItem icon={<Briefcase size={16} />} onClick={() => { setIsOpen(false); router.push('/trips'); }} label="Bookings" />
+                  <MenuItem icon={<Tag size={16} />} onClick={() => { setIsOpen(false); router.push('/offers'); }} label="Offers" />
+                  <MenuItem icon={<HelpCircle size={16} />} onClick={() => { setIsOpen(false); router.push('/help'); }} label="Help" />
+                  <hr className="my-2 border-neutral-100" />
                   
                   {currentUser?.isHost && (
                     <>
-                      <MenuItem icon={<CalendarDays size={16} />} onClick={() => { setIsOpen(false); router.push('/host/reservations'); }} label="My reservations" />
                       <MenuItem icon={<Home size={16} />} onClick={() => { setIsOpen(false); router.push('/host/properties'); }} label="My properties" />
                       <MenuItem icon={<LayoutDashboard size={16} />} onClick={() => { setIsOpen(false); router.push('/host/dashboard'); }} label="Host Dashboard" />
                       <MenuItem icon={<PlusCircle size={16} />} onClick={() => { setIsOpen(false); onRent(); }} label="Couup a new property" />
