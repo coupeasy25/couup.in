@@ -92,7 +92,7 @@ const Modal: React.FC<ModalProps> = ({
                 disabled={disabled} 
                 onClick={handleSecondaryAction}
                 variant="outline"
-                className="w-full"
+                className="flex-1"
               >
                 {secondaryActionLabel}
               </Button>
@@ -100,7 +100,7 @@ const Modal: React.FC<ModalProps> = ({
             <Button 
               disabled={disabled} 
               onClick={handleSubmit}
-              className="w-full bg-[#F97316] hover:bg-[#F97316]/90 text-white"
+              className="flex-1 bg-[#F97316] hover:bg-[#F97316]/90 text-white"
             >
               {actionLabel}
             </Button>

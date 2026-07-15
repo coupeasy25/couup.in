@@ -82,7 +82,16 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
             <Calendar
               value={dateRange}
               disabledDates={disabledDates}
-              onChange={(value) => onChangeDate(value.selection)}
+              onChange={(value) => {
+                onChangeDate(value.selection);
+                if (
+                  value.selection.startDate && 
+                  value.selection.endDate && 
+                  value.selection.startDate.getTime() !== value.selection.endDate.getTime()
+                ) {
+                  setTimeout(() => setShowCalendar(false), 300);
+                }
+              }}
             />
             <div className="w-full flex justify-end mt-4">
               <button

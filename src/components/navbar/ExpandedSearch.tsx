@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Search, MapPin, Calendar as CalendarIcon, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,8 +18,15 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
   const router = useRouter();
   const params = useSearchParams();
   const searchModal = useSearchModal();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<"where" | "checkin" | "checkout" | "who" | null>(null);
+
+  useEffect(() => {
+    if (activeTab === "where" && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [activeTab]);
   const [locationValue, setLocationValue] = useState(params?.get('locationValue') || "");
   const urlGuestCount = params?.get('guestCount') ? parseInt(params.get('guestCount') as string, 10) : 0;
   const urlStartDate = params?.get('startDate') ? new Date(params.get('startDate') as string) : undefined;
@@ -139,176 +146,177 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
 
       <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center gap-6 px-4" onMouseLeave={() => setActiveTab(null)}>
         <div className="relative w-full">
-          <div className="bg-white rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.16)] border border-neutral-300 flex flex-col md:flex-row w-full h-[80px] items-center">
+          <div className="bg-white rounded-[32px] md:rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.16)] border border-neutral-300 flex flex-col md:flex-row w-full h-auto md:h-[80px] items-center">
 
             {/* Location */}
             <div
               onClick={() => setActiveTab("where")}
               onMouseEnter={() => setActiveTab("where")}
-              className={`flex-1 flex flex-col justify-center px-8 h-full hover:bg-neutral-100 cursor-pointer rounded-l-full transition ${activeTab === "where" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+              className={`w-full md:flex-1 flex flex-col justify-center px-8 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer rounded-t-[32px] md:rounded-t-none md:rounded-l-full transition ${activeTab === "where" ? "bg-neutral-100 shadow-md z-10" : ""}`}
             >
-            <span className="text-[13px] text-black font-medium">Where to?</span>
-            <input
-              type="text"
-              value={locationValue}
-              onChange={(e) => setLocationValue(e.target.value)}
-              placeholder="Search your destination..."
-              className="text-[16px] font-bold text-neutral-900 bg-transparent outline-none w-full placeholder:text-neutral-400 placeholder:font-normal"
-              suppressHydrationWarning
-            />
-          </div>
+              <span className="text-[13px] text-black font-medium">Where to?</span>
+              <input
+                ref={inputRef}
+                type="text"
+                value={locationValue}
+                onChange={(e) => setLocationValue(e.target.value)}
+                placeholder="Search your destination..."
+                className="text-[16px] font-bold text-neutral-900 bg-transparent outline-none w-full placeholder:text-neutral-400 placeholder:font-normal"
+                suppressHydrationWarning
+              />
+            </div>
 
-          {/* Check In */}
-          <div
-            onClick={() => setActiveTab("checkin")}
-            onMouseEnter={() => setActiveTab("checkin")}
-            className={`flex-[0.6] flex flex-col justify-center px-6 h-full hover:bg-neutral-100 cursor-pointer transition ${activeTab === "checkin" ? "bg-neutral-100 shadow-md z-10" : ""}`}
-          >
-            <span className="text-[13px] text-black font-medium truncate">Check in</span>
-            <span className={`text-[16px] truncate ${dateRange.startDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
-              {dateRange.startDate ? format(dateRange.startDate, "MMM d") : "Add check-in"}
-            </span>
-          </div>
-
-          {/* Check Out */}
-          <div
-            onClick={() => setActiveTab("checkout")}
-            onMouseEnter={() => setActiveTab("checkout")}
-            className={`flex-[0.6] flex flex-col justify-center px-6 h-full hover:bg-neutral-100 cursor-pointer transition ${activeTab === "checkout" ? "bg-neutral-100 shadow-md z-10" : ""}`}
-          >
-            <span className="text-[13px] text-black font-medium truncate">Check out</span>
-            <span className={`text-[16px] truncate ${dateRange.endDate && dateRange.startDate !== dateRange.endDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
-              {dateRange.endDate && dateRange.startDate !== dateRange.endDate ? format(dateRange.endDate, "MMM d") : "Add check-out"}
-            </span>
-          </div>
-
-          {/* Guests */}
-          <div
-            onClick={() => setActiveTab("who")}
-            onMouseEnter={() => setActiveTab("who")}
-            className={`flex-[0.8] flex flex-row items-center justify-between pl-6 pr-2 h-full hover:bg-neutral-100 cursor-pointer rounded-r-full transition relative ${activeTab === "who" ? "bg-neutral-100 shadow-md z-10" : ""}`}
-          >
-            <div className="flex flex-col justify-center flex-1">
-              <span className="text-[13px] text-black font-medium truncate">Guests</span>
-              <span className={`text-[16px] truncate ${guestCount > 0 ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
-                {guestCount > 0 ? `${guestCount} guests` : "Who's coming?"}
+            {/* Check In */}
+            <div
+              onClick={() => setActiveTab("checkin")}
+              onMouseEnter={() => setActiveTab("checkin")}
+              className={`w-full md:flex-[0.6] flex flex-col justify-center px-8 md:px-6 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 transition ${activeTab === "checkin" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+            >
+              <span className="text-[13px] text-black font-medium truncate">Check in</span>
+              <span className={`text-[16px] truncate ${dateRange.startDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
+                {dateRange.startDate ? format(dateRange.startDate, "MMM d") : "Add check-in"}
               </span>
             </div>
+
+            {/* Check Out */}
+            <div
+              onClick={() => setActiveTab("checkout")}
+              onMouseEnter={() => setActiveTab("checkout")}
+              className={`w-full md:flex-[0.6] flex flex-col justify-center px-8 md:px-6 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 transition ${activeTab === "checkout" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+            >
+              <span className="text-[13px] text-black font-medium truncate">Check out</span>
+              <span className={`text-[16px] truncate ${dateRange.endDate && dateRange.startDate !== dateRange.endDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
+                {dateRange.endDate && dateRange.startDate !== dateRange.endDate ? format(dateRange.endDate, "MMM d") : "Add check-out"}
+              </span>
+            </div>
+
+            {/* Guests */}
+            <div
+              onClick={() => setActiveTab("who")}
+              onMouseEnter={() => setActiveTab("who")}
+              className={`w-full md:flex-[0.8] flex flex-row items-center justify-between px-8 md:pl-6 md:pr-2 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 rounded-b-[32px] md:rounded-b-none md:rounded-r-full transition relative ${activeTab === "who" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+            >
+              <div className="flex flex-col justify-center flex-1">
+                <span className="text-[13px] text-black font-medium truncate">Guests</span>
+                <span className={`text-[16px] truncate ${guestCount > 0 ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
+                  {guestCount > 0 ? `${guestCount} guests` : "Who's coming?"}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Dropdowns */}
+          {/* Dropdowns */}
 
-        {/* Location Dropdown */}
-        {activeTab === "where" && (
-          <div className="absolute top-full left-0 w-full max-w-[450px] pt-3 z-50">
-            <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-4 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-200">
-              <div className="text-xs font-bold text-black">Suggested destinations</div>
+          {/* Location Dropdown */}
+          {activeTab === "where" && (
+            <div className="absolute top-full left-0 w-full max-w-[450px] pt-3 z-50">
+              <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-4 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-200">
+                <div className="text-xs font-bold text-black">Suggested destinations</div>
 
-              <div className="flex flex-col gap-1">
-                {optionsToShow.map((dest, index) => (
-                  <div
-                    key={index}
-                    onClick={() => {
-                      const searchName = dest.name === "Nearby" ? "Ahmedabad" : dest.name.split(",")[0];
-                      setLocationValue(searchName);
-                      setActiveTab("checkin"); // Auto advance to when
+                <div className="flex flex-col gap-1">
+                  {optionsToShow.map((dest, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        const searchName = dest.name === "Nearby" ? "Ahmedabad" : dest.name.split(",")[0];
+                        setLocationValue(searchName);
+                        setActiveTab("checkin"); // Auto advance to when
+                      }}
+                      className="flex flex-row items-center gap-3 hover:bg-neutral-100 p-2 rounded-xl cursor-pointer transition"
+                    >
+                      <div className={`p-2 rounded-xl ${dest.color}`}>
+                        <dest.icon size={20} strokeWidth={1.5} />
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="text-[14px] font-semibold text-black">{dest.name}</div>
+                        <div className="text-[12px] text-neutral-500 font-light">{dest.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Calendar Dropdown */}
+          {(activeTab === "checkin" || activeTab === "checkout") && (
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-full md:w-fit max-w-[100vw] pt-3 z-50 px-2 md:px-0">
+              <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-4 md:p-6 flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-200 overflow-x-auto">
+                <div className="pb-4 mt-2 min-w-max">
+                  <Calendar
+                    onChange={(value) => {
+                      setDateRange(value.selection);
+                      if (value.selection.startDate && value.selection.endDate && !isSameDay(value.selection.startDate, value.selection.endDate)) {
+                        setActiveTab("who");
+                      }
                     }}
-                    className="flex flex-row items-center gap-3 hover:bg-neutral-100 p-2 rounded-xl cursor-pointer transition"
-                  >
-                    <div className={`p-2 rounded-xl ${dest.color}`}>
-                      <dest.icon size={20} strokeWidth={1.5} />
-                    </div>
-                    <div className="flex flex-col">
-                      <div className="text-[14px] font-semibold text-black">{dest.name}</div>
-                      <div className="text-[12px] text-neutral-500 font-light">{dest.desc}</div>
-                    </div>
+                    value={dateRange}
+                    months={2}
+                    direction="horizontal"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Who Dropdown */}
+          {activeTab === "who" && (
+            <div className="absolute top-full right-0 w-full md:w-[400px] pt-3 z-50 px-2 md:px-0">
+              <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-8 flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-200">
+
+                {/* Adults */}
+                <div className="flex flex-row items-center justify-between py-2 border-b-[1px] border-neutral-200">
+                  <div className="flex flex-col">
+                    <div className="text-[16px] font-semibold text-black">Adults</div>
+                    <div className="text-sm font-light text-neutral-500">Ages 13 or above</div>
                   </div>
-                ))}
+                  <div className="flex flex-row items-center gap-4">
+                    <button
+                      aria-label="Decrease adults"
+                      onClick={() => setAdults((prev) => Math.max(0, prev - 1))}
+                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                    >
+                      -
+                    </button>
+                    <div className="font-light text-neutral-600 w-4 text-center">{adults}</div>
+                    <button
+                      aria-label="Increase adults"
+                      onClick={() => setAdults((prev) => prev + 1)}
+                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Children */}
+                <div className="flex flex-row items-center justify-between py-2">
+                  <div className="flex flex-col">
+                    <div className="text-[16px] font-semibold text-black">Children</div>
+                    <div className="text-sm font-light text-neutral-500">Ages 2–12</div>
+                  </div>
+                  <div className="flex flex-row items-center gap-4">
+                    <button
+                      aria-label="Decrease children"
+                      onClick={() => setChildren((prev) => Math.max(0, prev - 1))}
+                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                    >
+                      -
+                    </button>
+                    <div className="font-light text-neutral-600 w-4 text-center">{children}</div>
+                    <button
+                      aria-label="Increase children"
+                      onClick={() => setChildren((prev) => prev + 1)}
+                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Calendar Dropdown */}
-        {(activeTab === "checkin" || activeTab === "checkout") && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 w-fit pt-3 z-50">
-            <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-6 flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-200">
-              <div className="pb-4 mt-2">
-                <Calendar
-                  onChange={(value) => {
-                    setDateRange(value.selection);
-                    if (value.selection.startDate && value.selection.endDate && !isSameDay(value.selection.startDate, value.selection.endDate)) {
-                      setActiveTab("who");
-                    }
-                  }}
-                  value={dateRange}
-                  months={2}
-                  direction="horizontal"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Who Dropdown */}
-        {activeTab === "who" && (
-          <div className="absolute top-full right-0 w-[400px] pt-3 z-50">
-            <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-8 flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-200">
-
-              {/* Adults */}
-              <div className="flex flex-row items-center justify-between py-2 border-b-[1px] border-neutral-200">
-                <div className="flex flex-col">
-                  <div className="text-[16px] font-semibold text-black">Adults</div>
-                  <div className="text-sm font-light text-neutral-500">Ages 13 or above</div>
-                </div>
-                <div className="flex flex-row items-center gap-4">
-                  <button
-                    aria-label="Decrease adults"
-                    onClick={() => setAdults((prev) => Math.max(0, prev - 1))}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
-                  >
-                    -
-                  </button>
-                  <div className="font-light text-neutral-600 w-4 text-center">{adults}</div>
-                  <button
-                    aria-label="Increase adults"
-                    onClick={() => setAdults((prev) => prev + 1)}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Children */}
-              <div className="flex flex-row items-center justify-between py-2">
-                <div className="flex flex-col">
-                  <div className="text-[16px] font-semibold text-black">Children</div>
-                  <div className="text-sm font-light text-neutral-500">Ages 2–12</div>
-                </div>
-                <div className="flex flex-row items-center gap-4">
-                  <button
-                    aria-label="Decrease children"
-                    onClick={() => setChildren((prev) => Math.max(0, prev - 1))}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
-                  >
-                    -
-                  </button>
-                  <div className="font-light text-neutral-600 w-4 text-center">{children}</div>
-                  <button
-                    aria-label="Increase children"
-                    onClick={() => setChildren((prev) => prev + 1)}
-                    className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        )}
+          )}
 
         </div>
 

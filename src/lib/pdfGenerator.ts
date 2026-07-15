@@ -11,10 +11,10 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
 
       const { 
         listingTitle, locationValue, startDate, endDate, totalPrice, basePrice, taxes,
-        roomType, guests, userName, userEmail, paymentId, orderId, bookingDate
+        roomType, guests, userName, userEmail, paymentId, orderId, bookingDate, actualInvoiceNumber
       } = reservationData;
 
-      const invoiceNumber = `BK-CO-${new Date(bookingDate).getTime().toString().slice(-5)}`;
+      const invoiceNumber = actualInvoiceNumber || `BK-CO-${new Date(bookingDate).getTime().toString().slice(-5)}`;
       
       // Colors from design
       const primaryNavy = '#0f172a'; 
@@ -35,20 +35,24 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
 
       // --- HEADER ---
       // Left
-      doc.fillColor(primaryNavy).fontSize(28).font('Helvetica-Bold').text('COUUP', 40, 50, { characterSpacing: 1 });
-      doc.fillColor(primaryOrange).fontSize(10).font('Helvetica-Bold').text('HOTELS & PREMIUM TRAVEL', 40, 82, { characterSpacing: 1 });
+      doc.fillColor(primaryNavy).fontSize(28).font('Helvetica-Bold').text('COUUP', 40, 45, { characterSpacing: 1 });
+      doc.fillColor(primaryOrange).fontSize(10).font('Helvetica-Bold').text('HOTELS & PREMIUM TRAVEL', 40, 80, { characterSpacing: 1 });
       doc.fillColor(textGray).fontSize(9).font('Helvetica')
          .text('GSTIN: 24AAABC1234D1Z5', 40, 98)
          .text('support@couup.com | +91 800-000-0000', 40, 110);
 
       // Right
-      doc.fillColor(primaryNavy).fontSize(28).font('Helvetica-Bold').text('INVOICE', 350, 50, { align: 'right' });
+      doc.fillColor(primaryNavy).fontSize(28).font('Helvetica-Bold').text('INVOICE', 350, 45, { align: 'right' });
+      
+      if (actualInvoiceNumber) {
+        doc.fillColor(primaryNavy).fontSize(12).font('Helvetica-Bold').text(actualInvoiceNumber, 350, 78, { align: 'right' });
+      }
       
       // Fix for PDFKit 'continued' bug with alignment
       const dateText = `Date: ${formatDate(bookingDate)} | Status: `;
-      doc.fillColor(textGray).fontSize(10).font('Helvetica').text(dateText, 400, 85);
+      doc.fillColor(textGray).fontSize(10).font('Helvetica').text(dateText, 400, 95);
       const textWidth = doc.widthOfString(dateText);
-      doc.fillColor(primaryOrange).font('Helvetica-Bold').text('PAID', 400 + textWidth, 85);
+      doc.fillColor(primaryOrange).font('Helvetica-Bold').text('PAID', 400 + textWidth, 95);
 
       // Header Bottom Line
       doc.moveTo(40, 135).lineTo(555, 135).lineWidth(2).strokeColor(primaryNavy).stroke();
@@ -72,7 +76,7 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       
       doc.fillColor(primaryNavy).fontSize(10)
          .font('Helvetica-Bold').text('Booking ID: ', 330, boxTop + 35, { continued: true })
-         .font('Helvetica').text(invoiceNumber);
+         .font('Helvetica').text(orderId || invoiceNumber);
          
       
          

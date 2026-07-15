@@ -89,7 +89,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser, isScrolledStyle = true
         </div>
 
         {isOpen && (
-          <div className="absolute rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-neutral-200 w-[40vw] md:w-[260px] bg-white overflow-hidden right-0 top-14 text-sm text-neutral-800 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+          <div className="absolute rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-neutral-200 w-[80vw] md:w-[260px] bg-white overflow-hidden right-0 top-14 text-sm text-neutral-800 animate-in fade-in slide-in-from-top-2 duration-200 z-50">
             <div className="flex flex-col cursor-pointer py-2">
               {currentUser ? (
                 <>

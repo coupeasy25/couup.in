@@ -19,6 +19,8 @@ import ListingMap from "@/components/listings/ListingMap";
 import ListingPolicies from "@/components/listings/ListingPolicies";
 import ListingRooms from "@/components/listings/ListingRooms";
 
+import ListingAmenities from "@/components/listings/ListingAmenities";
+
 const initialDateRange = {
   startDate: new Date(),
   endDate: new Date(),
@@ -208,7 +210,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
 
   return (
     <Container>
-      <div className="max-w-screen-lg mx-auto">
+      <div className="max-w-screen-lg mx-auto pt-[90px]">
         <div className="flex flex-col gap-6">
           <ListingHead
             title={listing.title}
@@ -216,6 +218,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
             locationValue={listing.locationValue}
             id={listing.id}
             currentUser={currentUser}
+            peoplePerRoom={listing.peoplePerRoom}
           />
           <div className="grid grid-cols-1 md:grid-cols-7 md:gap-10 mt-6 relative">
             <div className="md:col-span-4">
@@ -241,6 +244,16 @@ const ListingClient: React.FC<ListingClientProps> = ({
                   />
                 </>
               )}
+
+              <hr className="border-neutral-200 my-8" />
+              
+              <div className="pb-10">
+                <ListingAmenities 
+                  amenities={listing.amenities}
+                  standoutAmenities={listing.standoutAmenities}
+                  safetyItems={listing.safetyItems}
+                />
+              </div>
 
               <hr className="border-neutral-200 mb-8" />
               <div className="pb-10">

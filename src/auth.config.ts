@@ -9,12 +9,12 @@ import { User } from "@/models/User"
 export default {
   providers: [
     GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.GITHUB_ID || 'GITHUB_ID_MISSING',
+      clientSecret: process.env.GITHUB_SECRET || 'GITHUB_SECRET_MISSING',
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID_MISSING',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET_MISSING',
       allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({

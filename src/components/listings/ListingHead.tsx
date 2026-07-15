@@ -10,6 +10,7 @@ interface ListingHeadProps {
   images: string[];
   id: string;
   currentUser?: any | null;
+  peoplePerRoom?: number;
 }
 
 const ListingHead: React.FC<ListingHeadProps> = ({
@@ -17,7 +18,8 @@ const ListingHead: React.FC<ListingHeadProps> = ({
   locationValue,
   images,
   id,
-  currentUser
+  currentUser,
+  peoplePerRoom
 }) => {
   const [showGallery, setShowGallery] = useState(false);
 
@@ -73,10 +75,17 @@ const ListingHead: React.FC<ListingHeadProps> = ({
   return (
     <>
       <div className="flex flex-row items-end justify-between mt-6 mb-4">
-        <div className="text-start">
+        <div className="flex flex-col gap-1 text-start">
           <div className="text-3xl font-semibold text-neutral-800">{title}</div>
+          {peoplePerRoom && (
+            <div className="flex flex-row items-center gap-2 text-[15px] font-light text-neutral-800">
+              <div>Up to {peoplePerRoom} guests per room</div>
+              <span className="text-neutral-300">•</span>
+              <div className="underline font-semibold">{locationValue}</div>
+            </div>
+          )}
         </div>
-        <div className="flex flex-row items-center gap-6 font-semibold text-sm text-neutral-800 underline decoration-1 underline-offset-4">
+        <div className="flex flex-row items-center gap-6 font-semibold text-sm text-neutral-800 underline decoration-1 underline-offset-4 pb-1">
           <div className="flex flex-row items-center gap-2 cursor-pointer hover:text-black transition">
             <Share size={16} />
             <span>Share</span>

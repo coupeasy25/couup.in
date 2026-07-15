@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
+import { useDraggableScroll } from "@/hooks/useDraggableScroll";
 import { useRouter } from "next/navigation";
 import ListingCard from "./ListingCard";
 import SeeAllCard from "./SeeAllCard";
@@ -15,7 +15,7 @@ interface ListingCarouselProps {
 }
 
 const ListingCarousel: React.FC<ListingCarouselProps> = ({ title, locationName, listings, currentUser, isSearchResult }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, events } = useDraggableScroll();
   const router = useRouter();
 
   const scroll = (direction: 'left' | 'right') => {
@@ -53,7 +53,7 @@ const ListingCarousel: React.FC<ListingCarouselProps> = ({ title, locationName, 
         >
           {title} <ChevronRight size={20} className="mt-1" />
         </h2>
-        <div className="hidden md:flex flex-row gap-2">
+        <div className="flex flex-row gap-2">
           <button aria-label="Scroll left" suppressHydrationWarning onClick={() => scroll('left')} className="p-2 border-[1px] rounded-full hover:shadow-md transition bg-white text-neutral-600">
             <ChevronLeft size={16} />
           </button>
@@ -65,7 +65,8 @@ const ListingCarousel: React.FC<ListingCarouselProps> = ({ title, locationName, 
 
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto gap-4 snap-x snap-mandatory hide-scrollbar pb-4"
+        {...events}
+        className="flex flex-nowrap overflow-x-auto gap-4 snap-x scroll-smooth custom-scrollbar touch-pan-x pb-6 pt-2 cursor-grab active:cursor-grabbing"
       >
 
         {displayListings.map((listing) => (

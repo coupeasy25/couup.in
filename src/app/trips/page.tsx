@@ -16,6 +16,8 @@ const TripsPage = async () => {
   }
 
   const reservations = await getReservations({ userId: currentUser.id });
+  const { getUserInvoices } = await import("@/actions/invoiceActions");
+  const invoices = await getUserInvoices();
 
   if (reservations.length === 0) {
     return (
@@ -30,6 +32,7 @@ const TripsPage = async () => {
     <TripsClient
       reservations={reservations}
       currentUser={currentUser}
+      invoices={invoices}
     />
   );
 };

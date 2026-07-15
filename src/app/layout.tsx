@@ -70,6 +70,8 @@ import ClientLayout from "@/components/ClientLayout";
 import { getActiveAmenities } from "@/actions/getAmenities";
 import getDestinations from "@/actions/getDestinations";
 
+import NextTopLoader from "nextjs-toploader";
+
 export default async function RootLayout({
   children,
 }: {
@@ -80,8 +82,9 @@ export default async function RootLayout({
   const destinations = await getDestinations();
 
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="overflow-x-hidden">
+      <body className={`${inter.className} overflow-x-hidden w-full`}>
+        <NextTopLoader color="#F97316" showSpinner={false} />
         <Toaster />
         <RegisterModal />
         <LoginModal />

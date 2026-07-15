@@ -45,6 +45,10 @@ export default async function AdminLayout({
                   <XCircle size={20} />
                   Cancellations
                 </Link>
+                <Link href="/admin/invoices" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
+                  <CreditCard size={20} />
+                  Invoices
+                </Link>
                 <Link href="/admin/payments" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <CreditCard size={20} />
                   Payments
@@ -60,6 +64,10 @@ export default async function AdminLayout({
                 <Link href="/admin/banners" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <ImageIcon size={20} />
                   Banners
+                </Link>
+                <Link href="/admin/ads" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
+                  <ImageIcon size={20} />
+                  Ads
                 </Link>
                 <Link href="/admin/offers" className="flex items-center gap-3 px-4 py-3 text-neutral-600 hover:text-[#F97316] hover:bg-neutral-100 rounded-xl transition font-medium">
                   <Coffee size={20} />

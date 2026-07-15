@@ -13,11 +13,13 @@ import TripDetailsModal from "@/components/modals/TripDetailsModal";
 interface TripsClientProps {
   reservations: any[];
   currentUser?: any | null;
+  invoices?: any[];
 }
 
 const TripsClient: React.FC<TripsClientProps> = ({
   reservations,
   currentUser,
+  invoices = []
 }) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
@@ -249,6 +251,20 @@ const TripsClient: React.FC<TripsClientProps> = ({
                             >
                               View Property
                             </button>
+                            
+                            {invoices.find((inv: any) => inv.reservationId === reservation.id) && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const inv = invoices.find((inv: any) => inv.reservationId === reservation.id);
+                                  window.open(`/invoice/${inv._id}`, '_blank');
+                                  setOpenMenuId(null);
+                                }}
+                                className="w-full text-left px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50 font-medium transition-colors border-t border-neutral-100"
+                              >
+                                View Invoice
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>

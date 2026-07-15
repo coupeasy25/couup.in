@@ -12,12 +12,13 @@ import { getSettings } from "@/actions/admin/settingsActions";
 import { getBanners } from "@/actions/getBanners";
 import BannerList from "@/components/home/BannerList";
 import PromotionalOffers from "@/components/home/PromotionalOffers";
+import AdBannerDisplay from "@/components/home/AdBannerDisplay";
+import { getAdBanners } from "@/actions/getAdBanners";
 import FilterBar from "@/components/search/FilterBar";
 import { getActiveAmenities } from "@/actions/getAmenities";
 import getDestinations from "@/actions/getDestinations";
-import DestinationsList from "@/components/home/DestinationsList";
-import ValueStays from "@/components/home/ValueStays";
 import { getOffers } from "@/actions/admin/offerActions";
+import HomeSeoContent from "@/components/home/HomeSeoContent";
 
 interface HomeProps {
   searchParams: Promise<any>;
@@ -29,6 +30,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const currentUser = await getCurrentUser();
   const settings = await getSettings();
   const banners = await getBanners();
+  const adBanners = await getAdBanners();
   const amenities = await getActiveAmenities();
   const destinations = await getDestinations();
   const offers = await getOffers(); // Fetch active offers
@@ -92,8 +94,11 @@ export default async function Home({ searchParams }: HomeProps) {
           </Container>
         ) : Object.keys(params).length > 0 ? (
           <Container>
-            <div className="flex flex-col w-full gap-5">
-              <div className="flex flex-col gap-2 mt-4">
+            <div className="flex flex-col w-full gap-2">
+              {/* Show Ad Banner in Search Results */}
+              <AdBannerDisplay banners={adBanners} />
+
+              <div className="flex flex-col gap-1 mt-1">
                 {params.locationValue ? (
                   <>
                     <p className="text-sm font-semibold text-neutral-500 uppercase tracking-wider">
@@ -115,7 +120,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 )}
               </div>
 
-              <div className="sticky top-[80px] z-30 bg-white py-3 border-b border-neutral-100 mb-2">
+              <div className="sticky top-[80px] z-30 bg-white py-1 border-b border-neutral-100 mb-2">
                 <FilterBar amenities={amenities} />
               </div>
 
@@ -132,11 +137,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </Container>
         ) : (
           <div className="flex flex-col w-full">
-            <Container>
-              <DestinationsList destinations={destinations} />
-              <ValueStays />
-
-            </Container>
+           
 
             {/* First 2 carousels */}
             {locationsToDisplay.length > 0 && (
@@ -180,7 +181,9 @@ export default async function Home({ searchParams }: HomeProps) {
             )}
 
             {/* App Promo Banner at the bottom */}
-
+            
+            {/* SEO Content Section */}
+            <HomeSeoContent />
           </div>
         )}
       </div>

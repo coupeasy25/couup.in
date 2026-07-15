@@ -124,7 +124,7 @@ const FilterModal = ({ amenities: initialAmenities = [] }: FilterModalProps) => 
   };
 
   const bodyContent = (
-    <div className="flex flex-col gap-8 max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar">
+    <div className="flex flex-col gap-8 pr-2">
       
       {/* Price Range */}
       {filterSettings?.showPriceFilter !== false && (

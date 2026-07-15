@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
+import { useDraggableScroll } from "@/hooks/useDraggableScroll";
 
 interface Destination {
   _id: string;
@@ -17,7 +17,7 @@ interface DestinationsListProps {
 
 const DestinationsList: React.FC<DestinationsListProps> = ({ destinations }) => {
   const router = useRouter();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollRef, events } = useDraggableScroll();
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -36,12 +36,12 @@ const DestinationsList: React.FC<DestinationsListProps> = ({ destinations }) => 
   }
 
   return (
-    <div className=" pb-10 w-full">
+    <div className="pt-8 pb-10 w-full">
       <div className="flex flex-row items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-neutral-900">
           Popular Destinations
         </h2>
-        <div className="hidden md:flex flex-row gap-2">
+        <div className="flex flex-row gap-2">
           <button aria-label="Scroll left" suppressHydrationWarning onClick={() => scroll('left')} className="p-2 border-[1px] rounded-full hover:shadow-md transition bg-white text-neutral-600">
             <ChevronLeft size={16} />
           </button>
@@ -52,43 +52,48 @@ const DestinationsList: React.FC<DestinationsListProps> = ({ destinations }) => 
       </div>
 
       {/* Horizontal Scroll Container */}
-      <div className="w-full flex justify-center">
-        <div ref={scrollRef} className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory hide-scrollbar w-max max-w-full">
+      <div className="w-full min-w-0">
+        <div
+          ref={scrollRef}
+          {...events}
+          className="flex flex-nowrap gap-4 md:gap-6 overflow-x-auto pb-6 pt-2 snap-x scroll-smooth custom-scrollbar touch-pan-x cursor-grab active:cursor-grabbing"
+        >
           {destinations.map((destination) => (
             <div
               key={destination._id}
               onClick={() => router.push(`/?locationValue=${encodeURIComponent(destination.name)}`)}
               className="group cursor-pointer flex flex-col gap-2 min-w-[180px] max-w-[180px] sm:min-w-[200px] sm:max-w-[200px] snap-start shrink-0"
             >
-            {/* Card Image */}
-            <div className="relative w-full aspect-[4/5] rounded-[20px] overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300">
-              <Image
-                src={destination.imageSrc}
-                alt={destination.name}
-                fill
-                sizes="(max-width: 748px) 50vw, 220px"
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              />
+              {/* Card Image */}
+              <div className="relative w-full aspect-[4/5] rounded-[20px] overflow-hidden shadow-sm">
+                <Image
+                  src={destination.imageSrc}
+                  alt={destination.name}
+                  fill
+                  draggable={false}
+                  sizes="(max-width: 748px) 50vw, 220px"
+                  className="object-cover"
+                />
 
-              {/* Dark Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80"></div>
+                {/* Dark Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80"></div>
 
-              {/* Text Inside Card */}
-              <div className="absolute bottom-0 left-0 w-full p-4 flex flex-col items-start text-left">
-                <span className="text-white font-medium text-xl drop-shadow-sm tracking-wide">
-                  {destination.name}
-                </span>
-                <span className="text-white/80 text-[10px] font-medium uppercase tracking-widest mt-1">
-                  INDIA
-                </span>
+                {/* Text Inside Card */}
+                <div className="absolute bottom-0 left-0 w-full p-4 flex flex-col items-start text-left">
+                  <span className="text-white font-medium text-xl drop-shadow-sm tracking-wide">
+                    {destination.name}
+                  </span>
+                  <span className="text-white/80 text-[10px] font-medium uppercase tracking-widest mt-1">
+                    INDIA
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Text Outside Card */}
-            <div className="flex flex-row items-center justify-start gap-1 pl-1 text-neutral-500 group-hover:text-neutral-900 transition-colors">
-              <span className="text-xs font-semibold">View Stays</span>
-              <ArrowRight size={14} strokeWidth={2.5} />
-            </div>
+              {/* Text Outside Card */}
+              <div className="flex flex-row items-center justify-start gap-1 pl-1 text-neutral-500 group-hover:text-neutral-900 transition-colors">
+                <span className="text-xs font-semibold">View Stays</span>
+                <ArrowRight size={14} strokeWidth={2.5} />
+              </div>
             </div>
           ))}
         </div>

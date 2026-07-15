@@ -161,6 +161,35 @@ export async function POST(request: Request) {
     paymentDetails
   });
 
+  // Automatically create an Invoice for this online booking
+  let actualInvoiceNumber = '';
+  try {
+    const { Invoice } = require("@/models/Invoice");
+    const primaryGuest = guests && guests[0] ? `${guests[0].firstName} ${guests[0].lastName}` : (currentUser.name || 'Guest');
+    
+    const createdInvoice = await Invoice.create({
+      type: 'Online',
+      reservationId: reservation._id,
+      userId: currentUser._id,
+      guestName: primaryGuest,
+      guestContact: guestContact || (currentUser as any).phone || '',
+      guestEmail: guestEmail || currentUser.email || '',
+      propertyName: listing.title,
+      roomType,
+      checkIn: startDate,
+      checkOut: endDate,
+      amount: basePrice || 0,
+      taxes: taxes || 0,
+      total: totalPrice,
+      paymentMethod: paymentMethod || 'Online',
+      status: 'Paid'
+    });
+    
+    actualInvoiceNumber = createdInvoice.invoiceNumber ? `INV-${createdInvoice.invoiceNumber}` : '';
+  } catch (invoiceErr) {
+    console.error("Failed to generate online invoice:", invoiceErr);
+  }
+
   if (couponCode) {
     try {
       const { Coupon } = require("@/models/Coupon");
@@ -187,7 +216,8 @@ export async function POST(request: Request) {
         userEmail: currentUser.email,
         paymentId: razorpay_payment_id,
         orderId: razorpay_order_id,
-        bookingDate: new Date()
+        bookingDate: new Date(),
+        actualInvoiceNumber
       });
 
       await sendBookingConfirmationEmail(
