@@ -23,10 +23,24 @@ export async function PATCH(
     }
 
     const body = await request.json();
+
+    if (body.hasOwnProperty('isOnHold')) {
+      await connectToDatabase();
+      const listing = await Listing.findByIdAndUpdate(
+        listingId,
+        { isOnHold: body.isOnHold },
+        { new: true }
+      );
+      if (!listing) {
+        return new NextResponse("Listing not found", { status: 404 });
+      }
+      return NextResponse.json(listing);
+    }
+
     const { status } = body;
 
     if (!status || !['PENDING', 'APPROVED', 'REJECTED'].includes(status)) {
-      return new NextResponse("Invalid status", { status: 400 });
+      return new NextResponse("Invalid request", { status: 400 });
     }
 
     await connectToDatabase();

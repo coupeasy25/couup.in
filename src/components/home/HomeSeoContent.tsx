@@ -59,11 +59,8 @@ const HomeSeoContent = () => {
             <p className="text-sm mb-4">Below are some reasons to choose our platform for booking hotels and resorts.</p>
             <ul className="list-disc pl-5 flex flex-col gap-3 text-sm">
               <li><strong>Free Cancellation</strong> - Cancel your bookings without paying cancellation charges on eligible properties.</li>
-              <li><strong>Flexible Dates</strong> - Modify your travel dates easily before your scheduled check-in.</li>
-              <li><strong>Earn Rewards</strong> - Refer your friends and earn rewards in your wallet after they complete their first stay.</li>
               <li><strong>Premium Properties</strong> - Select from top-rated hotels and luxury resorts that offer premium services and world-class amenities.</li>
               <li><strong>24/7 Customer Support</strong> - Receive 24/7 customer service for any assistance related to your bookings.</li>
-              <li><strong>Instant Refund</strong> - Get an instant refund for cancellations or booking-related issues.</li>
             </ul>
           </div>
 
@@ -78,7 +75,7 @@ const HomeSeoContent = () => {
               <li><strong>Step 4:</strong> Select the property that best fits your needs and budget.</li>
               <li><strong>Step 5:</strong> Choose your room type and enter guest details.</li>
               <li><strong>Step 6:</strong> Proceed to payment using our secure checkout process.</li>
-              <li><strong>Step 7:</strong> Receive instant confirmation of your booking via email and SMS.</li>
+              <li><strong>Step 7:</strong> Receive instant confirmation of your booking via email.</li>
             </ul>
           </div>
 
@@ -94,12 +91,6 @@ const HomeSeoContent = () => {
           <div className="mt-4">
             <h2 className="text-2xl font-bold text-neutral-900 mb-6">FAQs related to Hotel & Resort Booking</h2>
             
-            <div className="flex gap-6 border-b border-neutral-200 mb-6 overflow-x-auto custom-scrollbar pb-1">
-              <span className="pb-2 border-b-2 border-rose-500 text-rose-500 font-semibold text-sm cursor-pointer whitespace-nowrap">General</span>
-              <span className="pb-2 text-neutral-500 font-semibold text-sm cursor-pointer hover:text-neutral-800 whitespace-nowrap">Booking-related</span>
-              <span className="pb-2 text-neutral-500 font-semibold text-sm cursor-pointer hover:text-neutral-800 whitespace-nowrap">Payment</span>
-              <span className="pb-2 text-neutral-500 font-semibold text-sm cursor-pointer hover:text-neutral-800 whitespace-nowrap">Cancellation & Refund</span>
-            </div>
 
             <div className="flex flex-col border-t border-neutral-200">
               {faqs.map((faq, index) => (

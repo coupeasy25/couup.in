@@ -149,7 +149,7 @@
 }
 
 .rdrDay {
-  @apply text-black h-12 w-12 text-[15px] font-semibold;
+  @apply text-black h-12 w-12 text-[15px] font-semibold md:h-14 md:w-14 lg:h-[60px] lg:w-[60px] lg:text-[16px];
   padding: 0 !important;
 }
 
@@ -244,4 +244,29 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* --- Global Fullscreen Loader Override for NProgress --- */
+#nprogress .spinner {
+  display: flex !important;
+  position: fixed !important;
+  z-index: 99999 !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  right: auto !important;
+}
+
+#nprogress .spinner-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border: solid 4px transparent !important;
+  border-top-color: #000 !important;
+  border-left-color: #000 !important;
+  border-radius: 50% !important;
+  animation: nprogress-spinner 400ms linear infinite !important;
 }

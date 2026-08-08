@@ -22,14 +22,15 @@ const ContactPage = () => {
               <div className="bg-neutral-50 p-6 rounded-lg border border-neutral-100">
                 <h2 className="text-xl font-bold text-neutral-800 mb-2">Customer Support</h2>
                 <p className="mb-4">For immediate assistance with bookings, payments, or urgent issues during your stay.</p>
-                <p className="font-semibold text-neutral-800">Email: support@couup.com</p>
-                <p className="font-semibold text-neutral-800">Phone: 1800-COUUP-HELP</p>
+                <p className="font-semibold text-neutral-800">Email: support@couup.in</p>
+                <p className="font-semibold text-neutral-800">Phone: 6355081118</p>
               </div>
 
               <div className="bg-neutral-50 p-6 rounded-lg border border-neutral-100">
                 <h2 className="text-xl font-bold text-neutral-800 mb-2">Partner With Us</h2>
                 <p className="mb-4">Are you a property owner looking to list your space on Couup? Connect with our onboarding team.</p>
-                <p className="font-semibold text-neutral-800">Email: hosts@couup.com</p>
+                <p className="font-semibold text-neutral-800">Email: support@couup.in</p>
+                <p className="font-semibold text-neutral-800">Phone: 6355081118</p>
               </div>
             </div>
 

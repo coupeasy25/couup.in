@@ -246,48 +246,6 @@ const ListingClient: React.FC<ListingClientProps> = ({
               )}
 
               <hr className="border-neutral-200 my-8" />
-              
-              <div className="pb-10">
-                <ListingAmenities 
-                  amenities={listing.amenities}
-                  standoutAmenities={listing.standoutAmenities}
-                  safetyItems={listing.safetyItems}
-                />
-              </div>
-
-              <hr className="border-neutral-200 mb-8" />
-              <div className="pb-10">
-                <h2 className="text-2xl font-semibold mb-4">Select checkout date</h2>
-                <div className="font-light text-neutral-600 mb-6">Add your travel dates for exact pricing</div>
-                <Calendar
-                  value={dateRange}
-                  disabledDates={disabledDates}
-                  onChange={(value) => setDateRange(value.selection)}
-                />
-              </div>
-
-              <hr className="border-neutral-200 mb-8" />
-              <div className="pb-10">
-                <ListingMap fullAddress={listing.fullAddress} coordinates={listing.coordinates} />
-              </div>
-
-              <hr className="border-neutral-200 mb-8" />
-              <div className="pb-10">
-                <ListingPolicies 
-                  checkInTime={listing.checkInTime}
-                  checkOutTime={listing.checkOutTime}
-                  cancellationPolicy={listing.cancellationPolicy}
-                  cancellationRules={listing.cancellationRules}
-                  cancellationDays={listing.cancellationDays}
-                  cancellationDeduction={listing.cancellationDeduction}
-                  allowsHourlyBooking={listing.allowsHourlyBooking}
-                  hourlyCancellationPolicy={listing.hourlyCancellationPolicy}
-                  hourlyCancellationRules={listing.hourlyCancellationRules}
-                  smokingAllowed={listing.smokingAllowed}
-                  petsAllowed={listing.petsAllowed}
-                  partyAllowed={listing.partyAllowed}
-                />
-              </div>
 
             </div>
 
@@ -307,6 +265,63 @@ const ListingClient: React.FC<ListingClientProps> = ({
                 />
               </div>
             </div>
+          </div>
+          
+          <div className="pb-10 pt-4 w-full flex flex-col items-center">
+            <h2 className="text-2xl font-semibold mb-2 text-center">Select checkout date</h2>
+            <div className="font-light text-neutral-600 mb-6 text-center">Add your travel dates for exact pricing</div>
+            <div className="hidden md:flex justify-center w-full overflow-hidden">
+              <Calendar
+                value={dateRange}
+                disabledDates={disabledDates}
+                onChange={(value) => setDateRange(value.selection)}
+                months={2}
+                direction="horizontal"
+              />
+            </div>
+            <div className="md:hidden flex justify-center w-full">
+              <Calendar
+                value={dateRange}
+                disabledDates={disabledDates}
+                onChange={(value) => setDateRange(value.selection)}
+                months={1}
+                direction="vertical"
+              />
+            </div>
+          </div>
+
+          <hr className="border-neutral-200 my-4" />
+          
+          <div className="pb-8">
+            <ListingAmenities 
+              amenities={listing.amenities}
+              standoutAmenities={listing.standoutAmenities}
+              safetyItems={listing.safetyItems}
+            />
+          </div>
+
+          <hr className="border-neutral-200 mb-8" />
+
+          <div className="pb-10">
+            <ListingMap fullAddress={listing.fullAddress} coordinates={listing.coordinates} />
+          </div>
+
+          <hr className="border-neutral-200 mb-8" />
+          <div className="pb-10">
+            <ListingPolicies 
+              checkInTime={listing.checkInTime}
+              checkOutTime={listing.checkOutTime}
+              cancellationPolicy={listing.cancellationPolicy}
+              cancellationRules={listing.cancellationRules}
+              cancellationDays={listing.cancellationDays}
+              cancellationDeduction={listing.cancellationDeduction}
+              allowsHourlyBooking={listing.allowsHourlyBooking}
+              hourlyCancellationPolicy={listing.hourlyCancellationPolicy}
+              hourlyCancellationRules={listing.hourlyCancellationRules}
+              smokingAllowed={listing.smokingAllowed}
+              petsAllowed={listing.petsAllowed}
+              partyAllowed={listing.partyAllowed}
+            />
           </div>
 
           <ListingReviews reviews={reviews} listingId={listing.id} currentUser={currentUser} />

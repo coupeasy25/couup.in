@@ -19,10 +19,10 @@ const ListingReviews: React.FC<ListingReviewsProps> = ({ reviews = [], listingId
   }, [reviews]);
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
-      
+    <div className="flex flex-col gap-8 p-8 bg-white border border-neutral-200 rounded-2xl shadow-sm mt-8">
+
       {/* Rating Header */}
-      <div className="flex flex-row items-center gap-2 text-2xl font-semibold mt-4 mb-8">
+      <div className="flex flex-row items-center gap-2 text-2xl font-semibold mb-2">
         {reviews.length > 0 ? (
           <>
             <span>★</span>
@@ -53,10 +53,11 @@ const ListingReviews: React.FC<ListingReviewsProps> = ({ reviews = [], listingId
                   </div>
                 </div>
               </div>
-              <div className="flex flex-row gap-2 items-center text-xs font-light text-neutral-500">
-                <span className="text-yellow-400">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+              <div className="flex flex-row gap-1 items-center text-sm font-light">
+                <span className="text-yellow-400">{'★'.repeat(review.rating)}</span>
+                <span className="text-neutral-300">{'★'.repeat(5 - review.rating)}</span>
               </div>
-              <div className="text-[16px] font-light text-neutral-800 leading-relaxed">
+              <div className="text-[16px] font-light text-neutral-800 leading-relaxed mt-1">
                 {review.comment}
               </div>
             </div>

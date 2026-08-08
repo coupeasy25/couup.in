@@ -334,6 +334,42 @@ const BecomeHostClient: React.FC<BecomeHostClientProps> = ({ currentUser, initia
           </div>
 
           <div>
+            <Label className="text-xl font-semibold">Location on Map</Label>
+            <div className="mt-4">
+              {(() => {
+                const lat = watch('coordinates.lat');
+                const lng = watch('coordinates.lng');
+                const address = watch('fullAddress');
+                const hasCoordinates = lat && lng && lat !== 0 && lng !== 0;
+                
+                const mapQuery = hasCoordinates ? `${lat},${lng}` : address;
+                
+                if (!mapQuery) {
+                  return (
+                    <div className="w-full h-[40vh] rounded-xl border border-neutral-200 flex items-center justify-center bg-neutral-50 text-neutral-400">
+                      Enter address or coordinates to see map
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div className="w-full h-[40vh] rounded-xl overflow-hidden border border-neutral-200">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                      allowFullScreen
+                      title="Location Map"
+                    ></iframe>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          <div>
             <Label className="text-xl font-semibold">How many people stay here in one room?</Label>
             <Input className="mt-4 text-lg py-6" type="number" min={1} {...register("peoplePerRoom", { required: true })} />
           </div>

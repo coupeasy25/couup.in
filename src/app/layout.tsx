@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import Navbar from "@/components/navbar/Navbar";
 import RegisterModal from "@/components/modals/RegisterModal";
 import LoginModal from "@/components/modals/LoginModal";
+import BulkBookingModal from "@/components/modals/BulkBookingModal";
 import FilterModal from "@/components/modals/FilterModal";
 import BookingSuccessModal from "@/components/modals/BookingSuccessModal";
 import getCurrentUser from "@/actions/getCurrentUser";
@@ -69,8 +70,7 @@ export const metadata: Metadata = {
 import ClientLayout from "@/components/ClientLayout";
 import { getActiveAmenities } from "@/actions/getAmenities";
 import getDestinations from "@/actions/getDestinations";
-
-import NextTopLoader from "nextjs-toploader";
+import NavigationLoader from "@/components/NavigationLoader";
 
 export default async function RootLayout({
   children,
@@ -84,10 +84,11 @@ export default async function RootLayout({
   return (
     <html lang="en" className="overflow-x-hidden">
       <body className={`${inter.className} overflow-x-hidden w-full`}>
-        <NextTopLoader color="#F97316" showSpinner={false} />
+        <NavigationLoader />
         <Toaster />
         <RegisterModal />
         <LoginModal />
+        <BulkBookingModal />
         <Suspense fallback={null}>
           <FilterModal amenities={amenities} />
         </Suspense>
@@ -117,7 +118,7 @@ export default async function RootLayout({
                 "logo": "https://www.couup.in/images/logo-2.png",
                 "sameAs": [
                   "https://www.facebook.com/couup",
-                  "https://www.instagram.com/couup",
+                  "https://www.instagram.com/couup.in/",
                   "https://twitter.com/couup"
                 ]
               }

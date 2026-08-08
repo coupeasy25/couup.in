@@ -65,6 +65,7 @@ export interface IListing extends Document {
     fourHours?: number;
   };
   hourlyRoomCount?: number;
+  isOnHold?: boolean;
 }
 
 const ListingSchema = new Schema<IListing>({
@@ -143,7 +144,8 @@ const ListingSchema = new Schema<IListing>({
     phone: { type: String, required: false },
     alternatePhone: { type: String, required: false },
     companyName: { type: String, required: false },
-  }
+  },
+  isOnHold: { type: Boolean, default: false }
 }, { timestamps: true });
 // Force Mongoose to recompile the schema to fix Next.js HMR dropping new fields
 delete mongoose.models.Listing;

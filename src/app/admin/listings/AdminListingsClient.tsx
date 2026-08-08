@@ -4,7 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { X, CheckCircle, XCircle } from "lucide-react";
+import { X, CheckCircle, XCircle, PauseCircle, PlayCircle } from "lucide-react";
 
 interface AdminListingsClientProps {
   initialListings: any[];
@@ -28,6 +28,28 @@ export default function AdminListingsClient({ initialListings }: AdminListingsCl
       );
       if (selectedListing && selectedListing._id === listingId) {
         setSelectedListing({ ...selectedListing, status });
+      }
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error.response?.data || "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggleHold = async (listingId: string, currentHoldStatus: boolean) => {
+    setIsLoading(true);
+    const newHoldStatus = !currentHoldStatus;
+    try {
+      await axios.patch(`/api/admin/listings/${listingId}`, { isOnHold: newHoldStatus });
+      toast.success(newHoldStatus ? "Listing put on hold" : "Hold removed successfully");
+      setListings(current => 
+        current.map(listing => 
+          listing._id === listingId ? { ...listing, isOnHold: newHoldStatus } : listing
+        )
+      );
+      if (selectedListing && selectedListing._id === listingId) {
+        setSelectedListing({ ...selectedListing, isOnHold: newHoldStatus });
       }
       router.refresh();
     } catch (error: any) {
@@ -77,6 +99,11 @@ export default function AdminListingsClient({ initialListings }: AdminListingsCl
                   <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusColor(listing.status || 'PENDING')}`}>
                     {listing.status || 'PENDING'}
                   </span>
+                  {listing.isOnHold && (
+                    <span className="ml-2 px-2.5 py-1 rounded-full text-xs font-semibold border bg-orange-100 text-orange-800 border-orange-200">
+                      ON HOLD
+                    </span>
+                  )}
                 </td>
                 <td className="p-4 text-right">
                   <button 
@@ -302,8 +329,30 @@ export default function AdminListingsClient({ initialListings }: AdminListingsCl
                 <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getStatusColor(selectedListing.status || 'PENDING')}`}>
                   {selectedListing.status || 'PENDING'}
                 </span>
+                {selectedListing.isOnHold && (
+                  <span className="px-3 py-1 rounded-full text-sm font-semibold border bg-orange-100 text-orange-800 border-orange-200">
+                    ON HOLD
+                  </span>
+                )}
               </div>
               <div className="flex gap-3">
+                <button
+                  onClick={() => handleToggleHold(selectedListing._id, !!selectedListing.isOnHold)}
+                  disabled={isLoading}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold transition ${selectedListing.isOnHold ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}
+                >
+                  {selectedListing.isOnHold ? (
+                    <>
+                      <PlayCircle size={18} />
+                      Remove Hold
+                    </>
+                  ) : (
+                    <>
+                      <PauseCircle size={18} />
+                      Put on Hold
+                    </>
+                  )}
+                </button>
                 <button
                   onClick={() => handleUpdateStatus(selectedListing._id, 'REJECTED')}
                   disabled={isLoading || selectedListing.status === 'REJECTED'}

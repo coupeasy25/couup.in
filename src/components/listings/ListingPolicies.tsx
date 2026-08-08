@@ -38,7 +38,7 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-2">
 
         {/* Timing */}
-        <div className="flex flex-col gap-3">
+        <div className="flex  flex-col gap-3">
           <div className="flex items-center gap-2 font-semibold text-lg">
             <Clock size={20} />
             Timing
@@ -109,11 +109,25 @@ const ListingPolicies: React.FC<ListingPoliciesProps> = ({
               {smokingAllowed ? "Smoking allowed" : "No smoking"}
             </div>
             <div className="flex items-center gap-2">
-              {petsAllowed ? <CheckCircle2 size={16} className="text-green-500" /> : <Dog size={16} className="text-red-500" />}
+              {petsAllowed ? (
+                <CheckCircle2 size={16} className="text-green-500" />
+              ) : (
+                <div className="relative flex items-center justify-center">
+                  <Dog size={16} className="text-red-500" />
+                  <div className="absolute w-[120%] h-[1.5px] bg-red-500 -rotate-45" />
+                </div>
+              )}
               {petsAllowed ? "Pets allowed" : "No pets"}
             </div>
             <div className="flex items-center gap-2">
-              {partyAllowed ? <CheckCircle2 size={16} className="text-green-500" /> : <PartyPopper size={16} className="text-red-500" />}
+              {partyAllowed ? (
+                <CheckCircle2 size={16} className="text-green-500" />
+              ) : (
+                <div className="relative flex items-center justify-center">
+                  <PartyPopper size={16} className="text-red-500" />
+                  <div className="absolute w-[120%] h-[1.5px] bg-red-500 -rotate-45" />
+                </div>
+              )}
               {partyAllowed ? "Parties allowed" : "No parties"}
             </div>
           </div>

@@ -74,7 +74,7 @@ const ListingHead: React.FC<ListingHeadProps> = ({
 
   return (
     <>
-      <div className="flex flex-row items-end justify-between mt-6 mb-4">
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between mt-6 mb-4 gap-4">
         <div className="flex flex-col gap-1 text-start">
           <div className="text-3xl font-semibold text-neutral-800">{title}</div>
           {peoplePerRoom && (
@@ -98,11 +98,11 @@ const ListingHead: React.FC<ListingHeadProps> = ({
       </div>
 
       {/* 5-Image Grid */}
-      <div className="w-full h-[60vh] max-h-[500px] overflow-hidden rounded-2xl relative flex flex-row gap-2">
+      <div className="w-full h-[40vh] md:h-[60vh] md:max-h-[500px] overflow-hidden rounded-2xl relative flex flex-row gap-2">
         {/* Large Left Image */}
         <div
           onClick={() => setShowGallery(true)}
-          className="w-1/2 h-full relative cursor-pointer hover:opacity-90 transition group"
+          className="w-full md:w-1/2 h-full relative cursor-pointer hover:opacity-90 transition group"
         >
           <Image
             alt={`${title} - Main Image`}
@@ -115,7 +115,7 @@ const ListingHead: React.FC<ListingHeadProps> = ({
         </div>
 
         {/* Small 2x2 Right Grid */}
-        <div className="w-1/2 h-full grid grid-cols-2 grid-rows-2 gap-2">
+        <div className="hidden md:grid w-1/2 h-full grid-cols-2 grid-rows-2 gap-2">
           <div onClick={() => setShowGallery(true)} className="relative h-full w-full cursor-pointer hover:opacity-90 transition group overflow-hidden">
             <Image alt="Image 2" src={displayImages[1]} fill className="object-cover transition duration-500" />
           </div>

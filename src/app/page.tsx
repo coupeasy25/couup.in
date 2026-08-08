@@ -19,6 +19,9 @@ import { getActiveAmenities } from "@/actions/getAmenities";
 import getDestinations from "@/actions/getDestinations";
 import { getOffers } from "@/actions/admin/offerActions";
 import HomeSeoContent from "@/components/home/HomeSeoContent";
+import DestinationsList from "@/components/home/DestinationsList";
+import DestinationsGrid from "@/components/home/DestinationsGrid";
+import BulkBookingCTA from "@/components/home/BulkBookingCTA";
 
 interface HomeProps {
   searchParams: Promise<any>;
@@ -137,7 +140,19 @@ export default async function Home({ searchParams }: HomeProps) {
           </Container>
         ) : (
           <div className="flex flex-col w-full">
-           
+
+
+            {/* Promotional Offers Section */}
+            {offers && offers.length > 0 && (
+              <div className="flex flex-col w-full">
+                <PromotionalOffers offers={offers} />
+              </div>
+            )}
+
+            {/* Masonry Destinations Grid */}
+            {destinations && destinations.length > 0 && (
+              <DestinationsGrid destinations={destinations} />
+            )}
 
             {/* First 2 carousels */}
             {locationsToDisplay.length > 0 && (
@@ -156,12 +171,8 @@ export default async function Home({ searchParams }: HomeProps) {
               </Container>
             )}
 
-            {/* Promotional Offers Section */}
-            {offers && offers.length > 0 && (
-              <div className="flex  flex-col w-full">
-                <PromotionalOffers offers={offers} />
-              </div>
-            )}
+            {/* Bulk Booking CTA */}
+            <BulkBookingCTA />
 
             {/* Remaining carousels */}
             {locationsToDisplay.length > 2 && (
@@ -181,7 +192,7 @@ export default async function Home({ searchParams }: HomeProps) {
             )}
 
             {/* App Promo Banner at the bottom */}
-            
+
             {/* SEO Content Section */}
             <HomeSeoContent />
           </div>

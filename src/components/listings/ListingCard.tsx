@@ -17,6 +17,7 @@ interface ListingCardProps {
   actionLabel?: string;
   actionId?: string;
   currentUser?: any | null;
+  large?: boolean;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
@@ -29,6 +30,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   actionLabel,
   actionId = "",
   currentUser,
+  large = false,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -124,7 +126,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
       className="col-span-1 cursor-pointer group bg-white border-[1px] border-neutral-200/60 rounded-2xl overflow-hidden shadow-[0_2px_15px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_25px_-4px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col h-full"
     >
       <div className="flex flex-col w-full h-full">
-        <div className="aspect-[4/3] w-full relative overflow-hidden bg-neutral-100">
+        <div className={`${large ? "aspect-[16/11]" : "aspect-[4/3]"} w-full relative overflow-hidden bg-neutral-100`}>
           <Image
             fill
             draggable={false}
@@ -136,7 +138,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
           {images.length > 1 && (
             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent z-0"></div>
           )}
-          
+
           <div className="absolute top-3 right-3 z-10">
             <HeartButton
               listingId={data.id || data._id}
@@ -186,13 +188,13 @@ const ListingCard: React.FC<ListingCardProps> = ({
                 <span>{rating}</span>
               </div>
             </div>
-            
+
             {data.locationValue && (
               <div className="font-medium text-neutral-500 text-[14px]">
                 {data.locationValue}
               </div>
             )}
-            
+
             <div className="font-medium text-neutral-500 text-[14px] mt-2 flex items-center justify-between">
               {reservationDate ? (
                 <span>{reservationDate}</span>
@@ -202,7 +204,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
                   <span className="text-[14px]">/ night</span>
                 </div>
               )}
-              
+
               {reservation && reservation.status && (
                 <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${reservation.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' :
                   reservation.status === 'Checked-in' ? 'bg-green-100 text-green-700' :

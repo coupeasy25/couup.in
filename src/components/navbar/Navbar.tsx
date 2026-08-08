@@ -82,6 +82,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
               alt="Couup Logo"
               width={160}
               height={45}
+              priority
+              style={{ width: "auto", height: "auto" }}
               className="object-contain max-w-[120px] md:max-w-none"
             />
           </Link>
@@ -104,14 +106,14 @@ const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
           <div className="flex flex-row items-center gap-3 md:gap-4">
             {/* Mobile Search Button */}
             {(!isMainPage || isScrolled) && (
-              <div 
+              <div
                 onClick={searchModal.onOpen}
                 className="md:hidden p-2.5 rounded-full border-[1px] border-neutral-200 shadow-sm hover:shadow-md cursor-pointer transition bg-white"
               >
                 <SearchIcon size={18} strokeWidth={2.5} className="text-neutral-800" />
               </div>
             )}
-            
+
             <UserMenu currentUser={currentUser} isScrolledStyle={isScrolledStyle} />
           </div>
         </div>

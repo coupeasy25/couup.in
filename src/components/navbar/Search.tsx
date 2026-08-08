@@ -9,12 +9,12 @@ const Search = () => {
   return (
     <div 
       onClick={searchModal.onOpen}
-      className="w-full max-w-4xl rounded-full bg-white shadow-xl py-2 px-4 cursor-pointer hover:shadow-2xl transition"
+      className="w-full max-w-4xl rounded-full bg-white shadow-xl py-2 px-4 cursor-pointer transition"
     >
       <div className="flex flex-row items-center justify-between">
 
         {/* Where */}
-        <div className="flex flex-col flex-1 px-6 py-2 hover:bg-neutral-100 rounded-full transition">
+        <div className="flex flex-col flex-1 px-6 py-2 rounded-full transition">
           <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#F97316]">Where</div>
           <div className="text-sm text-neutral-500 font-light truncate">Search your destination...</div>
         </div>
@@ -22,7 +22,7 @@ const Search = () => {
         <div className="h-8 border-l-[1px] border-neutral-300"></div>
 
         {/* When */}
-        <div className="flex flex-col flex-1 px-6 py-2 hover:bg-neutral-100 rounded-full transition">
+        <div className="flex flex-col flex-1 px-6 py-2 rounded-full transition">
           <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#F97316]">When</div>
           <div className="text-sm text-neutral-500 font-light truncate">Add check-in</div>
         </div>
@@ -30,7 +30,7 @@ const Search = () => {
         <div className="h-8 border-l-[1px] border-neutral-300"></div>
 
         {/* Who */}
-        <div className="flex flex-row items-center flex-1 justify-between pl-6 pr-2 py-2 hover:bg-neutral-100 rounded-full transition">
+        <div className="flex flex-row items-center flex-1 justify-between pl-6 pr-2 py-2 rounded-full transition">
           <div className="flex flex-col">
             <div className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#F97316]">Who</div>
             <div className="text-sm text-neutral-500 font-light truncate">Who's coming?</div>

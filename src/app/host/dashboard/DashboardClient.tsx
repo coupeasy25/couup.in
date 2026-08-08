@@ -328,13 +328,53 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
     );
   };
 
-  const handlePrint = () => {
+  const handlePrint = useCallback(() => {
     window.print();
-  };
+  }, []);
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    const element = document.getElementById('booking-receipt-content');
+    if (!element) return;
+    
+    try {
+      const domtoimage = (await import('dom-to-image-more')).default;
+      const jsPDF = (await import('jspdf')).default;
+      
+      const scale = 2;
+      const dataUrl = await domtoimage.toPng(element, {
+        quality: 1.0,
+        height: element.offsetHeight * scale,
+        width: element.offsetWidth * scale,
+        style: {
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: `${element.offsetWidth}px`,
+          height: `${element.offsetHeight}px`
+        }
+      });
+      
+      const pdf = new jsPDF({
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      });
+      
+      const imgProps = pdf.getImageProperties(dataUrl);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`booking_receipt_${selectedBooking?.id || 'export'}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
+    }
+  }, [selectedBooking?.id]);
 
   if (!listing) {
     return (
-      <Container>
+      <div className="w-full">
         <div className="min-h-[50vh] flex flex-col items-center justify-center text-center print:hidden">
           <h2 className="text-3xl font-bold mb-3 tracking-tight">No Properties Yet</h2>
           <p className="text-neutral-500 mb-8 max-w-md">Create your first listing to access the premium host dashboard and start managing bookings.</p>
@@ -342,7 +382,7 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
             Add Property Now
           </button>
         </div>
-      </Container>
+      </div>
     );
   }
 
@@ -354,78 +394,75 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
     <div className="min-h-screen bg-white text-neutral-900 font-sans pb-20">
       
       {/* HEADER - Hidden on Print */}
-      <div className="border-b border-neutral-100 sticky top-0 bg-white/95 backdrop-blur-md z-40 print:hidden">
-        <Container>
-          <div className="pt-10 pb-0 flex flex-col gap-8">
-            
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <div>
-                <h1 className="text-4xl font-light tracking-tight text-black mb-2">
-                  Host Dashboard
-                </h1>
-                <div className="flex items-center gap-3">
-                  {listing?.status && (
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${
-                      listing.status === 'APPROVED' ? 'bg-black text-white' :
-                      listing.status === 'PENDING' ? 'bg-neutral-200 text-neutral-600' :
-                      listing.status === 'REJECTED' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-neutral-100 text-neutral-800'
-                    }`}>
-                      {listing.status}
-                    </span>
-                  )}
-                  <div className="relative group flex items-center">
-                    <span className="text-neutral-400 text-sm mr-2">Managing:</span>
-                    <select 
-                      className="appearance-none font-medium bg-transparent outline-none cursor-pointer text-sm text-black border-b border-neutral-200 hover:border-black transition-colors pr-6 py-1"
-                      value={selectedListingId}
-                      onChange={(e) => setSelectedListingId(e.target.value)}
-                    >
-                      {listings.map(l => (
-                        <option key={l.id} value={l.id}>{l.title}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none w-4 h-4 text-neutral-400" />
-                  </div>
+      <div className="border-b border-neutral-100 bg-white z-40 print:hidden">
+        <div className="pb-0 flex flex-col gap-8">
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h1 className="text-4xl font-light tracking-tight text-black mb-2">
+                Host Dashboard
+              </h1>
+              <div className="flex items-center gap-3">
+                {listing?.status && (
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${
+                    listing.status === 'APPROVED' ? 'bg-black text-white' :
+                    listing.status === 'PENDING' ? 'bg-neutral-200 text-neutral-600' :
+                    listing.status === 'REJECTED' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-neutral-100 text-neutral-800'
+                  }`}>
+                    {listing.status}
+                  </span>
+                )}
+                <div className="relative group flex items-center">
+                  <span className="text-neutral-400 text-sm mr-2">Managing:</span>
+                  <select 
+                    className="appearance-none font-medium bg-transparent outline-none cursor-pointer text-sm text-black border-b border-neutral-200 hover:border-black transition-colors pr-6 py-1"
+                    value={selectedListingId}
+                    onChange={(e) => setSelectedListingId(e.target.value)}
+                  >
+                    {listings.map(l => (
+                      <option key={l.id} value={l.id}>{l.title}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none w-4 h-4 text-neutral-400" />
                 </div>
               </div>
-              
-              <div className="flex items-center gap-4">
-                 <button onClick={() => router.push(`/properties/${listing.id}`)} className="flex items-center gap-2 px-5 py-2.5 rounded-md border border-neutral-200 hover:border-black hover:bg-neutral-50 transition-all text-xs font-semibold">
-                    <ExternalLink size={14} /> View Listing
-                  </button>
-                  <button onClick={() => router.push('/')} className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-black text-white hover:bg-neutral-800 transition-all text-xs font-semibold">
-                    Return to Website
-                  </button>
-              </div>
             </div>
-
-            {/* Premium Underline Tabs */}
-            <div className="flex overflow-x-auto gap-8 scrollbar-hide pt-2 relative">
-              {TABS.map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`pb-3 text-xs tracking-widest uppercase transition-all whitespace-nowrap relative ${
-                    activeTab === tab 
-                      ? "text-black font-bold" 
-                      : "text-neutral-400 font-semibold hover:text-black"
-                  }`}
-                >
-                  {tab}
-                  {activeTab === tab && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black" />
-                  )}
+            
+            <div className="flex items-center gap-4">
+               <button onClick={() => router.push(`/properties/${listing.id}`)} className="flex items-center gap-2 px-5 py-2.5 rounded-md border border-neutral-200 hover:border-black hover:bg-neutral-50 transition-all text-xs font-semibold">
+                  <ExternalLink size={14} /> View Listing
                 </button>
-              ))}
+                <button onClick={() => router.push('/')} className="flex items-center gap-2 px-5 py-2.5 rounded-md bg-black text-white hover:bg-neutral-800 transition-all text-xs font-semibold">
+                  Return to Website
+                </button>
             </div>
-
           </div>
-        </Container>
+
+          {/* Premium Underline Tabs */}
+          <div className="flex overflow-x-auto gap-8 scrollbar-hide pt-2 relative">
+            {TABS.map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-3 text-xs tracking-widest uppercase transition-all whitespace-nowrap relative ${
+                  activeTab === tab 
+                    ? "text-black font-bold" 
+                    : "text-neutral-400 font-semibold hover:text-black"
+                }`}
+              >
+                {tab}
+                {activeTab === tab && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black" />
+                )}
+              </button>
+            ))}
+          </div>
+
+        </div>
       </div>
 
       {/* MAIN CONTENT - Hidden on Print except specific modals */}
-      <Container>
-        <div className="pt-10 print:hidden">
+      <div className="pt-10 print:hidden">
           
           {/* Overview Tab */}
           {activeTab === "Overview" && (
@@ -796,79 +833,91 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
 
           {/* Property Management Tab */}
           {activeTab === "Property Management" && (
-            <div className="border border-neutral-100 rounded-lg max-w-4xl mx-auto">
-              <div className="p-6 md:p-8 border-b border-neutral-100">
-                <h2 className="text-xl font-light tracking-tight">Property Settings</h2>
+            <div className="max-w-5xl mx-auto animate-in fade-in duration-300">
+              <div className="mb-10">
+                <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 mb-2">Property Settings</h2>
+                <p className="text-sm text-neutral-500">Manage your rates, availability, and room configurations.</p>
               </div>
 
-              <div className="p-6 md:p-8">
-                <div className="flex flex-col gap-10 mb-10">
-                  {/* Hourly Pricing */}
-                  <div>
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-6 flex items-center gap-2">
-                      Hourly Rates (₹)
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-2 block">2 HOURS</label>
-                        <Input type="number" className="rounded-md h-10 bg-transparent border-neutral-200 focus:border-black font-medium" placeholder="Optional" value={formData.hourlyRates?.twoHours || ''} onChange={e => handleHourlyRateChange('twoHours', e.target.value)} />
+              <div className="flex flex-col gap-8">
+                
+                {/* Hourly Pricing Section */}
+                <div className="flex flex-col md:flex-row gap-8 py-8 border-t border-neutral-100">
+                  <div className="w-full md:w-1/3">
+                    <h3 className="text-base font-medium text-neutral-900 mb-1">Hourly Rates</h3>
+                    <p className="text-sm text-neutral-500 pr-4">Set special pricing for short stays and define how many rooms are allocated for hourly booking.</p>
+                  </div>
+                  <div className="w-full md:w-2/3 bg-white border border-neutral-200 rounded-xl p-6 md:p-8 shadow-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">2 Hours (₹)</label>
+                        <Input type="number" className="h-11 bg-neutral-50/50 border-neutral-200 focus:bg-white focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all rounded-lg font-medium" placeholder="0" value={formData.hourlyRates?.twoHours || ''} onChange={e => handleHourlyRateChange('twoHours', e.target.value)} />
                       </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-2 block">3 HOURS</label>
-                        <Input type="number" className="rounded-md h-10 bg-transparent border-neutral-200 focus:border-black font-medium" placeholder="Optional" value={formData.hourlyRates?.threeHours || ''} onChange={e => handleHourlyRateChange('threeHours', e.target.value)} />
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">3 Hours (₹)</label>
+                        <Input type="number" className="h-11 bg-neutral-50/50 border-neutral-200 focus:bg-white focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all rounded-lg font-medium" placeholder="0" value={formData.hourlyRates?.threeHours || ''} onChange={e => handleHourlyRateChange('threeHours', e.target.value)} />
                       </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-2 block">4 HOURS</label>
-                        <Input type="number" className="rounded-md h-10 bg-transparent border-neutral-200 focus:border-black font-medium" placeholder="Optional" value={formData.hourlyRates?.fourHours || ''} onChange={e => handleHourlyRateChange('fourHours', e.target.value)} />
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">4 Hours (₹)</label>
+                        <Input type="number" className="h-11 bg-neutral-50/50 border-neutral-200 focus:bg-white focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all rounded-lg font-medium" placeholder="0" value={formData.hourlyRates?.fourHours || ''} onChange={e => handleHourlyRateChange('fourHours', e.target.value)} />
                       </div>
                     </div>
-                    <div className="mt-6 border-t border-neutral-100 pt-6">
-                      <div className="w-full md:w-1/3">
-                        <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-2 block">TOTAL HOURLY ROOMS AVAILABLE</label>
+                    <div className="pt-6 border-t border-neutral-100">
+                      <div className="flex flex-col gap-2 w-full sm:w-1/2">
+                        <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Hourly Rooms</label>
                         <Input 
                           type="number" 
-                          className="rounded-md h-10 bg-transparent border-neutral-200 focus:border-black font-medium" 
+                          className="h-11 bg-neutral-50/50 border-neutral-200 focus:bg-white focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all rounded-lg font-medium" 
                           value={formData.hourlyRoomCount || ''} 
+                          placeholder="0"
                           onChange={e => setFormData({ ...formData, hourlyRoomCount: parseInt(e.target.value) || 0 })} 
                         />
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Main Rooms */}
-                  <div>
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-6">Main Rooms Pricing & Availability (₹)</h3>
+                {/* Main Rooms Section */}
+                <div className="flex flex-col md:flex-row gap-8 py-8 border-t border-neutral-100">
+                  <div className="w-full md:w-1/3">
+                    <h3 className="text-base font-medium text-neutral-900 mb-1">Standard Rooms</h3>
+                    <p className="text-sm text-neutral-500 pr-4">Configure pricing and availability for your overnight stays.</p>
+                  </div>
+                  <div className="w-full md:w-2/3 bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
                     {(!formData.rooms || formData.rooms.length === 0) ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-2 block">BASE PRICE</label>
-                          <Input type="number" className="rounded-md h-10 bg-transparent border-neutral-200 focus:border-black font-medium" value={formData.price} onChange={e => setFormData({...formData, price: parseInt(e.target.value) || 0})} />
+                      <div className="p-6 md:p-8">
+                        <div className="flex flex-col gap-2 w-full sm:w-1/2">
+                          <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Base Price (₹)</label>
+                          <Input type="number" className="h-11 bg-neutral-50/50 border-neutral-200 focus:bg-white focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all rounded-lg font-medium" value={formData.price} onChange={e => setFormData({...formData, price: parseInt(e.target.value) || 0})} />
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 gap-6">
+                      <div className="divide-y divide-neutral-100">
                         {formData.rooms.map((room: any, idx: number) => (
-                          <div key={idx} className="pb-6 border-b border-neutral-100 last:border-0 last:pb-0 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                          <div key={idx} className="p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-neutral-50/50 transition-colors">
                             <div>
-                              <div className="font-semibold text-sm mb-1">{room.type || `Room ${idx + 1}`}</div>
-                              <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Capacity: {room.capacity}</div>
+                              <div className="font-semibold text-neutral-900 mb-1.5">{room.type || `Room ${idx + 1}`}</div>
+                              <div className="text-xs text-neutral-500 flex items-center gap-1.5">
+                                <Users size={14} className="text-neutral-400" />
+                                Capacity: {room.capacity}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-8">
-                              <div>
-                                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-2">Price</label>
+                            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                              <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Price (₹)</label>
                                 <Input 
                                   type="number" 
-                                  className="rounded-md h-9 w-32 border-neutral-200 focus:border-black font-medium text-sm"
+                                  className="h-10 w-28 bg-white border-neutral-200 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 font-medium text-sm rounded-lg"
                                   value={room.price} 
                                   onChange={e => handleRoomPriceChange(idx, parseInt(e.target.value) || 0)} 
                                 />
                               </div>
-                              <div>
-                                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-2">Quantity</label>
-                                <div className="flex items-center gap-3">
-                                  <button type="button" onClick={() => handleRoomCountChange(idx, Math.max(0, (room.count || 0) - 1))} className="w-8 h-8 rounded border border-neutral-200 flex items-center justify-center hover:border-black transition-colors">-</button>
-                                  <div className="font-medium text-sm w-4 text-center">{room.count || 0}</div>
-                                  <button type="button" onClick={() => handleRoomCountChange(idx, (room.count || 0) + 1)} className="w-8 h-8 rounded border border-neutral-200 flex items-center justify-center hover:border-black transition-colors">+</button>
+                              <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Rooms</label>
+                                <div className="flex items-center bg-white border border-neutral-200 rounded-lg overflow-hidden h-10">
+                                  <button type="button" onClick={() => handleRoomCountChange(idx, Math.max(0, (room.count || 0) - 1))} className="w-10 h-full flex items-center justify-center text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors">-</button>
+                                  <div className="font-medium text-sm w-10 text-center border-x border-neutral-100 h-full flex items-center justify-center text-neutral-900">{room.count || 0}</div>
+                                  <button type="button" onClick={() => handleRoomCountChange(idx, (room.count || 0) + 1)} className="w-10 h-full flex items-center justify-center text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors">+</button>
                                 </div>
                               </div>
                             </div>
@@ -879,13 +928,13 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-8 border-t border-neutral-100">
+                <div className="flex justify-end pt-4 pb-12 border-t border-neutral-100">
                   <button
                     disabled={isLoading}
                     onClick={onUpdateProperty}
-                    className="px-8 py-3 rounded-md bg-black text-white font-semibold text-xs uppercase tracking-widest hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                    className="px-6 py-3 rounded-lg bg-neutral-900 text-white font-medium text-sm shadow-sm hover:bg-neutral-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] flex items-center gap-2"
                   >
-                    {isLoading ? "Saving..." : "Save Changes"}
+                    {isLoading ? "Saving Changes..." : "Save Changes"}
                   </button>
                 </div>
               </div>
@@ -993,7 +1042,6 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
             </div>
           </div>
         )}
-      </Container>
       
       {/* FULL PRINTABLE MODAL FOR DETAILED BOOKING */}
       {selectedBooking && (
@@ -1004,6 +1052,9 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
               <div className="flex gap-4">
                 <button onClick={handlePrint} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-black transition-colors">
                   <Printer size={14} /> Print
+                </button>
+                <button onClick={handleDownloadPdf} className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-black transition-colors">
+                  <Download size={14} /> Download PDF
                 </button>
                 {selectedBooking.status !== 'Cancelled' && (
                   <button 
@@ -1020,7 +1071,7 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
               </button>
             </div>
 
-            <div className="p-8 md:p-12 print:p-0 bg-white text-black print:text-black">
+            <div id="booking-receipt-content" className="p-8 md:p-12 print:p-0 bg-white text-black print:text-black">
               <div className="flex justify-between items-start mb-12">
                 <div>
                   <h1 className="text-2xl font-light tracking-tight uppercase mb-2">Booking Receipt</h1>

@@ -33,7 +33,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         {/* Action bar (hidden when printing) */}
         <InvoiceClient />
 
-        <div className="px-10 py-12 md:px-16 print:p-8 flex flex-col flex-1">
+        <div id="invoice-content" className="px-10 py-12 md:px-16 print:p-8 flex flex-col flex-1">
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start mb-8 pb-6 border-b-2 border-[#0f172a]">
             <div className="flex flex-col mb-6 md:mb-0 gap-1">

@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Search, MapPin, Calendar as CalendarIcon, Users } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Range } from "react-date-range";
 import { formatISO, format, addDays, isSameDay } from "date-fns";
 import toast from "react-hot-toast";
 import useSearchModal from "@/hooks/useSearchModal";
+import { notifyNavigationStart } from "@/lib/navigationEvents";
 import Calendar from "../inputs/Calendar";
 
 interface ExpandedSearchProps {
@@ -113,6 +114,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
 
     const urlParams = new URLSearchParams(updatedQuery);
     searchModal.onClose();
+    notifyNavigationStart();
     router.push(`/?${urlParams.toString()}`);
   };
 
@@ -144,15 +146,15 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
         ></div>
       )}
 
-      <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center gap-6 px-4" onMouseLeave={() => setActiveTab(null)}>
-        <div className="relative w-full">
-          <div className="bg-white rounded-[32px] md:rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.16)] border border-neutral-300 flex flex-col md:flex-row w-full h-auto md:h-[80px] items-center">
+      <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center gap-6 px-4 shrink-0" onMouseLeave={() => setActiveTab(null)}>
+        <div className="relative w-full min-w-0 md:min-w-[720px]">
+          <div className="bg-white rounded-[32px] md:rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.16)] border border-neutral-300 flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_1.2fr] w-full md:h-[80px] items-stretch shrink-0">
 
             {/* Location */}
             <div
               onClick={() => setActiveTab("where")}
               onMouseEnter={() => setActiveTab("where")}
-              className={`w-full md:flex-1 flex flex-col justify-center px-8 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer rounded-t-[32px] md:rounded-t-none md:rounded-l-full transition ${activeTab === "where" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+              className="w-full min-w-[140px] flex flex-col justify-center px-8 py-4 md:py-0 md:h-full cursor-pointer rounded-t-[32px] md:rounded-t-none md:rounded-l-full shrink-0"
             >
               <span className="text-[13px] text-black font-medium">Where to?</span>
               <input
@@ -161,7 +163,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
                 value={locationValue}
                 onChange={(e) => setLocationValue(e.target.value)}
                 placeholder="Search your destination..."
-                className="text-[16px] font-bold text-neutral-900 bg-transparent outline-none w-full placeholder:text-neutral-400 placeholder:font-normal"
+                className="text-[16px] font-bold text-neutral-900 bg-transparent outline-none w-full truncate placeholder:text-neutral-400 placeholder:font-normal"
                 suppressHydrationWarning
               />
             </div>
@@ -170,7 +172,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
             <div
               onClick={() => setActiveTab("checkin")}
               onMouseEnter={() => setActiveTab("checkin")}
-              className={`w-full md:flex-[0.6] flex flex-col justify-center px-8 md:px-6 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 transition ${activeTab === "checkin" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+              className="w-full min-w-[120px] flex flex-col justify-center px-8 md:px-6 py-4 md:py-0 md:h-full cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 shrink-0"
             >
               <span className="text-[13px] text-black font-medium truncate">Check in</span>
               <span className={`text-[16px] truncate ${dateRange.startDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
@@ -182,7 +184,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
             <div
               onClick={() => setActiveTab("checkout")}
               onMouseEnter={() => setActiveTab("checkout")}
-              className={`w-full md:flex-[0.6] flex flex-col justify-center px-8 md:px-6 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 transition ${activeTab === "checkout" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+              className="w-full min-w-[120px] flex flex-col justify-center px-8 md:px-6 py-4 md:py-0 md:h-full cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 shrink-0"
             >
               <span className="text-[13px] text-black font-medium truncate">Check out</span>
               <span className={`text-[16px] truncate ${dateRange.endDate && dateRange.startDate !== dateRange.endDate ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
@@ -194,9 +196,9 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
             <div
               onClick={() => setActiveTab("who")}
               onMouseEnter={() => setActiveTab("who")}
-              className={`w-full md:flex-[0.8] flex flex-row items-center justify-between px-8 md:pl-6 md:pr-2 py-4 md:py-0 md:h-full hover:bg-neutral-100 cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 rounded-b-[32px] md:rounded-b-none md:rounded-r-full transition relative ${activeTab === "who" ? "bg-neutral-100 shadow-md z-10" : ""}`}
+              className="w-full min-w-[140px] flex flex-row items-center justify-between px-8 md:pl-6 md:pr-2 py-4 md:py-0 md:h-full cursor-pointer border-t md:border-t-0 md:border-l border-neutral-200 rounded-b-[32px] md:rounded-b-none md:rounded-r-full relative shrink-0"
             >
-              <div className="flex flex-col justify-center flex-1">
+              <div className="flex flex-col justify-center flex-1 min-w-0 overflow-hidden">
                 <span className="text-[13px] text-black font-medium truncate">Guests</span>
                 <span className={`text-[16px] truncate ${guestCount > 0 ? 'font-bold text-neutral-900' : 'text-neutral-400'}`}>
                   {guestCount > 0 ? `${guestCount} guests` : "Who's coming?"}
@@ -261,55 +263,57 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
 
           {/* Who Dropdown */}
           {activeTab === "who" && (
-            <div className="absolute top-full right-0 w-full md:w-[400px] pt-3 z-50 px-2 md:px-0">
-              <div className="bg-white rounded-3xl shadow-xl border-[1px] border-neutral-200 p-8 flex flex-col gap-6 animate-in fade-in slide-in-from-top-4 duration-200">
-
+            <div className="absolute top-full right-0 w-full md:w-[380px] pt-4 z-50 px-2 md:px-0">
+              <div className="bg-white rounded-[32px] shadow-[0_8px_28px_rgba(0,0,0,0.15)] border border-neutral-200 p-6 flex flex-col gap-2 animate-in fade-in slide-in-from-top-4 duration-200">
+                
                 {/* Adults */}
-                <div className="flex flex-row items-center justify-between py-2 border-b-[1px] border-neutral-200">
+                <div className="flex flex-row items-center justify-between py-4 border-b border-neutral-100">
                   <div className="flex flex-col">
-                    <div className="text-[16px] font-semibold text-black">Adults</div>
-                    <div className="text-sm font-light text-neutral-500">Ages 13 or above</div>
+                    <div className="text-[15px] font-semibold text-neutral-800">Adults</div>
+                    <div className="text-[13px] font-normal text-neutral-500">Ages 13 or above</div>
                   </div>
-                  <div className="flex flex-row items-center gap-4">
+                  <div className="flex flex-row items-center gap-3">
                     <button
                       aria-label="Decrease adults"
                       onClick={() => setAdults((prev) => Math.max(0, prev - 1))}
-                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                      disabled={adults <= 0}
+                      className="w-9 h-9 rounded-full border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-black hover:border-black disabled:opacity-30 disabled:cursor-not-allowed transition"
                     >
-                      -
+                      <span className="text-xl leading-none mt-[-2px]">-</span>
                     </button>
-                    <div className="font-light text-neutral-600 w-4 text-center">{adults}</div>
+                    <div className="font-medium text-neutral-800 w-5 text-center text-base">{adults}</div>
                     <button
                       aria-label="Increase adults"
                       onClick={() => setAdults((prev) => prev + 1)}
-                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                      className="w-9 h-9 rounded-full border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-black hover:border-black transition"
                     >
-                      +
+                      <span className="text-xl leading-none mt-[-2px]">+</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Children */}
-                <div className="flex flex-row items-center justify-between py-2">
+                <div className="flex flex-row items-center justify-between py-4">
                   <div className="flex flex-col">
-                    <div className="text-[16px] font-semibold text-black">Children</div>
-                    <div className="text-sm font-light text-neutral-500">Ages 2–12</div>
+                    <div className="text-[15px] font-semibold text-neutral-800">Children</div>
+                    <div className="text-[13px] font-normal text-neutral-500">Ages 2–12</div>
                   </div>
-                  <div className="flex flex-row items-center gap-4">
+                  <div className="flex flex-row items-center gap-3">
                     <button
                       aria-label="Decrease children"
                       onClick={() => setChildren((prev) => Math.max(0, prev - 1))}
-                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                      disabled={children <= 0}
+                      className="w-9 h-9 rounded-full border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-black hover:border-black disabled:opacity-30 disabled:cursor-not-allowed transition"
                     >
-                      -
+                      <span className="text-xl leading-none mt-[-2px]">-</span>
                     </button>
-                    <div className="font-light text-neutral-600 w-4 text-center">{children}</div>
+                    <div className="font-medium text-neutral-800 w-5 text-center text-base">{children}</div>
                     <button
                       aria-label="Increase children"
                       onClick={() => setChildren((prev) => prev + 1)}
-                      className="w-8 h-8 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 hover:border-[#F97316] hover:text-[#F97316] hover:bg-[#F97316]/5 transition"
+                      className="w-9 h-9 rounded-full border border-neutral-300 flex items-center justify-center text-neutral-500 hover:text-black hover:border-black transition"
                     >
-                      +
+                      <span className="text-xl leading-none mt-[-2px]">+</span>
                     </button>
                   </div>
                 </div>
@@ -326,7 +330,7 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
             e.stopPropagation();
             handleSearch();
           }}
-          className="bg-[#F97316] text-white px-8 py-4 rounded-full flex items-center justify-center gap-3 shadow-[0_10px_20px_rgba(249,115,22,0.3)] z-10 cursor-pointer"
+          className="bg-[#F97316] text-white px-8 py-4 rounded-full flex items-center justify-center gap-3 shadow-[0_10px_20px_rgba(249,115,22,0.3)] z-10 cursor-pointer hover:bg-[#EA580C] transition"
         >
           <Search size={24} strokeWidth={2.5} />
           <span className="font-bold text-lg tracking-wide">Search</span>
