@@ -39,8 +39,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
             <div className="flex flex-col mb-6 md:mb-0 gap-1">
               <h1 className="text-4xl md:text-[42px] font-bold text-[#0f172a] tracking-tight leading-none mb-1">COUUP</h1>
               <p className="text-[#F97316] font-bold text-[13px] tracking-[0.1em]">HOTELS & PREMIUM TRAVEL</p>
-              <p className="text-[#64748b] text-[13px] mt-3">GSTIN: 24AAABC1234D1Z5</p>
-              <p className="text-[#64748b] text-[13px]">support@couup.in | +91 99999 99999</p>
+              <p className="text-[#64748b] text-[13px] mt-3">GSTIN: 24MGGPK7366D1Z4</p>
+              <p className="text-[#64748b] text-[13px]">contact@couup.in | +91 6355081118</p>
             </div>
             
             <div className="text-left md:text-right flex flex-col items-start md:items-end w-full md:w-auto">
@@ -81,29 +81,29 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                 Stay & Guest <span className="text-[#F97316]">Information</span>
               </h2>
               
-              <div className="bg-[#0f172a] text-white text-[11px] font-bold px-5 py-2.5 flex justify-between rounded-t-sm">
-                <div className="w-[35%]">PROPERTY & LOCATION</div>
-                <div className="w-[20%]">ROOM TYPE</div>
-                <div className="w-[25%]">CHECK-IN / CHECK-OUT</div>
-                <div className="w-[20%]">GUESTS</div>
+              <div className="bg-[#0f172a] text-white text-[11px] font-bold px-5 py-2.5 grid grid-cols-12 gap-4 rounded-t-sm">
+                <div className="col-span-4">PROPERTY & LOCATION</div>
+                <div className="col-span-3">ROOM TYPE</div>
+                <div className="col-span-3">CHECK-IN / OUT</div>
+                <div className="col-span-2">GUESTS</div>
               </div>
               
-              <div className="border border-[#e2e8f0] border-t-0 p-5 flex justify-between items-start rounded-b-sm">
-                <div className="w-[35%] pr-4">
+              <div className="border border-[#e2e8f0] border-t-0 p-5 grid grid-cols-12 gap-4 items-start rounded-b-sm">
+                <div className="col-span-4 pr-2">
                   <p className="text-[#0f172a] text-[14px] font-bold mb-1">{invoice.propertyName || 'N/A'}</p>
                   <p className="text-[#64748b] text-[13px]">Location not specified</p>
                 </div>
-                <div className="w-[20%] pr-4">
-                  <p className="text-[#0f172a] text-[13px]">{invoice.roomType || 'Standard'}</p>
+                <div className="col-span-3 pr-2">
+                  <p className="text-[#0f172a] text-[13px] break-words">{invoice.roomType || 'Standard'}</p>
                 </div>
-                <div className="w-[25%] pr-4">
+                <div className="col-span-3 pr-2">
                   <p className="text-[#0f172a] text-[13px] mb-1">{invoice.checkIn ? format(new Date(invoice.checkIn), "dd MMM yyyy") : 'N/A'}, 12:00 PM</p>
                   <p className="text-[#64748b] text-[13px] mb-1">to</p>
                   <p className="text-[#0f172a] text-[13px]">{invoice.checkOut ? format(new Date(invoice.checkOut), "dd MMM yyyy") : 'N/A'}, 11:00 AM</p>
                 </div>
-                <div className="w-[20%]">
+                <div className="col-span-2">
                   <p className="text-[#0f172a] text-[13px] font-bold mb-1">1 Guests (Adults)</p>
-                  <p className="text-[#64748b] text-[13px]">Primary: {invoice.guestName?.split(' ')[0]}</p>
+                  <p className="text-[#64748b] text-[13px] truncate">Primary: {invoice.guestName?.split(' ')[0]}</p>
                 </div>
               </div>
             </div>
@@ -115,28 +115,28 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
               Pricing <span className="text-[#F97316]">Summary</span>
             </h2>
 
-            <div className="bg-[#0f172a] text-white text-[11px] font-bold px-5 py-2.5 flex justify-between rounded-t-sm">
-              <div className="w-[45%]">DESCRIPTION</div>
-              <div className="w-[20%] text-center">QTY / NIGHTS</div>
-              <div className="w-[15%] text-right">RATE</div>
-              <div className="w-[20%] text-right">AMOUNT</div>
+            <div className="bg-[#0f172a] text-white text-[11px] font-bold px-5 py-2.5 grid grid-cols-12 gap-4 rounded-t-sm">
+              <div className="col-span-6">DESCRIPTION</div>
+              <div className="col-span-2 text-center">QTY / NIGHTS</div>
+              <div className="col-span-2 text-right">RATE</div>
+              <div className="col-span-2 text-right">AMOUNT</div>
             </div>
 
             <div className="border border-[#e2e8f0] border-t-0 p-5 rounded-b-sm">
               {/* Row 1: Base Price */}
-              <div className="flex justify-between items-center pb-4 border-b border-[#f1f5f9]">
-                <div className="w-[45%] text-[13px] text-[#0f172a]">{invoice.roomType || 'Standard'} Base Price</div>
-                <div className="w-[20%] text-[13px] text-[#0f172a] text-center">{nights}</div>
-                <div className="w-[15%] text-[13px] text-[#0f172a] text-right">₹{basePerNight.toLocaleString('en-IN')}</div>
-                <div className="w-[20%] text-[13px] text-[#0f172a] text-right">₹{invoice.amount.toLocaleString('en-IN')}</div>
+              <div className="grid grid-cols-12 gap-4 items-center pb-4 border-b border-[#f1f5f9]">
+                <div className="col-span-6 text-[13px] text-[#0f172a]">{invoice.roomType || 'Standard'} Base Price</div>
+                <div className="col-span-2 text-[13px] text-[#0f172a] text-center">{nights}</div>
+                <div className="col-span-2 text-[13px] text-[#0f172a] text-right">₹{basePerNight.toLocaleString('en-IN')}</div>
+                <div className="col-span-2 text-[13px] text-[#0f172a] text-right">₹{invoice.amount.toLocaleString('en-IN')}</div>
               </div>
 
               {/* Row 2: Taxes */}
-              <div className="flex justify-between items-center pt-4 pb-2">
-                <div className="w-[45%] text-[13px] text-[#0f172a]">Taxes & Fees</div>
-                <div className="w-[20%] text-[13px] text-[#0f172a] text-center">-</div>
-                <div className="w-[15%] text-[13px] text-[#0f172a] text-right">-</div>
-                <div className="w-[20%] text-[13px] text-[#0f172a] text-right">₹{invoice.taxes.toLocaleString('en-IN')}</div>
+              <div className="grid grid-cols-12 gap-4 items-center pt-4 pb-2">
+                <div className="col-span-6 text-[13px] text-[#0f172a]">Taxes & Fees</div>
+                <div className="col-span-2 text-[13px] text-[#0f172a] text-center">-</div>
+                <div className="col-span-2 text-[13px] text-[#0f172a] text-right">-</div>
+                <div className="col-span-2 text-[13px] text-[#0f172a] text-right">₹{invoice.taxes.toLocaleString('en-IN')}</div>
               </div>
             </div>
           </div>

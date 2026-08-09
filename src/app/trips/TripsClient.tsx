@@ -265,6 +265,18 @@ const TripsClient: React.FC<TripsClientProps> = ({
                                 View Invoice
                               </button>
                             )}
+                            
+                            <a 
+                              href={`/api/reservations/${reservation.id}/pdf`}
+                              download
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-4 py-3 text-sm text-neutral-700 hover:bg-neutral-50 font-medium transition-colors border-t border-neutral-100 flex items-center gap-2"
+                            >
+                              Download PDF
+                            </a>
                           </div>
                         )}
                       </div>

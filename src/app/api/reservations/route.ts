@@ -4,8 +4,7 @@ import { Reservation } from "@/models/Reservation";
 import { Listing } from "@/models/Listing";
 import getCurrentUser from "@/actions/getCurrentUser";
 import crypto from "crypto";
-import { generateBookingPDF } from "@/lib/pdfGenerator";
-import { sendBookingConfirmationEmail } from "@/lib/mailer";
+
 import Razorpay from "razorpay";
 
 export async function POST(request: Request) {
@@ -199,39 +198,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // Generate PDF and Send Email asynchronously (do not block the response)
-  const sendConfirmation = async () => {
-    try {
-      const pdfBuffer = await generateBookingPDF({
-        listingTitle: listing.title,
-        locationValue: listing.locationValue,
-        startDate,
-        endDate,
-        totalPrice,
-        basePrice,
-        taxes,
-        roomType,
-        guests,
-        userName: currentUser.name || (guests[0] ? `${guests[0].firstName} ${guests[0].lastName}` : 'Guest'),
-        userEmail: currentUser.email,
-        paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id,
-        bookingDate: new Date(),
-        actualInvoiceNumber
-      });
 
-      await sendBookingConfirmationEmail(
-        currentUser.email as string,
-        currentUser.name || 'Guest',
-        listing.title,
-        pdfBuffer
-      );
-    } catch (err) {
-      console.error("Failed to generate PDF or send email", err);
-    }
-  };
-
-  sendConfirmation();
 
   return NextResponse.json(reservation);
 }

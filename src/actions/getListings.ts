@@ -388,22 +388,19 @@ export default async function getListings(params: any) {
       query.cancellationPolicy = { $regex: /Flexible|Moderate/i };
     }
 
-    if (startDate && endDate) {
+    let conflictingReservations: any[] = [];
+    if (startDate && endDate && (isHourlyMode !== 'true' && isHourlyMode !== true)) {
       const parsedStartDate = new Date(startDate);
       const parsedEndDate = new Date(endDate);
 
-      const conflictingReservations = await Reservation.find({
+      conflictingReservations = await Reservation.find({
+        status: { $ne: 'Cancelled' },
         $or: [
           { endDate: { $gte: parsedStartDate }, startDate: { $lte: parsedStartDate } },
           { startDate: { $lte: parsedEndDate }, endDate: { $gte: parsedEndDate } },
           { startDate: { $gte: parsedStartDate }, endDate: { $lte: parsedEndDate } }
         ]
-      }).select('listingId').lean();
-
-      if (conflictingReservations.length > 0) {
-        const conflictingListingIds = conflictingReservations.map((res: any) => res.listingId);
-        query._id = { $nin: conflictingListingIds };
-      }
+      }).select('listingId roomsCount startDate endDate').lean();
     }
 
     let sortObj: any = { createdAt: -1 };
@@ -411,7 +408,50 @@ export default async function getListings(params: any) {
       sortObj = { price: 1 };
     }
 
-    const listings = await Listing.find(query).sort(sortObj).lean();
+    let listings = await Listing.find(query).sort(sortObj).lean();
+
+    if (startDate && endDate && (isHourlyMode !== 'true' && isHourlyMode !== true)) {
+      const requestedRooms = roomCount ? +roomCount : 1;
+      const parsedStartDate = new Date(startDate);
+      const parsedEndDate = new Date(endDate);
+      
+      listings = listings.filter((listing: any) => {
+        const listingRes = conflictingReservations.filter((res: any) => res.listingId.toString() === listing._id.toString());
+        
+        let maxCapacity = 1;
+        if (listing.rooms && listing.rooms.length > 0) {
+          maxCapacity = listing.rooms.reduce((acc: number, room: any) => acc + (room.count || 1), 0);
+        } else if (listing.roomCount) {
+          maxCapacity = listing.roomCount;
+        }
+        
+        let currentDate = new Date(parsedStartDate);
+        while (currentDate <= parsedEndDate) {
+          const isBlocked = listing.blockedDates?.some((bd: any) => {
+            const bDate = new Date(bd);
+            return bDate.getDate() === currentDate.getDate() && 
+                   bDate.getMonth() === currentDate.getMonth() && 
+                   bDate.getFullYear() === currentDate.getFullYear();
+          });
+          if (isBlocked) return false;
+          
+          let bookedRooms = 0;
+          for (const res of listingRes) {
+            const resStart = new Date(res.startDate);
+            const resEnd = new Date(res.endDate);
+            if (currentDate >= resStart && currentDate <= resEnd) {
+              bookedRooms += (res.roomsCount || 1);
+            }
+          }
+          
+          if (bookedRooms + requestedRooms > maxCapacity) {
+            return false;
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return true;
+      });
+    }
 
     const listingIds = listings.map((l: any) => l._id);
 

@@ -199,6 +199,25 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
     hourlyRoomCount: listing?.hourlyRoomCount || 1
   });
 
+  // Keep formData in sync if listing updates (e.g. after save)
+  useEffect(() => {
+    if (listing) {
+      setFormData({
+        title: listing.title || "", 
+        description: listing.description || "", 
+        price: listing.price || 0,
+        weekendPrice: listing.weekendPrice || "", 
+        festivalPrice: listing.festivalPrice || "",
+        hasWelcomeOffer: listing.hasWelcomeOffer || false, 
+        amenities: listing.amenities || [], 
+        rooms: listing.rooms || [],
+        allowsHourlyBooking: listing.allowsHourlyBooking || false,
+        hourlyRates: listing.hourlyRates || { twoHours: '', threeHours: '', fourHours: '' },
+        hourlyRoomCount: listing.hourlyRoomCount || 1
+      });
+    }
+  }, [listing]);
+
   const handleRoomPriceChange = (index: number, newPrice: number) => {
     const updatedRooms = [...formData.rooms];
     updatedRooms[index] = { ...updatedRooms[index], price: newPrice };
@@ -220,8 +239,17 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
 
   const onUpdateProperty = useCallback(async () => {
     setIsLoading(true);
+    
+    const dataToSend = { ...formData };
+    if (dataToSend.rooms && dataToSend.rooms.length > 0) {
+      const minRoomPrice = Math.min(...dataToSend.rooms.map(r => r.price || 0));
+      if (minRoomPrice > 0 && minRoomPrice !== Infinity) {
+        dataToSend.price = minRoomPrice;
+      }
+    }
+
     try {
-      await axios.patch(`/api/listings/${listing.id}`, formData);
+      await axios.patch(`/api/listings/${listing.id}`, dataToSend);
       toast.success("Changes saved successfully!");
       router.refresh();
     } catch (error: any) {

@@ -206,7 +206,7 @@ export default function FilterBar({ amenities: initialAmenities = [] }: FilterBa
       </div>
 
       {/* Scrollable Quick Toggles */}
-      <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide w-full pr-4 pb-1">
+      <div className="flex-1 min-w-0 flex items-center gap-3 overflow-x-auto scrollbar-hide pr-4 pb-1">
         {dynamicQuickFilters.map((filter) => (
           <button
             key={filter.label}

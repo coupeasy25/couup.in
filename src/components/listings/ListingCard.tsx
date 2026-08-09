@@ -69,6 +69,43 @@ const ListingCard: React.FC<ListingCardProps> = ({
     return data.price;
   }, [reservation, data.price]);
 
+  const searchStartDate = searchParams?.get('startDate');
+  const searchEndDate = searchParams?.get('endDate');
+
+  const calculatedTotalPrice = useMemo(() => {
+    if (!reservation && searchStartDate && searchEndDate) {
+      const start = new Date(searchStartDate);
+      const end = new Date(searchEndDate);
+      
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return null;
+      }
+
+      let currentDate = new Date(start);
+      let calcPrice = 0;
+      
+      if (currentDate.getTime() === end.getTime()) {
+        calcPrice = price;
+      } else {
+        while (currentDate < end) {
+          const dayOfWeek = currentDate.getDay();
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+          
+          let dailyPrice = price;
+          if (isWeekend && data.weekendPrice) {
+            dailyPrice = Number(data.weekendPrice);
+          }
+          calcPrice += dailyPrice;
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      }
+      
+      const welcomeDiscount = data.hasWelcomeOffer ? 500 : 0;
+      return Math.max(0, calcPrice - welcomeDiscount);
+    }
+    return null;
+  }, [searchStartDate, searchEndDate, price, reservation, data.weekendPrice, data.hasWelcomeOffer]);
+
   const reservationDate = useMemo(() => {
     if (!reservation) {
       return null;
@@ -179,8 +216,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
         </div>
         <div className="flex flex-col p-4 flex-grow justify-between gap-2">
           <div className="flex flex-col gap-0.5">
-            <div className="flex items-start justify-between gap-2">
-              <div className="font-semibold text-[16px] text-neutral-900 truncate">
+            <div className="flex items-start justify-between gap-2 w-full">
+              <div className="font-semibold text-[16px] text-neutral-900 truncate flex-1 min-w-0">
                 {data.title}
               </div>
               <div className="flex items-center gap-1 text-[14px] font-semibold text-neutral-800 shrink-0 mt-0.5">
@@ -198,9 +235,19 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <div className="font-medium text-neutral-500 text-[14px] mt-2 flex items-center justify-between">
               {reservationDate ? (
                 <span>{reservationDate}</span>
+              ) : calculatedTotalPrice !== null ? (
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-[16px] text-neutral-900">₹{calculatedTotalPrice.toLocaleString('en-IN')}</span>
+                    <span className="text-[14px]">total</span>
+                  </div>
+                  <div className="text-[12px] text-neutral-500 underline decoration-neutral-300">
+                    ₹{price.toLocaleString('en-IN')} / night
+                  </div>
+                </div>
               ) : (
                 <div className="flex items-center gap-1">
-                  <span className="font-bold text-[16px] text-neutral-900">₹{price}</span>
+                  <span className="font-bold text-[16px] text-neutral-900">₹{price.toLocaleString('en-IN')}</span>
                   <span className="text-[14px]">/ night</span>
                 </div>
               )}

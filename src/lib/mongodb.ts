@@ -14,6 +14,9 @@ const options = {
     strict: true,
     deprecationErrors: true,
   },
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
 };
 
 let client: MongoClient;
@@ -49,6 +52,9 @@ export async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     };
 
     cached.promise = mongoose.connect(uri, opts).then((mongoose) => {

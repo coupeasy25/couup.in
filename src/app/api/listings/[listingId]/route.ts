@@ -51,21 +51,26 @@ export async function PATCH(
     throw new Error('Invalid ID');
   }
 
-  const body = await request.json();
+  try {
+    const body = await request.json();
 
-  await connectToDatabase();
+    await connectToDatabase();
 
-  const updatedListing = await Listing.findOneAndUpdate(
-    { _id: listingId, userId: currentUser._id },
-    { $set: body },
-    { new: true, runValidators: true }
-  );
+    const updatedListing = await Listing.findOneAndUpdate(
+      { _id: listingId, userId: currentUser._id },
+      { $set: body },
+      { new: true, runValidators: true }
+    );
 
-  if (!updatedListing) {
-    return NextResponse.error();
+    if (!updatedListing) {
+      return NextResponse.error();
+    }
+
+    return NextResponse.json(updatedListing);
+  } catch (error: any) {
+    console.error("UPDATE_LISTING_ERROR", error);
+    return new NextResponse(error.message || "Internal Server Error", { status: 500 });
   }
-
-  return NextResponse.json(updatedListing);
 }
 
 export async function GET(

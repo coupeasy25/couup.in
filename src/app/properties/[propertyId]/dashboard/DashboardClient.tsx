@@ -57,10 +57,33 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listing, reservations
     amenities: listing.amenities || [],
   });
 
+  useEffect(() => {
+    if (listing) {
+      setFormData({
+        title: listing.title,
+        description: listing.description,
+        price: listing.price,
+        weekendPrice: listing.weekendPrice || "",
+        festivalPrice: listing.festivalPrice || "",
+        hasWelcomeOffer: listing.hasWelcomeOffer || false,
+        amenities: listing.amenities || [],
+      });
+    }
+  }, [listing]);
+
   const onUpdateProperty = useCallback(async () => {
     setIsLoading(true);
+
+    const dataToSend = { ...formData };
+    if (dataToSend.rooms && dataToSend.rooms.length > 0) {
+      const minRoomPrice = Math.min(...dataToSend.rooms.map((r: any) => r.price || 0));
+      if (minRoomPrice > 0 && minRoomPrice !== Infinity) {
+        dataToSend.price = minRoomPrice;
+      }
+    }
+
     try {
-      await axios.patch(`/api/listings/${listing.id}`, formData);
+      await axios.patch(`/api/listings/${listing.id}`, dataToSend);
       toast.success("Property updated!");
       router.refresh();
     } catch (error: any) {

@@ -290,6 +290,15 @@ const BookClient: React.FC<BookClientProps> = ({ listing, currentUser, settings 
             
             toast.success('Payment successful!');
             
+            // Trigger email asynchronously
+            // Trigger email asynchronously using fetch with keepalive to prevent cancellation
+            fetch('/api/reservations/send-email', { 
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ reservationId: responseData.data._id || responseData.data.id }),
+              keepalive: true 
+            }).catch(err => console.error("Failed to trigger email", err));
+            
             // Open Success Modal
             bookingSuccessModal.onOpen({
               id: responseData.data.id || responseData.data._id,

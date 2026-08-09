@@ -45,6 +45,23 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
   const guestCount = adults + children;
 
   const [dynamicLocations, setDynamicLocations] = useState<string[]>([]);
+  const [monthsToDisplay, setMonthsToDisplay] = useState(1);
+  const [calDirection, setCalDirection] = useState<"vertical" | "horizontal">("vertical");
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setMonthsToDisplay(1);
+        setCalDirection("vertical");
+      } else {
+        setMonthsToDisplay(2);
+        setCalDirection("horizontal");
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     axios.get('/api/locations')
@@ -253,8 +270,8 @@ const ExpandedSearch: React.FC<ExpandedSearchProps> = ({ isHero }) => {
                       }
                     }}
                     value={dateRange}
-                    months={2}
-                    direction="horizontal"
+                    months={monthsToDisplay}
+                    direction={calDirection}
                   />
                 </div>
               </div>

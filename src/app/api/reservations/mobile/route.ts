@@ -97,42 +97,46 @@ export async function POST(request: Request) {
         console.error("Error updating coupon usage:", err);
       }
     }
-    try {
-      const { generateBookingPDF } = require("@/lib/pdfGenerator");
-      const { sendBookingConfirmationEmail } = require("@/lib/mailer");
-      const { User } = require("@/models/User");
-      
-      const user = await User.findById(userId);
-      
-      if (user && user.email) {
-        const pdfBuffer = await generateBookingPDF({
-          listingTitle: listing.title,
-          locationValue: listing.locationValue,
-          startDate: new Date(startDate),
-          endDate: new Date(endDate),
-          totalPrice,
-          basePrice,
-          taxes,
-          roomType: roomType || 'Standard',
-          guests,
-          userName: user.name,
-          userEmail: user.email,
-          paymentId: reservation.razorpay_payment_id,
-          orderId: reservation.razorpay_order_id,
-          bookingDate: reservation.createdAt
-        });
+    const sendConfirmation = async () => {
+      try {
+        const { generateBookingPDF } = require("@/lib/pdfGenerator");
+        const { sendBookingConfirmationEmail } = require("@/lib/mailer");
+        const { User } = require("@/models/User");
+        
+        const user = await User.findById(userId);
+        
+        if (user && user.email) {
+          const pdfBuffer = await generateBookingPDF({
+            listingTitle: listing.title,
+            locationValue: listing.locationValue,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            totalPrice,
+            basePrice,
+            taxes,
+            roomType: roomType || 'Standard',
+            guests,
+            userName: user.name,
+            userEmail: user.email,
+            paymentId: reservation.razorpay_payment_id,
+            orderId: reservation.razorpay_order_id,
+            bookingDate: reservation.createdAt
+          });
 
-        await sendBookingConfirmationEmail(
-          user.email,
-          user.name,
-          listing.title,
-          pdfBuffer
-        );
+          await sendBookingConfirmationEmail(
+            user.email,
+            user.name,
+            listing.title,
+            pdfBuffer
+          );
+        }
+      } catch (emailError) {
+        console.error("Failed to send confirmation email:", emailError);
+        // We don't fail the booking if the email fails
       }
-    } catch (emailError) {
-      console.error("Failed to send confirmation email:", emailError);
-      // We don't fail the booking if the email fails
-    }
+    };
+
+    sendConfirmation();
 
     return NextResponse.json(reservation, {
       headers: {

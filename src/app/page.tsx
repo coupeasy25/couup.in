@@ -107,7 +107,7 @@ export default async function Home({ searchParams }: HomeProps) {
                     <p className="text-sm font-semibold text-neutral-500 uppercase tracking-wider">
                       {listings.length} {listings.length === 1 ? 'stay' : 'stays'} found
                     </p>
-                    <h2 className="text-3xl font-extrabold text-neutral-900 tracking-tight">
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-neutral-900 tracking-tight break-words">
                       Stays in {params.locationValue}
                     </h2>
                   </>

@@ -251,9 +251,18 @@ const TripDetailsModal: React.FC<TripDetailsModalProps> = ({
                   </span>
                 </div>
                 
-                <div className="text-xs text-neutral-400 font-medium text-right mb-8">
+                <div className="text-xs text-neutral-400 font-medium text-right mb-6">
                   Paid via {reservation.paymentMethod || 'Razorpay'}
                 </div>
+
+                <a
+                  href={`/api/reservations/${reservation.id}/pdf`}
+                  download
+                  className="w-full py-3 rounded-xl bg-neutral-900 text-white flex justify-center items-center font-semibold text-sm hover:bg-black transition-colors shadow-sm mb-8 gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                  Download PDF Invoice
+                </a>
 
                 {isUpcoming && (
                   <div className="flex flex-col gap-4">

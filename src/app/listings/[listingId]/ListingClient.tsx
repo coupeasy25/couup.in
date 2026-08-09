@@ -71,7 +71,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
       range.forEach(date => {
         // Use a simple date string (YYYY-MM-DD) for counting
         const dateString = date.toISOString().split('T')[0];
-        dateCounts[dateString] = (dateCounts[dateString] || 0) + 1;
+        dateCounts[dateString] = (dateCounts[dateString] || 0) + (reservation.roomsCount || 1);
       });
     });
 

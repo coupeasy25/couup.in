@@ -38,8 +38,8 @@ export async function generateBookingPDF(reservationData: any): Promise<Buffer> 
       doc.fillColor(primaryNavy).fontSize(28).font('Helvetica-Bold').text('COUUP', 40, 45, { characterSpacing: 1 });
       doc.fillColor(primaryOrange).fontSize(10).font('Helvetica-Bold').text('HOTELS & PREMIUM TRAVEL', 40, 80, { characterSpacing: 1 });
       doc.fillColor(textGray).fontSize(9).font('Helvetica')
-         .text('GSTIN: 24AAABC1234D1Z5', 40, 98)
-         .text('support@couup.com | +91 800-000-0000', 40, 110);
+         .text('GSTIN: 24MGGPK7366D1Z4', 40, 98)
+         .text('contact@couup.in | +91 6355081118', 40, 110);
 
       // Right
       doc.fillColor(primaryNavy).fontSize(28).font('Helvetica-Bold').text('INVOICE', 350, 45, { align: 'right' });
