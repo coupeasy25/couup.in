@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
     if (!listing || !user) return new NextResponse("Listing or User not found", { status: 404 });
 
-    const emailToSendTo = reservation.guestEmail || user.email;
+    const emailToSendTo = reservation.guestEmail || user.email || '';
 
     const pdfBuffer = await generateBookingPDF({
       listingTitle: listing.title,

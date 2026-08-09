@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -242,7 +242,7 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ listings, allReservat
     
     const dataToSend = { ...formData };
     if (dataToSend.rooms && dataToSend.rooms.length > 0) {
-      const minRoomPrice = Math.min(...dataToSend.rooms.map(r => r.price || 0));
+      const minRoomPrice = Math.min(...dataToSend.rooms.map((r: any) => r.price || 0));
       if (minRoomPrice > 0 && minRoomPrice !== Infinity) {
         dataToSend.price = minRoomPrice;
       }
